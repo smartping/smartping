@@ -8,6 +8,12 @@ type Config struct {
 	Name     string
 	Ip       string
 	Db       string
+	Alertsound    	     string
+	Thresholchecksec        string
+	Thresholdavgdelay    string
+	Thresholdloss        string
+	Tline    string
+	Tsymbolsize string
 	Type     string
 	Targets  []Target
 }
@@ -38,6 +44,9 @@ type showlist struct {
 	Nlist []map[string]string
 	Status map[string]string
 	AGraph []map[string]string
+	Alert string
+	Tline string
+	Tsymbolsize string
 }
 
 type TargetStatus struct {

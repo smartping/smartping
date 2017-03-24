@@ -8,16 +8,22 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
  - »æÖÆ»¥PING¼ä»úÆ÷µÄÍØÆË¼°±¨¾¯¹¦ÄÜ
 
 ## Éè¼ÆË¼ÂÇ ##
-±¾ÏµÍ³Éè¼ÆÎªÎÞÖÐÐÄ»¯Ô­Ôò£¬ËùÓÐµÄÊý¾Ý¾ù´æ´¢×ÔÉíµãÖÐ£¬Ä¬ÈÏÊý¾ÝÑ­»·±£Áô1¸öÔÂÊ±¼ä£¬ÓÉ×ÔÉíµãµÄÊý¾Ý»æÖÆ³öPING°üµÄ×´Ì¬£¬ÓÉ¸÷ÆäËûµãµÄÊý¾Ý»æÖÆ½øPING°üµÄ×´Ì¬(´Ë´¦Í¨¹ýAjax»ñÈ¡)£¬²¢Í¨¹ýÈ«²¿Êý¾Ý»æÖÆÕûÌåÍØÆËÍ¼£¬ÍØÆËÖÐ´æÔÚ±¨¾¯¹¦ÄÜ£¬±¨¾¯¹æÔòÎª15·ÖÖÓÄÚ´æÔÚÑÓ³Ù³¬¹ý200ms»ò¶ª°üÂÊ´óÓÚ30%¼´±¨¾¯¡£
+±¾ÏµÍ³Éè¼ÆÎªÎÞÖÐÐÄ»¯Ô­Ôò£¬ËùÓÐµÄÊý¾Ý¾ù´æ´¢×ÔÉíµãÖÐ£¬Ä¬ÈÏÊý¾ÝÑ­»·±£Áô1¸öÔÂÊ±¼ä£¬ÓÉ×ÔÉíµãµÄÊý¾Ý»æÖÆ³öPING°üµÄ×´Ì¬£¬ÓÉ¸÷ÆäËûµãµÄÊý¾Ý»æÖÆ½øPING°üµÄ×´Ì¬(´Ë´¦Í¨¹ýAjax»ñÈ¡)£¬²¢Í¨¹ýÈ«²¿Êý¾Ý»æÖÆÕûÌåÍØÆËÍ¼£¬ÍØÆËÖÐ´æÔÚ±¨¾¯¹¦ÄÜ£¬±¨¾¯¹æÔòÎªThresholchecksecÃëÖÓÄÚ´æÔÚÑÓ³Ù³¬¹ýThresholdavgdelayºÁÃë»ò¶ª°üÂÊ´óÓÚThresholdloss%¼´±¨¾¯£¬ÈôÉèÖÃ±¨¾¯ÉùÒôÔò»áÍ¬Ê±ÓÐÉùÒôÌáÐÑ¡£
     
 ## ÅäÖÃÎÄ¼þ ##
     {
-      "Name": "±¾»ú",            <-±¾»úµÄ±êÊ¶£¨Ö§³ÖÖÐÎÄ,Ó¢ÎÄ,[ÖÐ¸Ü£¬Êý×Ö]²»ÄÜ¿ªÍ·£©
-      "Ip": "127.0.0.1",        <-±¾»úµÄIP
-      "Db": "./database.db",    <-Êý¾Ý¿â
+      "Name": "±¾»ú",                   <-±¾»úµÄ±êÊ¶£¨Ö§³ÖÖÐÎÄ,Ó¢ÎÄ,[ÖÐ¸Ü£¬Êý×Ö]²»ÄÜ¿ªÍ·£©
+      "Ip": "127.0.0.1",                <-±¾»úµÄIP
+      "Db": "./database.db",            <-Êý¾Ý¿â
+      "Thresholchecksec" : "900",                                           <-±¨¾¯ÖÜÆÚ
+      "Thresholdloss" : "30",                                               <-±¨¾¯ÉèÖÃ-¶ª°üÂÊ
+      "Thresholdavgdelay" : "200",                                          <-±¨¾¯ÉèÖÃ-Æ½¾ùÑÓ³Ù
+      "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3",    <-±¨¾¯ÉùÒô
+      "Tline":"2",                                                          <-ÍØÆËÍ¼Ïß¿í¶È
+      "Tsymbolsize":"70",                                                   <-ÍØÆËÍ¼µã´óÐ¡
       "Targets": [              <-Ä¿±ê»úÆ÷ÁÐ±í
         {
-          "Name": "±¾»ú",             <-Ä¿±ê»úÆ÷Ãû³Æ
+          "Name": "±¾»ú",            <-Ä¿±ê»úÆ÷Ãû³Æ
           "Addr": "127.0.0.1",       <-Ä¿±ê»úÆ÷IP
           "Interval": "20",          <-ping¼ì²â°üÊý
           "Type":"CS"                <-Ä¿±ê»úÆ÷Ä£Ê½(C:Client,CS,Client/Server)
