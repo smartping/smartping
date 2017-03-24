@@ -359,9 +359,11 @@ var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Fun
         <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
    </head>
    <body style="height: 100%; margin: 0">
+
        <div class="row" style="height: 100%">
           <div class="col-md-9" style="height: 100%"><div id="container" style="height: 100%"></div></div>
           <div class="col-md-3">
+          <% if ne .Alert "" %><audio style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src='<% .Alert %>' type='audio/mp3'  /></audio><% end %>
           <%range .AGraph%>
             <div id="<% index . "From" %><% index . "To" %>_pannel" style="float:left;width:400px;height:150px;margin-right:10px;" class="well"></div>
           <%end%>
@@ -376,8 +378,6 @@ var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Fun
 	    <%range .Nlist %>
 	 	   dataarea.push({
 				name: '<% index . "name" %>',
-				x: parseInt( Math.random()*700 + 800, 10),
-				y: parseInt( Math.random()*700 + 800, 10),
 				    itemStyle: {
 					    normal: {
 						color: "<% index . "color"  %>"
@@ -405,8 +405,8 @@ var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Fun
             series : [
                 {
                     type: 'graph',
-                    layout: 'none',
-                    symbolSize: 80,
+                    layout: 'circular',
+                    symbolSize: <% .Tsymbolsize %>,
                     roam: true,
                     label: {
                         normal: {
@@ -414,7 +414,7 @@ var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Fun
                         }
                     },
                     edgeSymbol: ['circle', 'arrow'],
-                    edgeSymbolSize: [4, 20],
+                    edgeSymbolSize: [3, 15],
                     edgeLabel: {
                         normal: {
                             textStyle: {
@@ -428,7 +428,7 @@ var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Fun
                     lineStyle: {
                         normal: {
                             opacity: 0.9,
-                            width: 3,
+                            width: <% .Tline %>,
                             curveness: 0
                         }
                     }
@@ -624,7 +624,8 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 		defer state.Lock.Unlock()
 		preout := make(map[string]string)
 		//if loss lager than 30 or avf delay lager than 200 during last 15 min
-		timeStart := time.Now().Unix()-15*60
+		sec,_:=strconv.Atoi(config.Thresholchecksec)
+		timeStart := time.Now().Unix()-int64(sec)
 		timeStartStr := time.Unix(timeStart, 0).Format("2006-01-02 15:04")
 		for _,v := range state.State{
 			lock.Lock()
@@ -636,7 +637,9 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 				rows.Scan(&l.logtime, &l.ip, &l.name, &l.maxdelay, &l.mindelay, &l.avgdelay, &l.sendpk, &l.revcpk, &l.losspk, &l.lastcheck,)
 				lp,_:=strconv.Atoi(l.losspk)
 				ad,_:=strconv.Atoi(l.avgdelay)
-				if(lp>30 || ad>200){
+				thlp,_:=strconv.Atoi(config.Thresholdloss)
+				thad,_:=strconv.Atoi(config.Thresholdavgdelay)
+				if(lp>thlp || ad>thad){
 					preout[v.Target.Name]="false"
 				}
 			}
@@ -653,6 +656,7 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 		i :=0
 		var randint  []int
 		sl := new(showlist)
+		sl.Alert = ""
 		linestatus := make(map[string]string)
 		for _,v := range config.Targets{
 			var st string
@@ -679,10 +683,12 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 							}
 							alertgraph = append(alertgraph,agraph)
 							linestatus[v.Name+f]="red"
+							sl.Alert=config.Alertsound
 						}
 					}
 				}else{
 					st = "red"
+					sl.Alert=config.Alertsound
 				}
 			}
 			tostatus := map[string]string{
@@ -722,6 +728,8 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 				}
 			}
 		}
+		sl.Tline=config.Tline
+		sl.Tsymbolsize=config.Tsymbolsize
 		err := topology.Execute(w, sl)
 		if err != nil {
 			log.Fatal(err)

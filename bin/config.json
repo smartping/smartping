@@ -1,7 +1,13 @@
 {
   "Name": "本机",
-  "Ip": "127.0.0.1",
+  "Ip": "36.110.40.170",
   "Db": "./database.db",
+  "Thresholchecksec" : "30",
+  "Thresholdloss" : "30",
+  "Thresholdavgdelay" : "200",
+  "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3",
+  "Tline":"2",
+  "Tsymbolsize":"70",
   "Targets": [
     {
       "Name": "本机",
