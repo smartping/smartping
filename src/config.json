@@ -1,0 +1,25 @@
+{
+  "Name": "本机",
+  "Ip": "36.110.40.170",
+  "Db": "./database.db",
+  "Targets": [
+    {
+      "Name": "本机",
+      "Addr": "127.0.0.1",
+      "Interval": "20",
+      "Type":"CS"
+    },
+    {
+      "Name": "洋桥",
+      "Addr": "10.10.12.2",
+      "Interval": "20",
+      "Type":"CS"
+    },
+    {
+      "Name": "内网",
+      "Addr": "10.15.12.2",
+      "Interval": "20",
+      "Type":"C"
+    }
+  ]
+}
