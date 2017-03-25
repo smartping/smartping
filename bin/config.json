@@ -2,30 +2,43 @@
   "Name": "本机",
   "Ip": "36.110.40.170",
   "Db": "./database.db",
-  "Thresholchecksec" : "30",
-  "Thresholdloss" : "30",
-  "Thresholdavgdelay" : "200",
+  "Thdchecksec" : "900",
+  "Thdoccnum" : "1",
+  "Thdloss" : "30",
+  "Thdavgdelay" : "200",
   "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3",
-  "Tline":"2",
+  "Tline":"1",
   "Tsymbolsize":"70",
   "Targets": [
     {
       "Name": "本机",
       "Addr": "127.0.0.1",
       "Interval": "20",
-      "Type":"CS"
+      "Type":"CS",
+      "Thdchecksec" : "900",
+      "Thdoccnum" : "1",
+      "Thdloss" : "30",
+      "Thdavgdelay" : "200"
     },
     {
       "Name": "洋桥",
       "Addr": "10.10.12.2",
       "Interval": "20",
-      "Type":"CS"
+      "Type":"CS",
+      "Thdchecksec" : "30",
+      "Thdoccnum" : "1",
+      "Thdloss" : "30",
+      "Thdavgdelay" : "200"
     },
     {
       "Name": "内网",
       "Addr": "10.15.12.2",
       "Interval": "20",
-      "Type":"C"
+      "Type":"C",
+      "Thdchecksec" : "30",
+      "Thdoccnum" : "1",
+      "Thdloss" : "30",
+      "Thdavgdelay" : "200"
     }
   ]
 }

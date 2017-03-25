@@ -11,6 +11,7 @@ var filename = flag.String("f", "config.json", "JSON configuration file")
 var httpPort = flag.Int("p", 8899, "HTTP port")
 var lock sync.Mutex
 
+var Version = "0.0.2"
 // Main function
 func main() {
 	flag.Parse()
@@ -18,6 +19,7 @@ func main() {
 	var config Config
 	log.Println("Opening config file: ", *filename)
 	config = readConfig(*filename)
+	config.Ver = Version
 	log.Printf("Config loaded")
 	log.Println("LogDB : "+config.Db)
 	db, err := sql.Open("sqlite3", config.Db)

@@ -8,31 +8,40 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
  - »æÖÆ»¥PING¼ä»úÆ÷µÄÍØÆË¼°±¨¾¯¹¦ÄÜ
 
 ## Éè¼ÆË¼ÂÇ ##
-±¾ÏµÍ³Éè¼ÆÎªÎÞÖÐÐÄ»¯Ô­Ôò£¬ËùÓÐµÄÊý¾Ý¾ù´æ´¢×ÔÉíµãÖÐ£¬Ä¬ÈÏÊý¾ÝÑ­»·±£Áô1¸öÔÂÊ±¼ä£¬ÓÉ×ÔÉíµãµÄÊý¾Ý»æÖÆ³öPING°üµÄ×´Ì¬£¬ÓÉ¸÷ÆäËûµãµÄÊý¾Ý»æÖÆ½øPING°üµÄ×´Ì¬(´Ë´¦Í¨¹ýAjax»ñÈ¡)£¬²¢Í¨¹ýÈ«²¿Êý¾Ý»æÖÆÕûÌåÍØÆËÍ¼£¬ÍØÆËÖÐ´æÔÚ±¨¾¯¹¦ÄÜ£¬±¨¾¯¹æÔòÎªThresholchecksecÃëÖÓÄÚ´æÔÚÑÓ³Ù³¬¹ýThresholdavgdelayºÁÃë»ò¶ª°üÂÊ´óÓÚThresholdloss%¼´±¨¾¯£¬ÈôÉèÖÃ±¨¾¯ÉùÒôÔò»áÍ¬Ê±ÓÐÉùÒôÌáÐÑ¡£
+±¾ÏµÍ³Éè¼ÆÎªÎÞÖÐÐÄ»¯Ô­Ôò£¬ËùÓÐµÄÊý¾Ý¾ù´æ´¢×ÔÉíµãÖÐ£¬Ä¬ÈÏÊý¾ÝÑ­»·±£Áô1¸öÔÂÊ±¼ä£¬ÓÉ×ÔÉíµãµÄÊý¾Ý»æÖÆ ³öPING°ü µÄ×´Ì¬£¬ÓÉ¸÷ÆäËûµãµÄÊý¾Ý»æÖÆ ½øPING°ü µÄ×´Ì¬£¬²¢API½Ó¿Ú»ñÈ¡ÆäËûµãÊý¾Ý»æÖÆÕûÌåPINGÍØÆËÍ¼£¬ÍØÆËÍ¼ÖÐ´æÔÚ±¨¾¯¹¦ÄÜ£¬±¨¾¯¹æÔòÎªThresholchecksecÃëÖÓÄÚ·¢ÏÖ´óÓÚµÈÓÚThdoccnum´ÎÑÓ³Ù³¬¹ýThresholdavgdelayºÁÃë»ò¶ª°üÂÊ´óÓÚThresholdloss%¼´±¨¾¯£¬ÈôÉèÖÃ±¨¾¯ÉùÒôÔò»áÍ¬Ê±ÓÐAlertsoundÉùÒôÌáÐÑ¡£
     
 ## ÅäÖÃÎÄ¼þ ##
     {
-      "Name": "±¾»ú",                   <-±¾»úµÄ±êÊ¶£¨Ö§³ÖÖÐÎÄ,Ó¢ÎÄ,[ÖÐ¸Ü£¬Êý×Ö]²»ÄÜ¿ªÍ·£©
+      "Name": "±¾»ú",                    <-±¾»úµÄ±êÊ¶£¨Ö§³ÖÖÐÎÄ,Ó¢ÎÄ,[ÖÐ¸Ü£¬Êý×Ö]²»ÄÜ¿ªÍ·£©
       "Ip": "127.0.0.1",                <-±¾»úµÄIP
-      "Db": "./database.db",            <-Êý¾Ý¿â
-      "Thresholchecksec" : "900",                                           <-±¨¾¯ÖÜÆÚ
-      "Thresholdloss" : "30",                                               <-±¨¾¯ÉèÖÃ-¶ª°üÂÊ
-      "Thresholdavgdelay" : "200",                                          <-±¨¾¯ÉèÖÃ-Æ½¾ùÑÓ³Ù
+      "Db": "./database.db",            <-´æ´¢¼ÇÂ¼ÓÃÊý¾Ý¿â
+      "Thdchecksec" : "900",                                                <-[»ù´¡]±¨¾¯ÖÜÆÚ
+      "Thdoccnum" : "1",                                                    <-[»ù´¡]±¨¾¯¼ì²â´ÎÊý
+      "Thdloss" : "30",                                                     <-[»ù´¡]±¨¾¯ÉèÖÃ-¶ª°üÂÊ
+      "Thdavgdelay" : "200",                                                <-[»ù´¡]±¨¾¯ÉèÖÃ-Æ½¾ùÑÓ³Ù
       "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3",    <-±¨¾¯ÉùÒô
-      "Tline":"2",                                                          <-ÍØÆËÍ¼Ïß¿í¶È
+      "Tline":"1",                                                          <-ÍØÆËÍ¼Ïß¿í¶È
       "Tsymbolsize":"70",                                                   <-ÍØÆËÍ¼µã´óÐ¡
       "Targets": [              <-Ä¿±ê»úÆ÷ÁÐ±í
         {
           "Name": "±¾»ú",            <-Ä¿±ê»úÆ÷Ãû³Æ
           "Addr": "127.0.0.1",       <-Ä¿±ê»úÆ÷IP
           "Interval": "20",          <-ping¼ì²â°üÊý
-          "Type":"CS"                <-Ä¿±ê»úÆ÷Ä£Ê½(C:Client,CS,Client/Server)
+          "Type":"CS"                <-Ä¿±ê»úÆ÷Ä£Ê½(C:Client,CS,Client/Server),
+          "Thdchecksec" : "900",     <-±¨¾¯ÖÜÆÚ
+          "Thdoccnum" : "1",         <-±¨¾¯¼ì²â´ÎÊý
+          "Thdloss" : "30",          <-±¨¾¯ÉèÖÃ-¶ª°üÂÊ
+          "Thdavgdelay" : "200"      <-±¨¾¯ÉèÖÃ-Æ½¾ùÑÓ³Ù
         },
         {
           "Name": "ÑóÇÅ",
           "Addr": "10.10.12.2",
           "Interval": "20",
-          "Type":"CS"
+          "Type":"CS",
+          "Thdchecksec" : "900",
+          "Thdoccnum" : "1",
+          "Thdloss" : "30",
+          "Thdavgdelay" : "200"
         },
         ...
       ]
@@ -43,26 +52,35 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
   - Ä¿±ê»úÆ÷ÁÐ±í(Targets)ÖÐÒ²ÐèÒª°üº¬±¾»úµÄÐÅÏ¢£¬·ñÔÚÔÚÍØÆËÍ¼ÖÐ½«²»ÏÔÊ¾±¾»ú
   - PING¼ì²â°üÊýÐèÒªÐ¡ÓÚ60£¬Ä¿Ç°»æÍ¼ÊÇÒ»·ÖÖÓÒ»¸öµã£¬Èô¸ßÓÚ60½«³öÏÖ¶Ïµã
   - Ä¿±ê»úÆ÷Ä£Ê½,Client´ú±íÖ»½ÓÊÜPING°ü£¬²»»á·¢ËÍPING°ü£¬CS¼°¼È·¢PING°üÒ²ÊÕPING°ü£¬ÍØÆËÍ¼ÖÐÌåÏÖÎªµ¥ÏîÁ¬Ïß»òË«ÏòÁ¬Ïß
+  - Èô²»ÉèÖÃTargetsÄÚµÄ±¨¾¯ÖÜÆÚ£¬¼ì²â´ÎÊý£¬¶ª°üÂÊ£¬Æ½¾ùÑÓ³Ù½«²ÉÓÃ»ù´¡ÅäÖÃ
 
 
 ## Êý¾Ý¿â ##
 Êý¾Ý¿âÖÐ´æ´¢PINGµÄÈÕÖ¾Êý¾Ý£¬Ä¬ÈÏÑ­»·±£ÁôÒ»¸öÔÂÊý¾Ý£¬×î¶à£¨31*24*60=44640Ìõ£©
 
     CREATE TABLE pinglog (
-        logtime   VARCHAR (20),
+        logtime   VARCHAR (8),
         ip        VARCHAR (15),
         name      VARCHAR (15),
-        maxdelay  VARCHAR (10),
-        mindelay  VARCHAR (10),
-        avgdelay  VARCHAR (10),
-        sendpk    VARCHAR (10),
-        revcpk    VARCHAR (10),
-        losspk    VARCHAR (10),
-        lastcheck VARCHAR (20),
+        maxdelay  VARCHAR (3),
+        mindelay  VARCHAR (3),
+        avgdelay  VARCHAR (3),
+        sendpk    VARCHAR (2),
+        revcpk    VARCHAR (2),
+        losspk    VARCHAR (3),
+        lastcheck VARCHAR (16),
         PRIMARY KEY (
             logtime,
             ip
         )
+    );
+    CREATE INDEX pk_n_t ON pinglog (
+        name,
+        lastcheck
+    );
+    CREATE INDEX pk_i_t ON pinglog (
+        ip,
+        lastcheck
     );
 
 
@@ -70,7 +88,7 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
 
 **ÔËÐÐ**
 
-nohup ./idcping &
+nohup ./idcping >/dev/null 2>&1 &
 
 **·ÃÎÊ**
 

@@ -5,20 +5,22 @@ import (
 )
 
 type Config struct {
+	Ver      string
 	Name     string
 	Ip       string
 	Db       string
 	Alertsound    	     string
-	Thresholchecksec        string
-	Thresholdavgdelay    string
-	Thresholdloss        string
+	Thdchecksec     string
+	Thdoccnum	string
+	Thdavgdelay    string
+	Thdloss        string
 	Tline    string
 	Tsymbolsize string
-	Type     string
 	Targets  []Target
 }
 
 type State struct {
+	Conf Config
 	Localname string
 	Localip string
 	Showtype string
@@ -31,6 +33,10 @@ type Target struct {
 	Addr string
 	Interval string
 	Type string
+	Thdchecksec     string
+	Thdoccnum	string
+	Thdavgdelay    string
+	Thdloss        string
 }
 
 type topo struct{

@@ -11,6 +11,7 @@ import (
 	"time"
 	"smartping/mn"
 	"github.com/go-resty/resty"
+	"bytes"
 )
 
 // Init of the Web Page template.
@@ -41,6 +42,7 @@ var index = template.Must(template.New("index.tpl").Delims("<%", "%>").Funcs(tem
                 <div style="text-align:center">
                   <a href="/?t=out" class="label label-<% if eq $Showtype "out" %>success<% else %>default<% end %>">OUT</a>
 			      <a href="/?t=in" class="label label-<% if eq $Showtype "in" %>success<% else %>default<% end %>">IN</a>
+			      <a target="_blank" href="/api/config.json" class="label label-default" style="float:left">Config</a>
 			      <a target="_blank" href="/topology" class="label label-warning" style="float:right">ALERT</a>
 		         </div><br/>
               	<%range .State%>
@@ -71,6 +73,9 @@ var index = template.Must(template.New("index.tpl").Delims("<%", "%>").Funcs(tem
               <div class="col-md-1"  ></div>
             </div>
         </div>
+        <hr/>
+        <div style="text-align:center">SmartPing v<% .Conf.Ver %></div>
+        <br/>
     </div>
     <div id="charts" class="modal fade" tabindex="-1" role="dialog">
       <input type="hidden" id="pannelurl" value=""/>
@@ -374,24 +379,24 @@ var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Fun
         var myChart = echarts.init(dom);
         var app = {};
         option = null;
-	    dataarea = [];
-	    <%range .Nlist %>
-	 	   dataarea.push({
-				name: '<% index . "name" %>',
-				    itemStyle: {
-					    normal: {
-						color: "<% index . "color"  %>"
-					    }
-					}
-			    });
-      <%end%>
+	 dataarea = [];
+	 <%range .Nlist %>
+	     dataarea.push({
+		name: '<% index . "name" %>',
+		itemStyle: {
+			normal: {
+				color: "<% index . "color"  %>"
+			}
+	     	}
+	     });
+         <%end%>
 	  dataline = [];
          <%range .Tlist %>
 	  	dataline.push({
 				source: '<% index .From "name" %>',
 				target: '<% index .To "name" %>',
 				lineStyle: {
-					normal: {curveness: 0.2,color: "<% index .Color %>"}
+					normal: {curveness: <% if eq (index .Color) "green" %>0<% else %>0.3<% end %>,color: "<% index .Color %>"}
 				}
 			})
 	  <%end%>
@@ -406,7 +411,9 @@ var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Fun
                 {
                     type: 'graph',
                     layout: 'circular',
+
                     symbolSize: <% .Tsymbolsize %>,
+                    focusNodeAdjacency:true,
                     roam: true,
                     label: {
                         normal: {
@@ -618,30 +625,71 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 		fmt.Fprintln(w, string(out))
 	})
 
+	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
+		config, _ := json.Marshal(config)
+		var out bytes.Buffer
+		json.Indent(&out, config, "", "\t")
+		o := out.String()
+		fmt.Fprintln(w, o)
+	})
+
 	//Topology alert data api
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
 		state.Lock.Lock()
 		defer state.Lock.Unlock()
 		preout := make(map[string]string)
 		//if loss lager than 30 or avf delay lager than 200 during last 15 min
-		sec,_:=strconv.Atoi(config.Thresholchecksec)
-		timeStart := time.Now().Unix()-int64(sec)
-		timeStartStr := time.Unix(timeStart, 0).Format("2006-01-02 15:04")
+		//sec,_:=strconv.Atoi(config.Thdchecksec)
+		//timeStart := time.Now().Unix()-int64(sec)
+		//timeStartStr := time.Unix(timeStart, 0).Format("2006-01-02 15:04")
+		var Thdavgdelay string
+		var Thdloss string
+		var Thdoccnum string
+		var timeStart int64
+		var timeStartStr string
 		for _,v := range state.State{
 			lock.Lock()
+			sec,_:=strconv.Atoi(config.Thdchecksec)
+			timeStart   = time.Now().Unix()-int64(sec)
+			Thdloss     = config.Thdloss
+			Thdavgdelay = config.Thdavgdelay
+			Thdoccnum   = config.Thdoccnum
+			for _,t:=range config.Targets {
+				if t.Name==v.Target.Name{
+					if t.Thdchecksec !=""{
+						sec,_:=strconv.Atoi(t.Thdchecksec)
+						timeStart = time.Now().Unix()-int64(sec)
+					}
+					if t.Thdloss != ""{
+						Thdloss = t.Thdloss
+					}
+					if t.Thdavgdelay != ""{
+						Thdavgdelay = t.Thdavgdelay
+					}
+					if t.Thdoccnum != ""{
+						Thdoccnum = t.Thdoccnum
+					}
+				}
+			}
+			timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
 			rows, _ := db.Query("SELECT * FROM pinglog where 1=1 and lastcheck > '"+timeStartStr+"' and ip= '"+v.Target.Addr+"'")
 			//log.Println("SELECT * FROM pinglog where 1=1 and lastcheck > '"+timeStartStr+"' and ip= '"+v.Target.Addr+"'")
 			preout[v.Target.Name]="true"
+			var showtimes int
 			for rows.Next() {
 				l := new(LogInfo)
 				rows.Scan(&l.logtime, &l.ip, &l.name, &l.maxdelay, &l.mindelay, &l.avgdelay, &l.sendpk, &l.revcpk, &l.losspk, &l.lastcheck,)
 				lp,_:=strconv.Atoi(l.losspk)
 				ad,_:=strconv.Atoi(l.avgdelay)
-				thlp,_:=strconv.Atoi(config.Thresholdloss)
-				thad,_:=strconv.Atoi(config.Thresholdavgdelay)
+				thlp,_:=strconv.Atoi(Thdloss)
+				thad,_:=strconv.Atoi(Thdavgdelay)
 				if(lp>thlp || ad>thad){
-					preout[v.Target.Name]="false"
+					showtimes = showtimes+1
 				}
+			}
+			oct,_:=strconv.Atoi(Thdoccnum)
+			if showtimes>=oct {
+				preout[v.Target.Name]="false"
 			}
 			lock.Unlock()
 		}
@@ -693,6 +741,7 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 			}
 			tostatus := map[string]string{
 				"name"   : v.Name,
+				"type"   : v.Type,
 				"color" : st,
 			}
 			sl.Nlist = append(sl.Nlist,tostatus)
@@ -735,6 +784,7 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 			log.Fatal(err)
 		}
 	})
+
 	//Index
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		state.Lock.Lock()
@@ -744,6 +794,7 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 		if len(r.Form["t"]) > 0 {
 			state.Showtype = r.Form["t"][0]
 		}
+		state.Conf = config
 		//log.Println(state)
 		err := index.Execute(w, state)
 		if err != nil {
