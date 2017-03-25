@@ -12,6 +12,7 @@ import (
 	"smartping/mn"
 	"github.com/go-resty/resty"
 	"bytes"
+	"os"
 )
 
 // Init of the Web Page template.
@@ -781,7 +782,7 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 		sl.Tsymbolsize=config.Tsymbolsize
 		err := topology.Execute(w, sl)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("ERR:",err)
 		}
 	})
 
@@ -798,7 +799,7 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 		//log.Println(state)
 		err := index.Execute(w, state)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("ERR:",err)
 		}
 	})
 	s := fmt.Sprintf(":%d", port)
@@ -806,6 +807,8 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 	log.Printf("Get status on http://localhost%s/status", s)
 	err := http.ListenAndServe(s, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("ERR:",err)
 	}
+	log.Println("Server on 8899 stopped")
+	os.Exit(0)
 }
