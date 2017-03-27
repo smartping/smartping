@@ -8,7 +8,7 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
  - »æÖÆ»¥PING¼ä»úÆ÷µÄÍØÆË¼°±¨¾¯¹¦ÄÜ
 
 ## Éè¼ÆË¼ÂÇ ##
-±¾ÏµÍ³Éè¼ÆÎªÎÞÖÐÐÄ»¯Ô­Ôò£¬ËùÓÐµÄÊý¾Ý¾ù´æ´¢×ÔÉíµãÖÐ£¬Ä¬ÈÏÊý¾ÝÑ­»·±£Áô1¸öÔÂÊ±¼ä£¬ÓÉ×ÔÉíµãµÄÊý¾Ý»æÖÆ ³öPING°ü µÄ×´Ì¬£¬ÓÉ¸÷ÆäËûµãµÄÊý¾Ý»æÖÆ ½øPING°ü µÄ×´Ì¬£¬²¢API½Ó¿Ú»ñÈ¡ÆäËûµãÊý¾Ý»æÖÆÕûÌåPINGÍØÆËÍ¼£¬ÍØÆËÍ¼ÖÐ´æÔÚ±¨¾¯¹¦ÄÜ£¬±¨¾¯¹æÔòÎªThresholchecksecÃëÖÓÄÚ·¢ÏÖ´óÓÚµÈÓÚThdoccnum´ÎÑÓ³Ù³¬¹ýThresholdavgdelayºÁÃë»ò¶ª°üÂÊ´óÓÚThresholdloss%¼´±¨¾¯£¬ÈôÉèÖÃ±¨¾¯ÉùÒôÔò»áÍ¬Ê±ÓÐAlertsoundÉùÒôÌáÐÑ¡£
+±¾ÏµÍ³Éè¼ÆÎªÎÞÖÐÐÄ»¯Ô­Ôò£¬ËùÓÐµÄÊý¾Ý¾ù´æ´¢×ÔÉíµãÖÐ£¬Ä¬ÈÏÊý¾ÝÑ­»·±£Áô1¸öÔÂÊ±¼ä£¬ÓÉ×ÔÉíµãµÄÊý¾Ý»æÖÆ ³öPING°ü µÄ×´Ì¬£¬ÓÉ¸÷ÆäËûµãµÄÊý¾Ý»æÖÆ ½øPING°ü µÄ×´Ì¬£¬²¢API½Ó¿Ú»ñÈ¡ÆäËûµãÊý¾Ý»æÖÆÕûÌåPINGÍØÆËÍ¼£¬ÍØÆËÍ¼ÖÐ´æÔÚ±¨¾¯¹¦ÄÜ£¬±¨¾¯¹æÔòÎªThdchecksecÃëÖÓÄÚ·¢ÏÖ´óÓÚµÈÓÚThdoccnum´ÎÑÓ³Ù³¬¹ýThdavgdelayºÁÃë»ò¶ª°üÂÊ´óÓÚThdloss%¼´±¨¾¯£¬ÈôÉèÖÃ±¨¾¯ÉùÒôÔò»áÍ¬Ê±ÓÐAlertsoundÉùÒôÌáÐÑ¡£
     
 ## ÅäÖÃÎÄ¼þ ##
     {
