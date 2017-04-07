@@ -717,7 +717,7 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 			randint=append(randint,i)
 			i = i+1
 			if v.Type=="CS"{
-				resp, _ := resty.SetTimeout(time.Second).R().Get("http://"+v.Addr+":8899/api/topology.json")
+				resp, _ := resty.SetTimeout(time.Second*3).R().Get("http://"+v.Addr+":8899/api/topology.json")
 				if resp.StatusCode()==200{
 					map2 := make(map[string]interface{})
 					json.Unmarshal([]byte(resp.String()), &map2)
@@ -802,6 +802,8 @@ func startHttp(port int, state *State ,db *sql.DB ,config Config) {
 			log.Println("ERR:",err)
 		}
 	})
+
+
 	s := fmt.Sprintf(":%d", port)
 	log.Println("starting to listen on ", s)
 	log.Printf("Get status on http://localhost%s/status", s)
