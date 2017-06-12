@@ -4,6 +4,7 @@ WORKSPACE=$(cd $(dirname $0)/; pwd)
 cd $WORKSPACE
 
 mkdir -p var
+mkdir -p bin
 
 module=smartping
 app=$module
@@ -28,9 +29,9 @@ function start() {
         cat $pidfile
         return 1
     fi
-    cd $WORKSPACE/bin
-    nohup ./$app -r $WORKSPACE >/dev/null 2>&1 &
-    echo $! > ../$pidfile
+    #cd $WORKSPACE/bin
+    nohup ./bin/$app >/dev/null 2>&1 &
+    echo $! > ./$pidfile
     echo "$app started..., pid=$!"
 }
 
