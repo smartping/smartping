@@ -1,0 +1,87 @@
+#!/bin/bash
+
+WORKSPACE=$(cd $(dirname $0)/; pwd)
+cd $WORKSPACE
+
+mkdir -p var
+
+module=smartping
+app=$module
+pidfile=var/app.pid
+
+function check_pid() {
+    if [ -f $pidfile ];then
+        pid=`cat $pidfile`
+        if [ -n $pid ]; then
+            running=`ps -p $pid|grep -v "PID TTY" |wc -l`
+            return $running
+        fi
+    fi
+    return 0
+}
+
+function start() {
+    check_pid
+    running=$?
+    if [ $running -gt 0 ];then
+        echo -n "$app now is running already, pid="
+        cat $pidfile
+        return 1
+    fi
+    cd $WORKSPACE/bin
+    nohup ./$app -r $WORKSPACE >/dev/null 2>&1 &
+    echo $! > ../$pidfile
+    echo "$app started..., pid=$!"
+}
+
+function stop() {
+    pid=`cat $pidfile`
+    kill $pid
+    echo "$app stoped..."
+}
+
+function restart() {
+    stop
+    sleep 1
+    start
+}
+
+function status() {
+    check_pid
+    running=$?
+    if [ $running -gt 0 ];then
+        echo started
+    else
+        echo stoped
+    fi
+}
+
+
+function build() {
+    go build src/smartping.go
+    if [ $? -ne 0 ]; then
+        exit $?
+    fi
+    mv $module ./bin/$app
+}
+
+
+function help() {
+    echo "$0 build|start|stop|restart|status"
+}
+
+if [ "$1" == "" ]; then
+    help
+elif [ "$1" == "stop" ];then
+    stop
+elif [ "$1" == "start" ];then
+    start
+elif [ "$1" == "restart" ];then
+    restart
+elif [ "$1" == "status" ];then
+    status
+elif [ "$1" == "build" ];then
+    build
+else
+    help
+fi

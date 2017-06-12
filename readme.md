@@ -12,38 +12,31 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
     
 ## ÅäÖÃÎÄ¼þ ##
     {
-      "Name": "±¾»ú",                    <-±¾»úµÄ±êÊ¶£¨Ö§³ÖÖÐÎÄ,Ó¢ÎÄ,[ÖÐ¸Ü£¬Êý×Ö]²»ÄÜ¿ªÍ·£©
-      "Ip": "127.0.0.1",                <-±¾»úµÄIP
-      "Db": "./database.db",            <-´æ´¢¼ÇÂ¼ÓÃÊý¾Ý¿â
-      "Thdchecksec" : "900",                                                <-[»ù´¡]±¨¾¯ÖÜÆÚ
-      "Thdoccnum" : "1",                                                    <-[»ù´¡]±¨¾¯¼ì²â´ÎÊý
-      "Thdloss" : "30",                                                     <-[»ù´¡]±¨¾¯ÉèÖÃ-¶ª°üÂÊ
-      "Thdavgdelay" : "200",                                                <-[»ù´¡]±¨¾¯ÉèÖÃ-Æ½¾ùÑÓ³Ù
-      "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3",    <-±¨¾¯ÉùÒô
-      "Tline":"1",                                                          <-ÍØÆËÍ¼Ïß¿í¶È
-      "Tsymbolsize":"70",                                                   <-ÍØÆËÍ¼µã´óÐ¡
-      "Targets": [              <-Ä¿±ê»úÆ÷ÁÐ±í
+      "Name": "Localhost",
+      "Ip": "127.0.0.1",
+  
+      "_comment_thd":"Thdchecksec,Thdoccnum,Thdloss,Thdavgdelay²ÎÊýÎªÉèÖÃ±¨¾¯¹æÔò£¬·Ö±ð¶ÔÓ¦¼ì²âÖÜÆÚ£¬¶ª°üÂÊ£¬Æ½¾ùÑÓ³Ù£¬·¢Éú´ÎÊý",
+      "Thdchecksec" : 900,"Thdloss" : 30,"Thdavgdelay" : 200,"Thdoccnum" : 1,
+    
+      "_comment_topo":"Alertsound,Tline,Tsymbolsize,Topotimeout²ÎÊýÎªÉèÖÃÍØÆË±¨¾¯Ê±Ê¹ÓÃ£¬·Ö±ð¶ÔÓ¦±¨¾¯ÉùÒô£¬Á¬Ïß¿í¶È£¬Í¼ÐÎ´óÐ¡£¬ÍØÆË¼äµ÷ÓÃ³¬Ê±Ê±¼ä",
+      "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3","Tline":"1","Tsymbolsize":"70","Topotimeout":"5",
+    
+      "Targets": [
         {
-          "Name": "±¾»ú",            <-Ä¿±ê»úÆ÷Ãû³Æ
-          "Addr": "127.0.0.1",       <-Ä¿±ê»úÆ÷IP
-          "Interval": "20",          <-ping¼ì²â°üÊý
-          "Type":"CS"                <-Ä¿±ê»úÆ÷Ä£Ê½(C:Client,CS,Client/Server),
-          "Thdchecksec" : "900",     <-±¨¾¯ÖÜÆÚ
-          "Thdoccnum" : "1",         <-±¨¾¯¼ì²â´ÎÊý
-          "Thdloss" : "30",          <-±¨¾¯ÉèÖÃ-¶ª°üÂÊ
-          "Thdavgdelay" : "200"      <-±¨¾¯ÉèÖÃ-Æ½¾ùÑÓ³Ù
+          "Name": "±¾»ú","Addr": "127.0.0.1","Interval": "5","Type":"CS"
         },
         {
-          "Name": "ÑóÇÅ",
-          "Addr": "10.10.12.2",
-          "Interval": "20",
-          "Type":"CS",
-          "Thdchecksec" : "900",
-          "Thdoccnum" : "1",
-          "Thdloss" : "30",
-          "Thdavgdelay" : "200"
+          "Name": "NOPING","Addr": "93.46.8.89","Interval": "5","Type":"CS"
         },
-        ...
+        
+        {
+          "Name": "IP_10_0_0_51","Addr": "10.0.0.51","Interval": "5","Type":"CS"
+        },
+        {
+          "_comment":"±¨¾¯¹æÔò£¨Thdchecksec,Thdoccnum,Thdloss,Thdavgdelay£©¿ÉÒÔµ¥¶ÀÉèÖÃ£¬µ¥¶ÀÉèÖÃµÄ¹æÔòÓÅÏÈ",
+          "Name": "IP_10_0_15_1","Addr": "10.0.15.1","Interval": "5","Type":"CS","Thdchecksec" : 30,"Thdoccnum" : 1,"Thdloss" : 50,"Thdavgdelay" : 200
+        }
+        {more...}
       ]
     }
     
@@ -56,7 +49,7 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
 
 
 ## Êý¾Ý¿â ##
-Êý¾Ý¿âÖÐ´æ´¢PINGµÄÈÕÖ¾Êý¾Ý£¬Ä¬ÈÏÑ­»·±£ÁôÒ»¸öÔÂÊý¾Ý£¬×î¶à£¨31*24*60=44640Ìõ£©
+Êý¾Ý¿âÖÐ´æ´¢PINGµÄÈÕÖ¾Êý¾Ý£¬Ä¬ÈÏÑ­»·±£ÁôÒ»¸öÔÂÊý¾Ý£¬×î¶à£¨31*24*60*n=44640*NÌõ£©
 
     CREATE TABLE pinglog (
         logtime   VARCHAR (8),

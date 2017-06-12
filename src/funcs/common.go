@@ -1,7 +1,52 @@
-package mn
+package funcs
+
 import (
+	"strings"
+	"strconv"
+	"../g"
 	"fmt"
+	"time"
+	"path/filepath"
+	"os"
+	"log"
 )
+
+func GetRoot() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	dirctory := strings.Replace(dir, "\\", "/", -1)
+	runes := []rune(dirctory)
+	l := 0 + strings.LastIndex(dirctory, "/")
+	if l > len(runes) {
+		l = len(runes)
+	}
+	return string(runes[0:l])
+}
+
+// 转换成毫秒
+func CurrentTimeMillis() int64 {
+	return time.Now().UnixNano() / 1000000
+}
+
+func NewState() *g.State {
+	s := new(g.State)
+	s.State = make(map[*g.Target]g.TargetStatus)
+	return s
+}
+
+func Compare(num string,nb int) bool{
+	val,_:=strconv.Atoi(num)
+	if val < nb{
+		return false
+	}
+	return true
+}
+
+func Timestr(time string) string {
+	return strings.Fields(time)[1]
+}
 
 /*
 【排列组合问题：n个数中取m个】
@@ -125,6 +170,5 @@ func jieCheng(n int) int {
 	for i := 2; i <= n; i++ {
 		result *= i
 	}
-
 	return result
 }

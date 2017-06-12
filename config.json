@@ -1,0 +1,27 @@
+{
+  "Name": "Localhost",
+  "Ip": "127.0.0.1",
+
+  "_comment_thd":"Thdchecksec,Thdoccnum,Thdloss,Thdavgdelay参数为设置报警规则，分别对应检测周期，丢包率，平均延迟，发生次数",
+  "Thdchecksec" : 900,"Thdloss" : 30,"Thdavgdelay" : 200,"Thdoccnum" : 1,
+
+  "_comment_topo":"Alertsound,Tline,Tsymbolsize,Topotimeout参数为设置拓扑报警时使用，分别对应报警声音，连线宽度，图形大小，拓扑间调用超时时间",
+  "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3","Tline":"1","Tsymbolsize":"70","Topotimeout":"5",
+
+  "Targets": [
+    {
+      "Name": "本机","Addr": "127.0.0.1","Interval": "5","Type":"CS"
+    },
+    {
+      "Name": "NOPING","Addr": "93.46.8.89","Interval": "5","Type":"CS"
+    },
+    
+    {
+      "Name": "IP_10_0_0_51","Addr": "10.0.0.51","Interval": "5","Type":"CS"
+    },
+    {
+      "_comment":"报警规则（Thdchecksec,Thdoccnum,Thdloss,Thdavgdelay）可以单独设置，单独设置的规则优先",
+      "Name": "IP_10_0_15_1","Addr": "10.0.15.1","Interval": "5","Type":"CS","Thdchecksec" : 30,"Thdoccnum" : 1,"Thdloss" : 50,"Thdavgdelay" : 200
+    }
+  ]
+}

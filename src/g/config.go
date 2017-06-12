@@ -1,13 +1,17 @@
-package main
+package g
 
 import (
 	"encoding/json"
 	"log"
 	"os"
+	"sync"
 )
 
+//var DataLock = new
+var DLock sync.Mutex
+
 // Opening (or creating) config file in JSON format
-func readConfig(filename string) Config {
+func ReadConfig(filename string) Config {
 	config := Config{}
 	file, err := os.Open(filename)
 	defer file.Close()

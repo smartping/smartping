@@ -1,4 +1,4 @@
-package cmdping
+package funcs
 
 import (
 	"io"
@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"bufio"
 	"runtime"
-	"github.com/axgle/mahonia"
+	"github.com/gy-games-libs/mahonia"
 )
 
 type PingSt struct{
