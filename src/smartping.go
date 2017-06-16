@@ -14,7 +14,7 @@ var filename = flag.String("f", "config.json", "JSON configuration file")
 var httpPort = flag.Int("p", 8899, "HTTP port")
 //var lock sync.Mutex
 
-var Version = "0.2.2"
+var Version = "0.2.3"
 // Main function
 func main() {
 	flag.Parse()

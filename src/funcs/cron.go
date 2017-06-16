@@ -26,6 +26,7 @@ func runPingTest( db *sql.DB, c g.Config, t g.Target, res chan g.TargetStatus) {
 		log.Println("REPLACE INTO pinglog ",logtime, t.Addr,t.Name, pingres.MaxDelay, pingres.AvgDelay, pingres.MinDelay, pingres.SendPk, pingres.RevcPk, pingres.LossPk, lastcheck)
 		stmt, _ := db.Prepare("REPLACE INTO pinglog(logtime, ip, name, maxdelay, mindelay, avgdelay, sendpk, revcpk, losspk, lastcheck) values(?,?,?,?,?,?,?,?,?,?)")
 		stmt.Exec(logtime, t.Addr,t.Name, pingres.MaxDelay, pingres.AvgDelay, pingres.MinDelay, pingres.SendPk, pingres.RevcPk, pingres.LossPk, lastcheck )
+		stmt.Close()
 		g.DLock.Unlock()
 		res <- status
 		log.Printf("runPingTest on %s finish!", t.Name)
