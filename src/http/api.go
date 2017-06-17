@@ -82,6 +82,7 @@ func configApiRoutes(port int, state *g.State ,db *sql.DB ,config g.Config){
 				}
 			}
 		}
+		rows.Close()
 		g.DLock.Unlock()
 		preout := map[string][]string{
 			"lastcheck": lastcheck,
@@ -122,14 +123,15 @@ func configApiRoutes(port int, state *g.State ,db *sql.DB ,config g.Config){
 		Thdoccnum   	:= config.Thdoccnum
 		dbrst   	:= map[string]int{}
 		g.DLock.Lock()
-		rows, _ := db.Query("SELECT ip,name,max(avgdelay) maxavgdelay, max(losspk) maxlosspk ,count(1) Cnt FROM  pinglog where lastcheck > '"+timeStartStr+"' and (cast(avgdelay as double) > "+strconv.Itoa(Thdavgdelay)+" or cast(losspk as double) > "+strconv.Itoa(Thdloss)+") group by ip,name ")
+		mrows, _ := db.Query("SELECT ip,name,max(avgdelay) maxavgdelay, max(losspk) maxlosspk ,count(1) Cnt FROM  pinglog where lastcheck > '"+timeStartStr+"' and (cast(avgdelay as double) > "+strconv.Itoa(Thdavgdelay)+" or cast(losspk as double) > "+strconv.Itoa(Thdloss)+") group by ip,name ")
 		//log.Print("SELECT ip,name,max(avgdelay) maxavgdelay, max(losspk) maxlosspk ,count(1) Cnt FROM  pinglog where lastcheck > '"+timeStartStr+"' and (cast(avgdelay as double) > "+strconv.Itoa(Thdavgdelay)+" or cast(losspk as double) > "+strconv.Itoa(Thdloss)+") group by ip,name ")
-		for rows.Next() {
+		for mrows.Next() {
 			l 		:= new( g.TopoLog )
-			rows.Scan( &l.Ip, &l.Name,&l.Maxavgdelay,&l.Maxlosspk,&l.Cnt,)
+			mrows.Scan( &l.Ip, &l.Name,&l.Maxavgdelay,&l.Maxlosspk,&l.Cnt,)
 			log.Print(l)
 			dbrst[l.Ip],_ = strconv.Atoi(l.Cnt)
 		}
+		mrows.Close()
 		g.DLock.Unlock()
 		for _,v := range state.State{
 			for _,t:=range config.Targets {
@@ -144,6 +146,7 @@ func configApiRoutes(port int, state *g.State ,db *sql.DB ,config g.Config){
 							rows.Scan( &l.Ip, &l.Name,&l.Maxavgdelay,&l.Maxlosspk,&l.Cnt,)
 							dbrst[l.Ip],_ = strconv.Atoi(l.Cnt)
 						}
+						rows.Close()
 						g.DLock.Unlock()
 						if( dbrst[v.Target.Addr]> t.Thdoccnum ){
 							preout[v.Target.Name]="false"
