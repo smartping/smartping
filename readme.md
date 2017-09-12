@@ -1,29 +1,29 @@
 # SMARTPING #
-## ½éÉÜ ##
-SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾¯¹¦ÄÜ
+## ä»‹ç» ##
+SmartPingä¸ºä¸€ä¸ªå„æœºå™¨(ç‚¹)é—´é—´äº’PINGæ£€æµ‹å·¥å…·ï¼Œæ”¯æŒäº’PINGï¼Œå•å‘PINGï¼Œç»˜åˆ¶æ‹“æ‰‘åŠæŠ¥è­¦åŠŸèƒ½
 
-##¹¦ÄÜ ##
+##åŠŸèƒ½ ##
 
- - »úÆ÷¼ä»¥PING£¬µ¥ÏòPING£¬»æÍ¼
- - »æÖÆ»¥PING¼ä»úÆ÷µÄÍØÆË¼°±¨¾¯¹¦ÄÜ
+ - æœºå™¨é—´äº’PINGï¼Œå•å‘PINGï¼Œç»˜å›¾
+ - ç»˜åˆ¶äº’PINGé—´æœºå™¨çš„æ‹“æ‰‘åŠæŠ¥è­¦åŠŸèƒ½
 
-## Éè¼ÆË¼ÂÇ ##
-±¾ÏµÍ³Éè¼ÆÎªÎÞÖÐÐÄ»¯Ô­Ôò£¬ËùÓÐµÄÊý¾Ý¾ù´æ´¢×ÔÉíµãÖÐ£¬Ä¬ÈÏÊý¾ÝÑ­»·±£Áô1¸öÔÂÊ±¼ä£¬ÓÉ×ÔÉíµãµÄÊý¾Ý»æÖÆ ³öPING°ü µÄ×´Ì¬£¬ÓÉ¸÷ÆäËûµãµÄÊý¾Ý»æÖÆ ½øPING°ü µÄ×´Ì¬£¬²¢API½Ó¿Ú»ñÈ¡ÆäËûµãÊý¾Ý»æÖÆÕûÌåPINGÍØÆËÍ¼£¬ÍØÆËÍ¼ÖÐ´æÔÚ±¨¾¯¹¦ÄÜ£¬±¨¾¯¹æÔòÎªThdchecksecÃëÖÓÄÚ·¢ÏÖ´óÓÚµÈÓÚThdoccnum´ÎÑÓ³Ù³¬¹ýThdavgdelayºÁÃë»ò¶ª°üÂÊ´óÓÚThdloss%¼´±¨¾¯£¬ÈôÉèÖÃ±¨¾¯ÉùÒôÔò»áÍ¬Ê±ÓÐAlertsoundÉùÒôÌáÐÑ¡£
+## è®¾è®¡æ€è™‘ ##
+æœ¬ç³»ç»Ÿè®¾è®¡ä¸ºæ— ä¸­å¿ƒåŒ–åŽŸåˆ™ï¼Œæ‰€æœ‰çš„æ•°æ®å‡å­˜å‚¨è‡ªèº«ç‚¹ä¸­ï¼Œé»˜è®¤æ•°æ®å¾ªçŽ¯ä¿ç•™1ä¸ªæœˆæ—¶é—´ï¼Œç”±è‡ªèº«ç‚¹çš„æ•°æ®ç»˜åˆ¶ å‡ºPINGåŒ… çš„çŠ¶æ€ï¼Œç”±å„å…¶ä»–ç‚¹çš„æ•°æ®ç»˜åˆ¶ è¿›PINGåŒ… çš„çŠ¶æ€ï¼Œå¹¶APIæŽ¥å£èŽ·å–å…¶ä»–ç‚¹æ•°æ®ç»˜åˆ¶æ•´ä½“PINGæ‹“æ‰‘å›¾ï¼Œæ‹“æ‰‘å›¾ä¸­å­˜åœ¨æŠ¥è­¦åŠŸèƒ½ï¼ŒæŠ¥è­¦è§„åˆ™ä¸ºThdchecksecç§’é’Ÿå†…å‘çŽ°å¤§äºŽç­‰äºŽThdoccnumæ¬¡å»¶è¿Ÿè¶…è¿‡Thdavgdelayæ¯«ç§’æˆ–ä¸¢åŒ…çŽ‡å¤§äºŽThdloss%å³æŠ¥è­¦ï¼Œè‹¥è®¾ç½®æŠ¥è­¦å£°éŸ³åˆ™ä¼šåŒæ—¶æœ‰Alertsoundå£°éŸ³æé†’ã€‚
     
-## ÅäÖÃÎÄ¼þ ##
+## é…ç½®æ–‡ä»¶ ##
     {
       "Name": "Localhost",
       "Ip": "127.0.0.1",
   
-      "_comment_thd":"Thdchecksec,Thdoccnum,Thdloss,Thdavgdelay²ÎÊýÎªÉèÖÃ±¨¾¯¹æÔò£¬·Ö±ð¶ÔÓ¦¼ì²âÖÜÆÚ£¬¶ª°üÂÊ£¬Æ½¾ùÑÓ³Ù£¬·¢Éú´ÎÊý",
+      "_comment_thd":"Thdchecksec,Thdoccnum,Thdloss,Thdavgdelayå‚æ•°ä¸ºè®¾ç½®æŠ¥è­¦è§„åˆ™ï¼Œåˆ†åˆ«å¯¹åº”æ£€æµ‹å‘¨æœŸï¼Œä¸¢åŒ…çŽ‡ï¼Œå¹³å‡å»¶è¿Ÿï¼Œå‘ç”Ÿæ¬¡æ•°",
       "Thdchecksec" : 900,"Thdloss" : 30,"Thdavgdelay" : 200,"Thdoccnum" : 1,
     
-      "_comment_topo":"Alertsound,Tline,Tsymbolsize,Topotimeout²ÎÊýÎªÉèÖÃÍØÆË±¨¾¯Ê±Ê¹ÓÃ£¬·Ö±ð¶ÔÓ¦±¨¾¯ÉùÒô£¬Á¬Ïß¿í¶È£¬Í¼ÐÎ´óÐ¡£¬ÍØÆË¼äµ÷ÓÃ³¬Ê±Ê±¼ä",
+      "_comment_topo":"Alertsound,Tline,Tsymbolsize,Topotimeoutå‚æ•°ä¸ºè®¾ç½®æ‹“æ‰‘æŠ¥è­¦æ—¶ä½¿ç”¨ï¼Œåˆ†åˆ«å¯¹åº”æŠ¥è­¦å£°éŸ³ï¼Œè¿žçº¿å®½åº¦ï¼Œå›¾å½¢å¤§å°ï¼Œæ‹“æ‰‘é—´è°ƒç”¨è¶…æ—¶æ—¶é—´",
       "Alertsound" : "http://mp3.13400.com:99/1917/001204170042283.mp3","Tline":"1","Tsymbolsize":"70","Topotimeout":"5",
     
       "Targets": [
         {
-          "Name": "±¾»ú","Addr": "127.0.0.1","Interval": "5","Type":"CS"
+          "Name": "æœ¬æœº","Addr": "127.0.0.1","Interval": "5","Type":"CS"
         },
         {
           "Name": "NOPING","Addr": "93.46.8.89","Interval": "5","Type":"CS"
@@ -33,23 +33,23 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
           "Name": "IP_10_0_0_51","Addr": "10.0.0.51","Interval": "5","Type":"CS"
         },
         {
-          "_comment":"±¨¾¯¹æÔò£¨Thdchecksec,Thdoccnum,Thdloss,Thdavgdelay£©¿ÉÒÔµ¥¶ÀÉèÖÃ£¬µ¥¶ÀÉèÖÃµÄ¹æÔòÓÅÏÈ",
+          "_comment":"æŠ¥è­¦è§„åˆ™ï¼ˆThdchecksec,Thdoccnum,Thdloss,Thdavgdelayï¼‰å¯ä»¥å•ç‹¬è®¾ç½®ï¼Œå•ç‹¬è®¾ç½®çš„è§„åˆ™ä¼˜å…ˆ",
           "Name": "IP_10_0_15_1","Addr": "10.0.15.1","Interval": "5","Type":"CS","Thdchecksec" : 30,"Thdoccnum" : 1,"Thdloss" : 50,"Thdavgdelay" : 200
         }
         {more...}
       ]
     }
     
-**×¢Òâ£º**
+**æ³¨æ„ï¼š**
 
-  - Ä¿±ê»úÆ÷ÁÐ±í(Targets)ÖÐÒ²ÐèÒª°üº¬±¾»úµÄÐÅÏ¢£¬·ñÔÚÔÚÍØÆËÍ¼ÖÐ½«²»ÏÔÊ¾±¾»ú
-  - PING¼ì²â°üÊýÐèÒªÐ¡ÓÚ60£¬Ä¿Ç°»æÍ¼ÊÇÒ»·ÖÖÓÒ»¸öµã£¬Èô¸ßÓÚ60½«³öÏÖ¶Ïµã
-  - Ä¿±ê»úÆ÷Ä£Ê½,Client´ú±íÖ»½ÓÊÜPING°ü£¬²»»á·¢ËÍPING°ü£¬CS¼°¼È·¢PING°üÒ²ÊÕPING°ü£¬ÍØÆËÍ¼ÖÐÌåÏÖÎªµ¥ÏîÁ¬Ïß»òË«ÏòÁ¬Ïß
-  - Èô²»ÉèÖÃTargetsÄÚµÄ±¨¾¯ÖÜÆÚ£¬¼ì²â´ÎÊý£¬¶ª°üÂÊ£¬Æ½¾ùÑÓ³Ù½«²ÉÓÃ»ù´¡ÅäÖÃ
+  - ç›®æ ‡æœºå™¨åˆ—è¡¨(Targets)ä¸­ä¹Ÿéœ€è¦åŒ…å«æœ¬æœºçš„ä¿¡æ¯ï¼Œå¦åœ¨åœ¨æ‹“æ‰‘å›¾ä¸­å°†ä¸æ˜¾ç¤ºæœ¬æœº
+  - PINGæ£€æµ‹åŒ…æ•°éœ€è¦å°äºŽ60ï¼Œç›®å‰ç»˜å›¾æ˜¯ä¸€åˆ†é’Ÿä¸€ä¸ªç‚¹ï¼Œè‹¥é«˜äºŽ60å°†å‡ºçŽ°æ–­ç‚¹
+  - ç›®æ ‡æœºå™¨æ¨¡å¼,Clientä»£è¡¨åªæŽ¥å—PINGåŒ…ï¼Œä¸ä¼šå‘é€PINGåŒ…ï¼ŒCSåŠæ—¢å‘PINGåŒ…ä¹Ÿæ”¶PINGåŒ…ï¼Œæ‹“æ‰‘å›¾ä¸­ä½“çŽ°ä¸ºå•é¡¹è¿žçº¿æˆ–åŒå‘è¿žçº¿
+  - è‹¥ä¸è®¾ç½®Targetså†…çš„æŠ¥è­¦å‘¨æœŸï¼Œæ£€æµ‹æ¬¡æ•°ï¼Œä¸¢åŒ…çŽ‡ï¼Œå¹³å‡å»¶è¿Ÿå°†é‡‡ç”¨åŸºç¡€é…ç½®
 
 
-## Êý¾Ý¿â ##
-Êý¾Ý¿âÖÐ´æ´¢PINGµÄÈÕÖ¾Êý¾Ý£¬Ä¬ÈÏÑ­»·±£ÁôÒ»¸öÔÂÊý¾Ý£¬×î¶à£¨31*24*60*n=44640*NÌõ£©
+## æ•°æ®åº“ ##
+æ•°æ®åº“ä¸­å­˜å‚¨PINGçš„æ—¥å¿—æ•°æ®ï¼Œé»˜è®¤å¾ªçŽ¯ä¿ç•™ä¸€ä¸ªæœˆæ•°æ®ï¼Œæœ€å¤šï¼ˆ31*24*60*n=44640*Næ¡ï¼‰
 
     CREATE TABLE pinglog (
         logtime   VARCHAR (8),
@@ -77,25 +77,25 @@ SmartPingÎªÒ»¸ö¸÷»úÆ÷(µã)¼ä¼ä»¥PING¼ì²â¹¤¾ß£¬Ö§³Ö»¥PING£¬µ¥ÏòPING£¬»æÖÆÍØÆË¼°±¨¾
     );
 
 
-## Ê¹ÓÃ ##
+## ä½¿ç”¨ ##
 
-**ÔËÐÐ**
+**è¿è¡Œ**
 
-nohup ./idcping >/dev/null 2>&1 &
+./control start
 
-**·ÃÎÊ**
+**è®¿é—®**
 
 http://ip:8899
 
-**Ê×Ò³Ê¾Àý£º**
+**é¦–é¡µç¤ºä¾‹ï¼š**
 
 ![index.jpg](_screen/index.jpg "")
 
-ÂÌÉ«Ãæ»ýÊ¹ÓÃ×ó²à×ø±êÖá´ú±íÆ½¾ùÑÓ³Ù£¬ºìÉ«Ãæ»ýÊ¹ÓÃÓÒ²à×ø±êÖá´ú±í¶ª°üÂÊ
+ç»¿è‰²é¢ç§¯ä½¿ç”¨å·¦ä¾§åæ ‡è½´ä»£è¡¨å¹³å‡å»¶è¿Ÿï¼Œçº¢è‰²é¢ç§¯ä½¿ç”¨å³ä¾§åæ ‡è½´ä»£è¡¨ä¸¢åŒ…çŽ‡
 
-**ÍØÆËÊ¾Àý£º**
+**æ‹“æ‰‘ç¤ºä¾‹ï¼š**
 
 ![topology.jpg](_screen/topology.jpg "")
 
-Ô²ÐÎ´ú±íÒ»¸öµã£¬ÂÌÉ«±íÊ¾Õý³££¬ºìÉ«±íÊ¾µ±Ç°²é¿´ÍØÆËÍ¼ËùÔÚµÄµãµ½´Ëµã²»Í¨£¬Á¬ÏßÖÐÂÌÉ«´ú±íÕý³££¬ºìÉ«´ú±íÒì³££¬»ÆÉ«´ú±íÎ´Öª(ÎÞ·¨È¡µ½Êý¾Ý)
+åœ†å½¢ä»£è¡¨ä¸€ä¸ªç‚¹ï¼Œç»¿è‰²è¡¨ç¤ºæ­£å¸¸ï¼Œçº¢è‰²è¡¨ç¤ºå½“å‰æŸ¥çœ‹æ‹“æ‰‘å›¾æ‰€åœ¨çš„ç‚¹åˆ°æ­¤ç‚¹ä¸é€šï¼Œè¿žçº¿ä¸­ç»¿è‰²ä»£è¡¨æ­£å¸¸ï¼Œçº¢è‰²ä»£è¡¨å¼‚å¸¸ï¼Œé»„è‰²ä»£è¡¨æœªçŸ¥(æ— æ³•å–åˆ°æ•°æ®)
 
