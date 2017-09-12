@@ -83,9 +83,10 @@ SmartPing为一个各机器(点)间间互PING检测工具，支持互PING，单�
 
 **运行**
 
-./control start
+Linux: ./control start
+Windows: control.cmd start
 
-**访问**
+**WEB访问**
 
 http://ip:8899
 
