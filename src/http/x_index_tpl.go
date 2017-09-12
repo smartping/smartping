@@ -12,7 +12,7 @@ var indexTemplate = `
         <script src="https://cdn.bootcss.com/jquery/3.2.0/jquery.min.js"></script>
         <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="https://cdn.bootcss.com/echarts/3.4.0/echarts.common.min.js"></script>
-        <script language="JavaScript" type="text/javascript" src="http://www.my97.net/dp/My97DatePicker/WdatePicker.js"></script>
+        <script language="JavaScript" type="text/javascript" src="http://www.my97.net/My97DatePicker/WdatePicker.js"></script>
 	</head>
 	<body>
 		<div id="main" style="margin: auto">
@@ -32,7 +32,7 @@ var indexTemplate = `
 		         </div><br/>
               	<%range .State%>
               	   <% if or (eq .Target.Type "CS") (eq $Showtype "out")  %>
-                		<div id="<% .Target.Name %>_pannel" style="float:left;width:400px;height:150px;margin-right:10px;" class="showcharts" value="<% .Target.Addr %>" ></div>
+                		<div id="m_<% .Target.Name | md5str %>_pannel" style="float:left;width:400px;height:150px;margin-right:10px;" class="showcharts" value="<% .Target.Addr %>" ></div>
                         <% end %>
                 	<%end%>
               </div>
@@ -270,12 +270,12 @@ var indexTemplate = `
 		}
         <%range .State%>
 	   <% if or (eq .Target.Type "CS") (eq $Showtype "out")  %>
-            var <% .Target.Name %> = echarts.init(document.getElementById('<% .Target.Name %>_pannel'));
-            <% .Target.Name %>.setOption(optmini);
-            <% .Target.Name %>.setOption({title:{text:'<% if eq $Showtype "out" %><% $Localname %>-><% .Target.Name %><% else %><% .Target.Name %>-><% $Localname %><% end %>'}});
+            var C<% .Target.Name | md5str %> = echarts.init(document.getElementById('m_<% .Target.Name | md5str %>_pannel'));
+            C<% .Target.Name | md5str %>.setOption(optmini);
+            C<% .Target.Name | md5str %>.setOption({title:{text:'<% if eq $Showtype "out" %><% $Localname %>-><% .Target.Name %><% else %><% .Target.Name %>-><% $Localname %><% end %>'}});
             $.get('<% if eq $Showtype "out" %>/api/status.json?ip=<% .Target.Addr %><% else %>http://<% .Target.Addr %>:8899/api/status.json?ip=<% $LocalIp %><% end %>').done(function (data) {
                 var data = JSON.parse(data);
-                <% .Target.Name %>.setOption({
+                C<% .Target.Name | md5str %>.setOption({
                     xAxis: {
                         data: data.lastcheck
                     },

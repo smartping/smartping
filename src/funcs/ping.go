@@ -81,9 +81,10 @@ func pingWindows(Addr string , cnt string ) PingSt{
 		}
 		if(strings.Contains(line, "最短")){
 			packge := strings.Fields(line)
+			//fmt.Print(packge)
 			ps.MinDelay = strings.Split(strings.Split(packge[2],"，")[0],"ms")[0]
-			ps.AvgDelay = strings.Split(strings.Split(packge[4],"，")[0],"ms")[0]
-			ps.MaxDelay = strings.Split(packge[6],"ms")[0]
+			ps.AvgDelay = strings.Split(packge[6],"ms")[0]
+			ps.MaxDelay = strings.Split(strings.Split(packge[4],"，")[0],"ms")[0]
 			log.Print("Addr:",Addr," SendPk:",ps.SendPk," RevcPk:",ps.LossPk," LossPk:",ps.LossPk," | MinDelay:",ps.MinDelay," AvgDelay:",ps.AvgDelay," MaxDelay:",ps.MaxDelay)
 		}
 	}

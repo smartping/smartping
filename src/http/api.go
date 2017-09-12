@@ -69,7 +69,7 @@ func configApiRoutes(port int, state *g.State ,db *sql.DB ,config g.Config){
 		//foreach all data
 		for rows.Next() {
 			l := new(g.LogInfo)
-			err := rows.Scan(&l.Logtime, &l.Ip, &l.Name, &l.Maxdelay, &l.Mindelay, &l.Avgdelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck,)
+			err := rows.Scan(&l.Logtime, &l.Ip, &l.Name, &l.Maxdelay,  &l.Avgdelay, &l.Mindelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck,)
 			if err != nil {
 				fmt.Println(err)
 			}

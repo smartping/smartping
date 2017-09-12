@@ -17,7 +17,7 @@ import (
 )
 
 // Init of the Web Page template.
-var index = template.Must(template.New("index.tpl").Delims("<%", "%>").Funcs(template.FuncMap{"compare": funcs.Compare,"timestr":funcs.Timestr}).Parse(indexTemplate))
+var index = template.Must(template.New("index.tpl").Delims("<%", "%>").Funcs(template.FuncMap{"compare": funcs.Compare,"timestr":funcs.Timestr,"md5str":funcs.Md5str}).Parse(indexTemplate))
 var topology = template.Must(template.New("topology.tpl").Delims("<%", "%>").Funcs(template.FuncMap{"json": json.Marshal}).Parse(topologyTemplate))
 
 

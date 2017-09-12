@@ -4,11 +4,13 @@ import (
 	"strings"
 	"strconv"
 	"../g"
-	"fmt"
 	"time"
 	"path/filepath"
 	"os"
 	"log"
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 )
 
 func GetRoot() string {
@@ -48,6 +50,12 @@ func Timestr(time string) string {
 	return strings.Fields(time)[1]
 }
 
+func Md5str(str string) string {
+	md5Ctx := md5.New()
+	md5Ctx.Write([]byte(str))
+	cipherStr := md5Ctx.Sum(nil)
+	return hex.EncodeToString(cipherStr)
+}
 /*
 【排列组合问题：n个数中取m个】
 */
