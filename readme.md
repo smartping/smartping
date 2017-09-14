@@ -81,7 +81,7 @@ SmartPing为一个各机器(点)间间互PING检测工具，支持互PING，单�
 
 ## 使用 ##
 
-** 二进制版本地址请在RELEASE下载 **
+**二进制版本地址请在RELEASE下载**
 
 https://github.com/gy-games/smartping/releases
 
