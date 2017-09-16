@@ -102,8 +102,6 @@ type LogInfo struct {
 }
 
 type TopoLog struct {
-	Ip          string
-	Name        string
 	Maxavgdelay string
 	Maxlosspk   string
 	Cnt         string

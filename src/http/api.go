@@ -133,11 +133,11 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 			timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
 			preout[v.Name] = "false"
 			g.DLock.Lock()
-			rows, err := db.Query("SELECT ip,name,max(avgdelay) maxavgdelay, max(losspk) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") ")
+			rows, err := db.Query("SELECT max(avgdelay) maxavgdelay, max(losspk) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") ")
 			if err == nil {
 				for rows.Next() {
 					l := new(g.TopoLog)
-					rows.Scan(&l.Ip, &l.Name, &l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
+					rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
 					sec, _ := strconv.Atoi(l.Cnt)
 					if sec < v.Thdoccnum {
 						preout[v.Name] = "true"
