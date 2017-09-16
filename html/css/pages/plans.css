@@ -1,0 +1,319 @@
+/*------------------------------------------------------------------
+Bootstrap Admin Template by EGrappler.com
+------------------------------------------------------------------*/
+
+
+/*-- Plan Container --*/
+
+.plan-container {
+    position: relative;
+    float: left;    
+}
+
+/*-- Plan --*/
+
+.plan {
+    margin-right: 6px;
+    
+    
+}
+
+
+/*-- Plan Header --*/
+
+.plan-header {
+    text-align: center;
+    color: #FFF;
+    
+    background-color: #686868;
+    
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+
+.plan-title {
+    padding: 10px 0;
+    
+	font-size: 16px;
+    color: #FFF;
+
+	border-bottom: 1px solid #FFF;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+    
+    
+}
+
+.plan-price {
+	padding: 20px 0 10px;
+	
+    font-size: 66px;
+    line-height: 0.8em;
+    
+	background-color: #797979;
+	
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.plan-price span.term {
+    display: block;
+    margin-bottom: 0;
+    
+    font-size: 13px;
+    line-height: 0;
+    padding: 2em 0 1em;
+}
+
+.plan-price span.note {
+	position: relative;
+	top: -40px;
+	
+	display: inline;
+	
+    font-size: 17px;
+    line-height: 0.8em;
+}
+
+
+
+/*-- Plan Features --*/
+
+.plan-features {
+	border: 1px solid #DDD;	
+	border-bottom: none;
+}
+
+.plan-features {
+	padding-bottom: 1em;
+}
+
+.plan-features ul {
+	padding: 0;
+	margin: 0;
+	
+	list-style: none;
+}
+
+.plan-features li {	
+	padding: 1em 0;
+	margin: 0 2em;
+	
+	text-align: center;
+	
+	border-bottom: 1px dotted #CCC;
+}
+
+.plan-features li:last-child {
+	border-bottom: none;
+}
+
+
+/*-- Plan Actions --*/
+
+.plan-actions {
+	padding: 1.15em 0;
+	
+	background: #F2F2F2;
+	
+	background-color: whiteSmoke;
+	
+	
+	border: 1px solid #DDD;
+	
+}
+
+.plan-actions .btn {
+	padding: 1em 0;
+	margin: 0 2em;
+	
+	display: block;
+	
+	font-size: 16px;
+	font-weight: 600;
+}
+
+
+
+/*-- Columns --*/
+
+.pricing-plans.plans-1 .plan-container {
+    width: 100%;
+}
+.pricing-plans.plans-2 .plan-container {
+    width: 50%;
+}
+
+.pricing-plans.plans-3 .plan-container {
+    width: 33.33%;
+}
+
+.pricing-plans.plans-4 .plan-container {
+    width: 25%;
+}
+
+
+
+
+
+
+
+
+/*-- Best Value Highlight --*/
+
+.plan.best-value .plan-header {
+	background-color: #677E30;
+}
+
+.plan.best-value .plan-price {
+	background-color: #81994D;
+}
+
+
+
+
+
+
+
+.plan.skyblue .plan-header {
+	background-color: #3D7AB8;
+}
+
+.plan.skyblue .plan-price {
+	background-color: #69C;
+}
+
+
+
+.plan.lavendar .plan-header {
+	background-color: #754F75;
+}
+
+.plan.lavendar .plan-price {
+	background-color: #969;
+}
+
+
+
+.plan.teal .plan-header {
+	background-color: #257272;
+}
+
+.plan.teal .plan-price {
+	background-color: #399;
+}
+
+
+
+
+.plan.pink .plan-header {
+	background-color: #FF3778;
+}
+
+.plan.pink .plan-price {
+	background-color: #F69;
+}
+
+
+
+
+
+
+
+.plan.black .plan-header {
+	background-color: #222;
+}
+
+.plan.black .plan-price {
+	background-color: #333;
+}
+
+
+
+
+
+.plan.yellow .plan-header {
+	background-color: #C69E00;
+}
+
+.plan.yellow .plan-price {
+	background-color: #E8B900;
+}
+
+
+
+.plan.purple .plan-header {
+	background-color: #4E2675;
+}
+
+.plan.purple .plan-price {
+	background-color: #639;
+}
+
+
+
+
+
+.plan.red .plan-header {
+	background-color: #A40000;
+}
+
+.plan.red .plan-price {
+	background-color: #C00;
+}
+
+
+
+.plan.orange .plan-header {
+	background-color: #D98200;
+}
+
+.plan.orange .plan-price {
+	background-color: #F90;
+}
+
+
+
+.plan.blue .plan-header {
+	background-color: #0052A4;
+}
+
+.plan.blue .plan-price {
+	background-color: #06C;
+}
+
+
+
+.plan.green .plan-header {
+	background-color: #00ba8b ;
+}
+
+.plan.green .plan-price {
+	background-color: #00ba8b ;
+}
+
+
+
+
+
+/*------------------------------------------------------------------
+[2. Min Width: 767px / Max Width: 979px]
+*/
+
+@media (min-width: 767px) and (max-width: 979px) {
+	
+	.pricing-plans .plan-container {
+	    width: 50% !important;
+	    margin-bottom: 2em;
+	}	
+	
+}
+
+
+
+@media (max-width: 767px) {
+	
+	.pricing-plans .plan-container {
+	    width: 100% !important;
+	    margin-bottom: 2em;
+	}
+
+}

@@ -1,28 +1,23 @@
 package http
 
 import (
-	"net/http"
-	"log"
-	"database/sql"
 	"../g"
+	"github.com/gy-games-libs/file"
+	"net/http"
+	"path/filepath"
+	"strings"
 )
 
-func configIndexRoutes(port int, state *g.State ,db *sql.DB ,config g.Config){
-	//Index
+func configIndexRoutes() {
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		state.Lock.Lock()
-		defer state.Lock.Unlock()
-		r.ParseForm()
-		state.Showtype="out"
-		if len(r.Form["t"]) > 0 {
-			state.Showtype = r.Form["t"][0]
+		if strings.HasSuffix(r.URL.Path, "/") {
+			if !file.IsExist(filepath.Join(g.Root, "/html", r.URL.Path, "index.html")) {
+				http.NotFound(w, r)
+				return
+			}
 		}
-		state.Conf = config
-		//log.Println(state)
-		err := index.Execute(w, state)
-		if err != nil {
-			log.Println("ERR:",err)
-		}
+		http.FileServer(http.Dir(filepath.Join(g.Root, "/html"))).ServeHTTP(w, r)
 	})
 
 }

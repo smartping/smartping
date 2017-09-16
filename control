@@ -21,6 +21,10 @@ function check_pid() {
     return 0
 }
 
+function run() {
+    ./bin/$app
+}
+
 function start() {
     check_pid
     running=$?
@@ -59,6 +63,7 @@ function status() {
 
 
 function build() {
+    go get ./...
     go build src/smartping.go
     if [ $? -ne 0 ]; then
         exit $?
@@ -66,13 +71,14 @@ function build() {
     mv $module ./bin/$app
 }
 
-
 function help() {
-    echo "$0 build|start|stop|restart|status"
+    echo "$0 build|run|start|stop|restart|status"
 }
 
 if [ "$1" == "" ]; then
     help
+elif [ "$1" == "run" ];then
+    run
 elif [ "$1" == "stop" ];then
     stop
 elif [ "$1" == "start" ];then

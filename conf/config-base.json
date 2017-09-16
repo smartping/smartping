@@ -1,0 +1,54 @@
+{
+	"Port": 8899 ,
+	"Name": "",
+	"Ip": "",
+	"Password": "smartping",
+	"Alerthistory": 7,
+	"Alertcycle": 1,
+	"Alertsound": "/alert.mp3",
+	"Thdchecksec": 900,
+	"Thdoccnum": 3,
+	"Thdavgdelay": 200,
+	"Thdloss": 30,
+	"Tline": "1",
+	"Tsymbolsize": "70",
+	"Timeout": "5",
+	"Targets": [
+		{
+			"Name": "本机",
+			"Addr": "127.0.0.1",
+			"Type": "CS",
+			"Thdchecksec": 900,
+			"Thdoccnum": 3,
+			"Thdavgdelay": 200,
+			"Thdloss": 30
+		},
+		{
+			"Name": "NOPING",
+			"Addr": "93.46.8.89",
+			"Type": "C",
+			"Thdchecksec": 900,
+			"Thdoccnum": 3,
+			"Thdavgdelay": 200,
+			"Thdloss": 30
+		},
+		{
+			"Name": "百度",
+			"Addr": "220.181.57.217",
+			"Type": "CS",
+			"Thdchecksec": 900,
+			"Thdoccnum": 3,
+			"Thdavgdelay": 200,
+			"Thdloss": 30
+		},
+		{
+			"Name": "114DNS",
+			"Addr": "114.114.114.114",
+			"Type": "CS",
+			"Thdchecksec": 30,
+			"Thdoccnum": 3,
+			"Thdavgdelay": 200,
+			"Thdloss": 50
+		}
+	]
+}
