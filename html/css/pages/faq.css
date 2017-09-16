@@ -1,0 +1,109 @@
+/*------------------------------------------------------------------
+Bootstrap Admin Template by EGrappler.com
+------------------------------------------------------------------*/
+
+
+
+
+.faq-search {
+	margin-bottom: 2em;
+	
+	text-align: right;
+}
+
+.faq-search input {
+	width: 96%;
+	display: block;
+	padding: 2%;
+}
+
+
+
+.faq-empty {
+	display: none;
+}
+
+
+
+.faq-toc {
+	padding: 1.5em 0;
+	margin: 2em 0 0;
+	
+	border: 1px dotted #CCC;
+	border-right: none;
+	border-left: none;
+}
+
+.faq-toc ol {
+	padding: 0;
+	margin: 0;
+}
+
+.faq-toc li {
+	margin-bottom: .75em;
+	
+	list-style: none;
+}
+
+.faq-toc a {
+	margin-left: .5em;
+}
+
+
+
+.faq-list {
+	padding: 0;
+	margin: 3em 0 0;
+	
+	list-style: none;	
+}
+
+.faq-list li {
+	display: table;
+	margin-bottom: 2em;
+}
+
+.faq-icon {
+	display: table-cell;
+	padding-right: 1.25em;
+	vertical-align: top;
+}
+
+.faq-text {
+	display: table-cell;
+	vertical-align: top;
+	
+}
+
+
+.faq-number {
+	width: 32px;
+	height: 32px;
+	
+	font-size: 14px;
+	font-weight: 600;
+	text-align: center;
+	line-height: 32px;
+	color: #FFF;
+	
+	background: #00ba8b;
+	
+	border: 3px solid #FFF;
+	
+	
+	
+	border-radius: 100px;
+	
+	
+}
+
+
+
+
+.btn-support-ask {
+		display: block; font-size: 22px; padding: 14px 0; font-weight: 600; margin-bottom: .75em;
+	}
+	
+	.btn-support-contact {
+		display: block; padding: 12px 0; font-size: 18px; font-weight: 600;
+	}

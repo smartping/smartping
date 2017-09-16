@@ -9,3 +9,4 @@ bin/*
 *-journal
 *.db-journal
 *.iml
+db/database.db
