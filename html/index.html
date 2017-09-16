@@ -22,7 +22,7 @@
       <a class="brand" href="index.html">SmartPing Dashbord </a>
       <div class="nav-collapse">
         <ul class="nav pull-right">
-          <li><a target="_blank" href="http://www.smartping.cn" >Project Home</a></li>
+          <li></li>
         </ul>
       </div>
       <!--/.nav-collapse -->
@@ -94,7 +94,7 @@
   <div class="footer-inner">
     <div class="container">
       <div class="row">
-        <div class="span12"> &copy; 2017 <a href="#">SmartPing Dashbord</a>. <span style="float:right" id="verion"></span></div>
+        <div class="span12"> &copy; 2017 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
         <!-- /span12 --> 
       </div>
       <!-- /row --> 
@@ -205,7 +205,7 @@
             $("#main").append("<div id='"+field.Name+"_pannel' style='float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;'  class='showcharts' apiurl='/api/ping.json?ip="+field.Addr+"'></div>");
             var chart = echarts.init(document.getElementById(field.Name+"_pannel"));
             chart.setOption(optmini);
-            chart.setOption({title:{text:result["Name"]+"->"+field.Name}});
+            chart.setOption({title:{text:result["Name"]+"->"+field.Name,textStyle:{'fontSize':13}}});
             $.ajax({
                 dataType: "json",
                 url: '/api/ping.json?ip='+field.Addr,
@@ -302,7 +302,9 @@
                 'minDelay' : false
             }
         },
-        tooltip: {},
+        tooltip: {
+            trigger: 'axis'
+        },
         xAxis: {
             data: []
         },
