@@ -15,7 +15,7 @@ func main() {
 	for _, target := range config.Targets {
 		go funcs.StartPing(target, db)
 	}
-	go funcs.StartAlert(config, db)
+	//go funcs.StartAlert(config, db)
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
 		for _, target := range config.Targets {
