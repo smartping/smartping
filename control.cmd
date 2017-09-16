@@ -4,7 +4,7 @@ IF "%1%"=="run" GOTO RUN
 IF "%1%"=="build" GOTO BUILD
 GOTO FAIL
 :BUILD
-go get ./...
+go get -v ./...
 go build -o %~dp0/bin/smartping.exe  %~dp0/src/smartping.go
 GOTO EXIT
 
