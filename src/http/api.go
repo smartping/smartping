@@ -18,18 +18,20 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 
 	//config api
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		nconf := g.Config{}
 		nconf = *config
 		nconf.Password = ""
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
 		json.Indent(&out, onconf, "", "\t")
-		o := out.String()
+		o := out.String();
 		fmt.Fprintln(w, o)
 	})
 
 	//graph data api
 	http.HandleFunc("/api/ping.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
 		var tableip string
@@ -124,6 +126,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 
 	//Topology data api
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		preout := make(map[string]string)
 		var timeStart int64
@@ -154,6 +157,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 
 	//alert api
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
 		var dtb string
