@@ -13,9 +13,9 @@ var Version = "0.3.1"
 func main() {
 
 	config, db := g.ParseConfig(Version)
-	//for _, target := range config.Targets {
-	//	go funcs.StartPing(target, db)
-	//}
+	for _, target := range config.Targets {
+		go funcs.CreateDB(target, db)
+	}
 	//go funcs.StartAlert(config, db)
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {

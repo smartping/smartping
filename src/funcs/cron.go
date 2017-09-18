@@ -12,6 +12,29 @@ import (
 	"time"
 )
 
+func CreateDB(t g.Target, db *sql.DB){
+	sql := `CREATE TABLE IF NOT EXISTS [pinglog-` + t.Addr + `] (
+	    logtime   VARCHAR (8),
+	    maxdelay  VARCHAR (3),
+	    mindelay  VARCHAR (3),
+	    avgdelay  VARCHAR (3),
+	    sendpk    VARCHAR (2),
+	    revcpk    VARCHAR (2),
+	    losspk    VARCHAR (3),
+	    lastcheck VARCHAR (16),
+	    PRIMARY KEY (
+		logtime
+	    )
+	);
+	CREATE INDEX  IF NOT EXISTS  "lc" ON [pinglog-` + t.Addr + `] (
+	    lastcheck
+	);
+	`
+	g.DLock.Lock()
+	db.Exec(sql)
+	g.DLock.Unlock()
+}
+
 func StartPing(t g.Target, db *sql.DB) {
 	logtime := time.Now().Format("02 15:04")
 	checktime := time.Now().Format("2006-01-02 15:04")
