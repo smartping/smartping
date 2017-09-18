@@ -107,12 +107,13 @@
 <script src="js/bootstrap.js"></script>
 <script src="js/echarts.min.js"></script>
 <script>
+    function Refresh()
+    {
+        window.location.reload();
+    }
     $(function(){
         $("#echarts").height($(window).height()-220);
-        function Refresh()
-        {
-            window.location.reload();
-        }
+
         $.getJSON("/api/config.json",function(result){
             $("#verion").html("Version: "+result["Ver"])
             $.each(result["Targets"], function(i, field){

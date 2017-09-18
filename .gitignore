@@ -10,3 +10,4 @@ bin/*
 *.db-journal
 *.iml
 db/database.db
+conf/config.json

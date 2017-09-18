@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/gy-games-libs/file"
+	"io"
 	"log"
 	"os"
-	"sync"
-	"io"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 var DLock sync.Mutex
