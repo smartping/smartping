@@ -268,7 +268,7 @@
         url = $("#pannelurl").attr("value");
         $.get(url+"&starttime="+start+"&endtime="+endtime).done(function (data) {
             //console.log(data)
-            var data = JSON.parse(data);
+            //var data = JSON.parse(data);
             myChart.setOption({
                 xAxis: {
                     data: data.lastcheck
