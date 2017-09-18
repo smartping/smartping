@@ -8,12 +8,13 @@ import (
 )
 
 // Init config
-var Version = "0.3.0"
+var Version = "0.3.1"
 
 func main() {
+
 	config, db := g.ParseConfig(Version)
 	for _, target := range config.Targets {
-		go funcs.StartPing(target, db)
+		go funcs.CreateDB(target, db)
 	}
 	//go funcs.StartAlert(config, db)
 	c := cron.New()

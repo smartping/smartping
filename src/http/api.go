@@ -8,16 +8,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
-	"log"
 )
 
 func configApiRoutes(db *sql.DB, config *g.Config) {
 
 	//config api
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json")
 		nconf := g.Config{}
 		nconf = *config
 		nconf.Password = ""
@@ -30,6 +32,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 
 	//graph data api
 	http.HandleFunc("/api/ping.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
 		var tableip string
@@ -63,8 +66,6 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		}
 		cnt := int((timeEnd - timeStart) / 60)
 		var lastcheck []string
-		//var ip []string
-		//var name []string
 		var maxdelay []string
 		var mindelay []string
 		var avgdelay []string
@@ -91,7 +92,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		if err == nil {
 			for rows.Next() {
 				l := new(g.LogInfo)
-				err := rows.Scan(&l.Logtime, &l.Maxdelay, &l.Mindelay,  &l.Avgdelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck)
+				err := rows.Scan(&l.Logtime, &l.Maxdelay, &l.Mindelay, &l.Avgdelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck)
 				if err != nil {
 					log.Println(err)
 				}
@@ -111,12 +112,12 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		g.DLock.Unlock()
 		preout := map[string][]string{
 			"lastcheck": lastcheck,
-			"maxdelay": maxdelay,
-			"mindelay": mindelay,
-			"avgdelay": avgdelay,
-			"sendpk":   sendpk,
-			"revcpk":   revcpk,
-			"losspk":   losspk,
+			"maxdelay":  maxdelay,
+			"mindelay":  mindelay,
+			"avgdelay":  avgdelay,
+			"sendpk":    sendpk,
+			"revcpk":    revcpk,
+			"losspk":    losspk,
 		}
 		out, _ := json.Marshal(preout)
 		fmt.Fprintln(w, string(out))
@@ -124,6 +125,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 
 	//Topology data api
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		preout := make(map[string]string)
 		var timeStart int64
@@ -154,6 +156,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 
 	//alert api
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
 		var dtb string

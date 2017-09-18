@@ -52,8 +52,8 @@ type State struct {
 }
 
 type Target struct {
-	Name string
-	Addr string
+	Name        string
+	Addr        string
 	Type        string
 	Thdchecksec int
 	Thdoccnum   int
