@@ -13,13 +13,12 @@ import (
 )
 
 func StartPing(t g.Target, db *sql.DB) {
-	log.Println("starting runPingTest ", t.Name)
-	pingres := Ping(t.Addr, "10")
-	//log.Print(pingres)
-	//status := g.PingResult{SendPk: pingres.SendPk, RevcPk: pingres.RevcPk, LossPk: pingres.LossPk, MaxDelay: pingres.MaxDelay, MinDelay: pingres.MinDelay, AvgDelay: pingres.AvgDelay, LastCheck: time.Now().Format("2006-01-02 15:04")}
-	g.DLock.Lock()
-	//create new table
-	db.Exec(`CREATE TABLE IF NOT EXISTS [pinglog-` + t.Addr + `] (
+	logtime := time.Now().Format("02 15:04")
+	checktime := time.Now().Format("2006-01-02 15:04")
+	log.Println("(", checktime, ")Starting runPingTest ", t.Name)
+	pingres := Ping(t.Addr)
+	//g.DLock.Lock()
+	sql := `CREATE TABLE IF NOT EXISTS [pinglog-` + t.Addr + `] (
 	    logtime   VARCHAR (8),
 	    maxdelay  VARCHAR (3),
 	    mindelay  VARCHAR (3),
@@ -32,15 +31,16 @@ func StartPing(t g.Target, db *sql.DB) {
 		logtime
 	    )
 	);
-	CREATE INDEX "lc" ON [pinglog-` + t.Addr + `] (
+	CREATE INDEX  IF NOT EXISTS  "lc" ON [pinglog-` + t.Addr + `] (
 	    lastcheck
-	);`)
-	stmt, _ := db.Prepare("REPLACE INTO [pinglog-" + t.Addr + "] (logtime, maxdelay, mindelay, avgdelay, sendpk, revcpk, losspk, lastcheck) values(?,?,?,?,?,?,?,?)")
-	stmt.Exec(time.Now().Format("02 15:04"), pingres.MaxDelay, pingres.MinDelay, pingres.AvgDelay, pingres.SendPk, pingres.RevcPk, pingres.LossPk, time.Now().Format("2006-01-02 15:04"))
-	//log.Print(pingres)
-	stmt.Close()
+	);
+	`
+	sql = sql + "REPLACE INTO [pinglog-" + t.Addr + "] (logtime, maxdelay, mindelay, avgdelay, sendpk, revcpk, losspk, lastcheck) values('" + logtime + "','" + pingres.MaxDelay + "','" + pingres.MinDelay + "','" + pingres.AvgDelay + "','" + pingres.SendPk + "','" + pingres.RevcPk + "','" + pingres.LossPk + "','" + checktime + "')"
+	//log.Print(sql)
+	g.DLock.Lock()
+	db.Exec(sql)
 	g.DLock.Unlock()
-	log.Printf("PingTest on %s finish!", t.Name)
+	log.Println("(", checktime, ") PingTest on ", t.Name, " finish!")
 }
 
 func StartAlert(config g.Config, db *sql.DB) {
@@ -52,7 +52,8 @@ func StartAlert(config g.Config, db *sql.DB) {
 				fromname  VARCHAR (15),
 				toname    VARCHAR (15),
 				alerttype INT (1)
-		);`
+		);
+	`
 	reminList := map[string]bool{}
 	for i := 0; i < config.Alerthistory; i++ {
 		reminList["alertlog-"+time.Unix((time.Now().Unix()-int64(86400*i)), 0).Format("20060102")] = true
