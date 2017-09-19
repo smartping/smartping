@@ -19,7 +19,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 	//config api
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		nconf := g.Config{}
 		nconf = *config
 		nconf.Password = ""
