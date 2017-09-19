@@ -1,10 +1,10 @@
 # SmartPing #
 
-SmartPing为一个各机器(点)间间互PING检测工具，支持互PING，单向PING，绘制拓扑及报警功能。
+SmartPing为一个各机器(点)间互PING检测工具，支持正向PING绘制，反向PING绘制，互PING拓扑绘制及报警功能。
 
 ## 功能 ##
 
-- 单向PING，反向Ping绘图
+- 正向PING，反向Ping绘图
 - 互PING间机器的状态拓扑
 - 自定义延迟、丢包阈值报警
 
