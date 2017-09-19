@@ -1,6 +1,7 @@
 # SmartPing #
+[![Go Report Card](https://goreportcard.com/badge/github.com/gy-games/smartping)](https://goreportcard.com/report/github.com/gy-games/smartping)
 
-SmartPing为一个各机器(点)间间互PING检测工具，支持互PING，单向PING，绘制拓扑及报警功能。
+SmartPing为一个各机器(点)间互PING检测工具，支持互PING，单向PING，绘制拓扑及报警功能。
 
 ## 功能 ##
 
