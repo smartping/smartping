@@ -4,15 +4,15 @@ import (
 	"../g"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	_ "github.com/gy-games-libs/go-sqlite3"
 	"github.com/gy-games-libs/resty"
-	"log"
+	"github.com/gy-games-libs/seelog"
 	"strconv"
 	"time"
 )
 
-func CreateDB(t g.Target, db *sql.DB){
+func CreateDB(t g.Target, db *sql.DB) {
+	seelog.Info("[func:CreateDB] CreateDB Start..")
 	sql := `CREATE TABLE IF NOT EXISTS [pinglog-` + t.Addr + `] (
 	    logtime   VARCHAR (8),
 	    maxdelay  VARCHAR (3),
@@ -30,17 +30,18 @@ func CreateDB(t g.Target, db *sql.DB){
 	    lastcheck
 	);
 	`
+	seelog.Debug("[func:CreateDB] ", sql)
 	g.DLock.Lock()
 	db.Exec(sql)
 	g.DLock.Unlock()
+	seelog.Info("[func:CreateDB] CreateDB Finish..")
 }
 
 func StartPing(t g.Target, db *sql.DB) {
 	logtime := time.Now().Format("02 15:04")
 	checktime := time.Now().Format("2006-01-02 15:04")
-	log.Println("(", checktime, ")Starting runPingTest ", t.Name)
+	seelog.Info("[func:StartPing] ", "(", checktime, ")Starting runPingTest ", t.Name)
 	pingres := Ping(t.Addr)
-	//g.DLock.Lock()
 	sql := `CREATE TABLE IF NOT EXISTS [pinglog-` + t.Addr + `] (
 	    logtime   VARCHAR (8),
 	    maxdelay  VARCHAR (3),
@@ -59,15 +60,15 @@ func StartPing(t g.Target, db *sql.DB) {
 	);
 	`
 	sql = sql + "REPLACE INTO [pinglog-" + t.Addr + "] (logtime, maxdelay, mindelay, avgdelay, sendpk, revcpk, losspk, lastcheck) values('" + logtime + "','" + pingres.MaxDelay + "','" + pingres.MinDelay + "','" + pingres.AvgDelay + "','" + pingres.SendPk + "','" + pingres.RevcPk + "','" + pingres.LossPk + "','" + checktime + "')"
-	//log.Print(sql)
+	seelog.Debug("[func:StartPing] ", sql)
 	g.DLock.Lock()
 	db.Exec(sql)
 	g.DLock.Unlock()
-	log.Println("(", checktime, ") PingTest on ", t.Name, " finish!")
+	seelog.Info("[func:StartPing] ", "(", checktime, ") PingTest on ", t.Name, " finish!")
 }
 
 func StartAlert(config g.Config, db *sql.DB) {
-	log.Println("starting run AlertCheck ")
+	seelog.Info("[func:StartAlert] ", "starting run AlertCheck ")
 	timeStartStr := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
 	dateStartStr := time.Unix(time.Now().Unix(), 0).Format("20060102")
 	sql := `CREATE TABLE IF NOT EXISTS [alertlog-` + dateStartStr + `] (
@@ -88,7 +89,7 @@ func StartAlert(config g.Config, db *sql.DB) {
 			var l string
 			err := lrows.Scan(&l)
 			if err != nil {
-				fmt.Println(err)
+				seelog.Error("[StartAlert] ", err)
 			}
 			listpreout = append(listpreout, l)
 		}
@@ -112,10 +113,11 @@ func StartAlert(config g.Config, db *sql.DB) {
 	} else {
 		sql = sql + "insert into [alertlog-" + dateStartStr + "] (logtime,fromname,toname,alerttype) values('" + timeStartStr + "','" + config.Name + "','" + config.Name + "','" + config.Name + "','2');"
 	}
+	seelog.Debug("[func:StartAlert] ", sql)
 	g.DLock.Lock()
 	db.Exec(sql)
 	g.DLock.Unlock()
-	log.Println("AlertCheck finish")
+	seelog.Info("[func:StartAlert] ", "AlertCheck finish ")
 }
 
 /*

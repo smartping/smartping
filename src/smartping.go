@@ -8,7 +8,7 @@ import (
 )
 
 // Init config
-var Version = "0.3.1"
+var Version = "0.4.0"
 
 func main() {
 

@@ -4,7 +4,7 @@ import (
 	"../g"
 	"database/sql"
 	"fmt"
-	"log"
+	"github.com/gy-games-libs/seelog"
 	"net/http"
 	"os"
 )
@@ -13,12 +13,12 @@ func StartHttp(db *sql.DB, config *g.Config) {
 
 	configApiRoutes(db, config)
 	configIndexRoutes()
+	seelog.Debug("[func:StartHttp] starting to listen on", config.Port)
 	s := fmt.Sprintf(":%d", config.Port)
-	log.Println("starting to listen on ", s)
+	//log.Println("starting to listen on ", s)
 	err := http.ListenAndServe(s, nil)
 	if err != nil {
-		log.Println("ERR:", err)
+		seelog.Error("[StartHttp] ", err)
 	}
-	log.Println("Server stopped")
 	os.Exit(0)
 }
