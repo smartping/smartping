@@ -42,6 +42,7 @@ func Ping(Addr string) PingSt {
 				}
 				allcost = allcost + rtt
 				revc = revc + 1
+				seelog.Debug("[func:Ping] Addr:",Addr," Cnt:",i+1," Revc:",revc," Current:",rtt," MaxDelay:",maxDelay," MinDelay:",minDelay)
 			}
 			err = p.Run()
 			if err != nil {
@@ -51,10 +52,11 @@ func Ping(Addr string) PingSt {
 			seelog.Error("[func:Ping] err:", err)
 			os.Exit(1)
 		}
+
 	}
 	rt.MaxDelay = strconv.FormatFloat((float64(maxDelay.Nanoseconds()) / float64(1000000)), 'f', 2, 64)
-	if minDelay == 3000 {
-		minDelay = 0
+	if minDelay == time.Duration(3000) * time.Millisecond {
+		minDelay = time.Duration(0) * time.Millisecond
 	}
 	rt.MinDelay = strconv.FormatFloat((float64(minDelay.Nanoseconds()) / float64(1000000)), 'f', 2, 64)
 	if revc > 0 {
@@ -65,6 +67,6 @@ func Ping(Addr string) PingSt {
 	rt.RevcPk = strconv.Itoa(revc)
 	rt.SendPk = "20"
 	rt.LossPk = strconv.Itoa(((20 - revc) / 20) * 100)
-	seelog.Debug("[func:Ping] ", "MaxDelay:"+rt.MaxDelay+" MinDelay:"+rt.MinDelay+" AvgDelay:"+rt.AvgDelay+" SendPK:"+rt.SendPk+" RevcPk:"+rt.RevcPk+" LossPK:"+rt.LossPk)
+	seelog.Debug("[func:Ping] Finnal",Addr, " MaxDelay:"+rt.MaxDelay+" MinDelay:"+rt.MinDelay+" AvgDelay:"+rt.AvgDelay+" SendPK:"+rt.SendPk+" RevcPk:"+rt.RevcPk+" LossPK:"+rt.LossPk)
 	return rt
 }
