@@ -1,7 +1,6 @@
 package funcs
 
 import (
-	"fmt"
 	"github.com/gy-games-libs/go-fastping"
 	"github.com/gy-games-libs/seelog"
 	"net"
@@ -46,10 +45,10 @@ func Ping(Addr string) PingSt {
 			}
 			err = p.Run()
 			if err != nil {
-				fmt.Println(err)
+				seelog.Error("[func:Ping] err:", err)
 			}
 		} else {
-			fmt.Println(err)
+			seelog.Error("[func:Ping] err:", err)
 			os.Exit(1)
 		}
 	}
