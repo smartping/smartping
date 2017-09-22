@@ -64,11 +64,13 @@ function status() {
 
 function build() {
     go get -v ./...
+    go build src/ping.go
     go build src/smartping.go
     if [ $? -ne 0 ]; then
         exit $?
     fi
     mv $module ./bin/$app
+    mv ping ./bin/ping
 }
 
 function help() {

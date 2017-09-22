@@ -33,6 +33,7 @@ cd %~dp0
 SET /P select="Please Enter Instructions:"
 IF "%select%"=="build" (
     go get -v ./...
+    go build -o %~dp0\bin\ping.exe  %~dp0\src\ping.go
     go build -o %~dp0\bin\smartping.exe  %~dp0\src\smartping.go
     echo Build Finish.. 
 ) ELSE (
