@@ -7,6 +7,7 @@ import (
 	"github.com/gy-games-libs/seelog"
 	"net/http"
 	"os"
+	"time"
 )
 
 func StartHttp(db *sql.DB, config *g.Config) {
@@ -19,6 +20,7 @@ func StartHttp(db *sql.DB, config *g.Config) {
 	err := http.ListenAndServe(s, nil)
 	if err != nil {
 		seelog.Error("[StartHttp] ", err)
+		time.Sleep(3*time.Second)
 	}
 	os.Exit(0)
 }

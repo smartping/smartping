@@ -71,8 +71,9 @@ func SysPing(Addr string) g.PingSt {
 			}
 		}
 		cmd.Wait()
-		
-		Delay, _ := strconv.Atoi(delay)
+
+		DelayF64, _ := strconv.ParseFloat(delay,32)
+		Delay := int(DelayF64)
 
 		GMinDelay, _ := strconv.Atoi(fps.MinDelay)
 		if Delay>0 && GMinDelay > Delay {
@@ -92,7 +93,7 @@ func SysPing(Addr string) g.PingSt {
 			fps.RevcPk = strconv.Itoa(GRevcPk + 1)
 		}
 		stop := time.Now()
-		seelog.Debug("[func:SysPing] Addr:",Addr," Cnt:",ic," Current:",delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
+		seelog.Debug("[func:SysPing] Addr:",Addr," Cnt:",ic," Current:",Delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
 		if (stop.Sub(start).Nanoseconds() / 1000000) < 3000 {
 			during := time.Duration(3000-int(stop.Sub(start).Nanoseconds()/1000000)) * time.Millisecond
 			seelog.Debug("[func:SysPing]",Addr," Gorouting Sleep.",during)
