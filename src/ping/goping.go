@@ -39,7 +39,7 @@ func GoPing(Addr string) g.PingSt {
 		cmd := exec.Command(ping, "-ip", Addr)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			seelog.Error("[func:CmdPing]",Addr," Ping Command Error",err)
+			seelog.Error("[func:GoPing]",Addr," Ping Command Error",err)
 			break
 		}
 		cmd.Start()
@@ -54,17 +54,17 @@ func GoPing(Addr string) g.PingSt {
 			l, err2 := reader.ReadString('\n')
 			err = json.Unmarshal([]byte(l), &rt)
 			if err != nil {
-				seelog.Error("[func:SPing] JsonUnmarshal", err)
+				seelog.Error("[func:GoPing] JsonUnmarshal", err)
 				break
 			}
 			if rt.Flag ==true{
 				delay = rt.Timeout
 				ps.RevcPk = "1"
-				seelog.Debug("[func:SPing] ",rt)
+				seelog.Debug("[func:GoPing] ",rt)
 				break
 			}else{
 				if rt.Message !="timeout"{
-					seelog.Error("[func:SPing] Ping Error", rt.Message)
+					seelog.Error("[func:GoPing] Ping Error", rt.Message)
 				}
 				break
 			}
@@ -94,10 +94,10 @@ func GoPing(Addr string) g.PingSt {
 			fps.RevcPk = strconv.Itoa(GRevcPk + 1)
 		}
 		stop := time.Now()
-		seelog.Debug("[func:CmdPing] Addr:",Addr," Cnt:",ic," Current:",delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
+		seelog.Debug("[func:GoPing] Addr:",Addr," Cnt:",ic," Current:",delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
 		if (stop.Sub(start).Nanoseconds() / 1000000) < 3000 {
 			during := time.Duration(3000-int(stop.Sub(start).Nanoseconds()/1000000)) * time.Millisecond
-			seelog.Debug("[func:CmdPing]",Addr," Gorouting Sleep.",during)
+			seelog.Debug("[func:GoPing]",Addr," Gorouting Sleep.",during)
 			time.Sleep(during)
 		}
 
@@ -111,6 +111,6 @@ func GoPing(Addr string) g.PingSt {
 	if(GRevcPk>0){
 		fps.AvgDelay = strconv.Itoa(GAvgDelay / GRevcPk)
 	}
-	seelog.Info("[func:Ping] Finish Addr:",Addr," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," AvgDelay:",fps.AvgDelay," Revc:",fps.RevcPk," LossPK:",fps.LossPk)
+	seelog.Info("[func:GoPing] Finish Addr:",Addr," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," AvgDelay:",fps.AvgDelay," Revc:",fps.RevcPk," LossPK:",fps.LossPk)
 	return fps
 }

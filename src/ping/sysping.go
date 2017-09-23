@@ -44,7 +44,7 @@ func SysPing(Addr string) g.PingSt {
 		cmd := exec.Command("ping",args[0:]...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			seelog.Error("[func:CmdPing]",Addr," Ping Command Error",err)
+			seelog.Error("[func:SysPing]",Addr," Ping Command Error",err)
 			break
 		}
 		cmd.Start()
@@ -71,9 +71,7 @@ func SysPing(Addr string) g.PingSt {
 			}
 		}
 		cmd.Wait()
-		//if cmd.Process.Pid>0{
-		//	cmd.Process.Kill()
-		//}
+		
 		Delay, _ := strconv.Atoi(delay)
 
 		GMinDelay, _ := strconv.Atoi(fps.MinDelay)
@@ -94,10 +92,10 @@ func SysPing(Addr string) g.PingSt {
 			fps.RevcPk = strconv.Itoa(GRevcPk + 1)
 		}
 		stop := time.Now()
-		seelog.Debug("[func:CmdPing] Addr:",Addr," Cnt:",ic," Current:",delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
+		seelog.Debug("[func:SysPing] Addr:",Addr," Cnt:",ic," Current:",delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
 		if (stop.Sub(start).Nanoseconds() / 1000000) < 3000 {
 			during := time.Duration(3000-int(stop.Sub(start).Nanoseconds()/1000000)) * time.Millisecond
-			seelog.Debug("[func:CmdPing]",Addr," Gorouting Sleep.",during)
+			seelog.Debug("[func:SysPing]",Addr," Gorouting Sleep.",during)
 			time.Sleep(during)
 		}
 
@@ -111,32 +109,6 @@ func SysPing(Addr string) g.PingSt {
 	if(GRevcPk>0){
 		fps.AvgDelay = strconv.Itoa(GAvgDelay / GRevcPk)
 	}
-	seelog.Info("[func:Ping] Finish Addr:",Addr," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," AvgDelay:",fps.AvgDelay," Revc:",fps.RevcPk," LossPK:",fps.LossPk)
+	seelog.Info("[func:SysPing] Finish Addr:",Addr," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," AvgDelay:",fps.AvgDelay," Revc:",fps.RevcPk," LossPK:",fps.LossPk)
 	return fps
-}
-
-func gosysping(reader *bufio.Reader, Addr string, ch chan string){
-
-	//cmd := exec.Command("ping", Addr)
-	//stdout, err := cmd.StdoutPipe()
-	//if err != nil {
-	//	seelog.Error("[func:CmdPing]",Addr," Ping Command Error",err)
-	//}
-	//cmd.Start()
-	//reader := bufio.NewReader(stdout)
-	for {
-		l, _ := reader.ReadString('\n')
-		if strings.Contains(l,Addr) && strings.Contains(l,"ms"){
-			//ch <-l
-			re := regexp.MustCompile(`([\d.]*\s*)ms`)
-			ms := re.FindAllStringSubmatch(l,-1)
-			if len(ms)>0 && len(ms[0])==2{
-				delay := ms[0][1]
-				//ps.RevcPk = "1"
-				ch <- delay
-				break
-			}
-		}
-	}
-
 }
