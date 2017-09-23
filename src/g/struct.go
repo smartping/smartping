@@ -4,13 +4,12 @@ import (
 	"sync"
 )
 
-//type HttpPort string
-
 type Config struct {
 	Ver          string
 	Port         int
 	Name         string
 	Timeout      string
+	Ping         string
 	Ip           string
 	Db           string
 	Password     string
@@ -26,12 +25,13 @@ type Config struct {
 	Targets      []Target
 }
 
+//Ping Db Result List
 type PingResultList struct {
 	Lock       sync.Mutex
 	PingResult map[string]PingResult
 }
 
-//PING RESULT
+//Ping Db Result
 type PingResult struct {
 	MaxDelay  string
 	MinDelay  string
@@ -40,6 +40,16 @@ type PingResult struct {
 	RevcPk    string
 	LossPk    string
 	LastCheck string
+}
+
+//Ping Stuct
+type PingSt struct {
+	SendPk   string
+	RevcPk   string
+	LossPk   string
+	MinDelay string
+	AvgDelay string
+	MaxDelay string
 }
 
 type State struct {

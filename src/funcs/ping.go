@@ -1,52 +1,27 @@
 package funcs
 
 import (
-	"bufio"
-	"encoding/json"
-	"github.com/elves-project/agent/src/g"
+	"../ping"
+	"../g"
+	"database/sql"
 	"github.com/gy-games-libs/seelog"
-	"io"
-	"os/exec"
-	"runtime"
 )
 
-type PingSt struct {
-	SendPk   string
-	RevcPk   string
-	LossPk   string
-	MinDelay string
-	AvgDelay string
-	MaxDelay string
+
+func StartSysPing(t g.Target, db *sql.DB,config g.Config){
+	seelog.Info("Start SysPing "+t.Addr+"..")
+	rt := ping.SysPing(t.Addr)
+	StoragePing(rt,t,db)
+	seelog.Info("Finish SysPing "+t.Addr+"..")
 }
 
-func Ping(Addr string) PingSt {
-	var rt PingSt
-	var ping string
-	switch os := runtime.GOOS; os {
-	case "windows":
-		ping = g.GetRoot() + "/bin/ping.exe"
-	default:
-		ping = g.GetRoot() + "/bin/ping"
-	}
-	cmd := exec.Command(ping, "-ip", Addr)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		seelog.Error(err)
-	}
-	cmd.Start()
-	reader := bufio.NewReader(stdout)
-	for {
-		line, err2 := reader.ReadString('\n')
-		seelog.Debug(line)
-		err = json.Unmarshal([]byte(line), &rt)
-		if err != nil {
-			seelog.Error("[func:Ping] ", err)
-		}
-		if err2 != nil || io.EOF == err2 {
-			break
-		}
-	}
-	cmd.Wait()
-	seelog.Debug("[func:Ping] Finnal", Addr, " MaxDelay:"+rt.MaxDelay+" MinDelay:"+rt.MinDelay+" AvgDelay:"+rt.AvgDelay+" SendPK:"+rt.SendPk+" RevcPk:"+rt.RevcPk+" LossPK:"+rt.LossPk)
-	return rt
+func StartGoPing(t g.Target, db *sql.DB,config g.Config){
+	seelog.Info("Start GoPing "+t.Addr+"..")
+	rt := ping.GoPing(t.Addr)
+	StoragePing(rt,t,db)
+	seelog.Info("Finish GoPing "+t.Addr+"..")
+}
+
+func StartFPing(db *sql.DB,config g.Config){
+
 }

@@ -100,6 +100,16 @@
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
+              <div class="control-group"  style="float: right;width: 60%">
+                <label class="control-label" for="Name" >Ping Type</label>
+                <div class="controls">
+                  <select id="Ping"  style="width:100%">
+                    <option name="sysping">sysping</option>
+                    <option name="goping">goping</option>
+                  </select>
+                </div> <!-- /controls -->
+              </div> <!-- /control-group -->
+
             <hr style="clear:both;">
 
             <h4>Alert</h4><br>
@@ -264,6 +274,7 @@
         config = {}
         config["Name"] = $("#Name").val();
         config["Ip"] = $("#Ip").val();
+        config["Ping"] = $("#Ping").val();
         config["Thdchecksec"] =  parseInt($("#Thdchecksec").val());
         config["Thdoccnum"] = parseInt($("#Thdoccnum").val());
         config["Thdloss"] = parseInt($("#Thdloss").val());
@@ -309,6 +320,14 @@
     }
     $(function(){
         $.getJSON("/api/config.json",function(result){
+            if(result["Ping"]=="sysping"){
+                $("#Ping").find("option[name='sysping']").attr("selected",true);
+            }
+            if(result["Ping"]=="goping"){
+                console.log(result["Ping"])
+                $("#Ping option[name='goping']").attr("selected",true);
+            }
+            //console.log(result["Ping"])
             $("#verion").html("Version: "+result["Ver"])
             $("#Name").val(result["Name"]);
             $("#Ip").val(result["Ip"]);

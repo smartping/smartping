@@ -13,7 +13,7 @@ func StartHttp(db *sql.DB, config *g.Config) {
 
 	configApiRoutes(db, config)
 	configIndexRoutes()
-	seelog.Debug("[func:StartHttp] starting to listen on", config.Port)
+	seelog.Info("[func:StartHttp] starting to listen on ", config.Port)
 	s := fmt.Sprintf(":%d", config.Port)
 	//log.Println("starting to listen on ", s)
 	err := http.ListenAndServe(s, nil)
