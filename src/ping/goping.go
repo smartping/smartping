@@ -1,13 +1,13 @@
 package ping
 
 import (
-	"runtime"
-	"os/exec"
-	"github.com/gy-games-libs/seelog"
-	"encoding/json"
-	"io"
-	"bufio"
 	"../g"
+	"bufio"
+	"encoding/json"
+	"github.com/gy-games-libs/seelog"
+	"io"
+	"os/exec"
+	"runtime"
 	"strconv"
 	"time"
 )
@@ -19,9 +19,7 @@ type Str struct {
 }
 
 func GoPing(Addr string) g.PingSt {
-	var rt Str
-	var ps g.PingSt
-	var fps g.PingSt
+
 	var ping string
 	switch os := runtime.GOOS; os {
 	case "windows":
@@ -29,41 +27,47 @@ func GoPing(Addr string) g.PingSt {
 	default:
 		ping = g.GetRoot() + "/bin/goping"
 	}
-	fps.SendPk = "20"
-	fps.RevcPk = "0"
-	fps.MaxDelay = "0"
-	fps.MinDelay = "3000"
-	fps.AvgDelay = "0"
+	SendPK := 0
+	RevcPK := 0
+	MaxDelay := 0
+	MinDelay := -1
+	AllDelay := 0
+	RevcBool := false
 	for ic := 0; ic < 20; ic++ {
 		start := time.Now()
+		RevcBool = false
+		SendPK = SendPK + 1
 		cmd := exec.Command(ping, "-ip", Addr)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			seelog.Error("[func:GoPing]",Addr," Ping Command Error",err)
+			seelog.Error("[func:GoPing]", Addr, " Ping Command Error", err)
 			break
 		}
 		cmd.Start()
 		reader := bufio.NewReader(stdout)
-		ps.RevcPk   = "0"
-		ps.MaxDelay = "0"
-		ps.MinDelay = "0"
-		ps.AvgDelay = "0"
-		delay := "0"
-		//ploop:
+		Delay := 0
 		for {
+			var rt Str
 			l, err2 := reader.ReadString('\n')
 			err = json.Unmarshal([]byte(l), &rt)
 			if err != nil {
 				seelog.Error("[func:GoPing] JsonUnmarshal", err)
 				break
 			}
-			if rt.Flag ==true{
-				delay = rt.Timeout
-				ps.RevcPk = "1"
-				seelog.Debug("[func:GoPing] ",rt)
+			if rt.Flag == true {
+				Delay, _ := strconv.Atoi(rt.Timeout)
+				RevcPK = RevcPK + 1
+				RevcBool = true
+				if MinDelay == -1 || MinDelay > Delay {
+					MinDelay = Delay
+				}
+				if MaxDelay < Delay {
+					MaxDelay = Delay
+				}
+				AllDelay = AllDelay + Delay
 				break
-			}else{
-				if rt.Message !="timeout"{
+			} else {
+				if rt.Message != "timeout" {
 					seelog.Error("[func:GoPing] Ping Error", rt.Message)
 				}
 				break
@@ -73,44 +77,28 @@ func GoPing(Addr string) g.PingSt {
 			}
 		}
 		cmd.Wait()
-
-		Delay, _ := strconv.Atoi(delay)
-
-		GMinDelay, _ := strconv.Atoi(fps.MinDelay)
-		if Delay>0 && GMinDelay > Delay {
-			fps.MinDelay = strconv.Itoa(Delay)
-		}
-
-		GMaxDelay, _ := strconv.Atoi(fps.MaxDelay)
-		if GMaxDelay < Delay {
-			fps.MaxDelay = strconv.Itoa(Delay)
-		}
-
-		GAvgDelay, _ := strconv.Atoi(fps.AvgDelay)
-		fps.AvgDelay = strconv.Itoa(GAvgDelay + Delay)
-
-		if ps.RevcPk == "1" {
-			GRevcPk, _ := strconv.Atoi(fps.RevcPk)
-			fps.RevcPk = strconv.Itoa(GRevcPk + 1)
-		}
 		stop := time.Now()
-		seelog.Debug("[func:GoPing] Addr:",Addr," Cnt:",ic," Current:",delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
+		seelog.Debug("[func:GoPing] Addr:", Addr, " Cnt:", ic, " CurrentStatus:", RevcBool, " CurrentDelay:", Delay, " Send:", SendPK, " Revc:", RevcPK, " MaxDelay:", MaxDelay, " MinDelay:", MinDelay, " SMCost:", stop.Sub(start))
 		if (stop.Sub(start).Nanoseconds() / 1000000) < 3000 {
 			during := time.Duration(3000-int(stop.Sub(start).Nanoseconds()/1000000)) * time.Millisecond
-			seelog.Debug("[func:GoPing]",Addr," Gorouting Sleep.",during)
+			seelog.Debug("[func:GoPing]", Addr, " Gorouting Sleep.", during)
 			time.Sleep(during)
 		}
 
 	}
-	if fps.MinDelay=="3000"{
+	var fps g.PingSt
+	fps.MaxDelay = strconv.Itoa(MaxDelay)
+	if MinDelay == -1 {
 		fps.MinDelay = "0"
+	} else {
+		fps.MinDelay = strconv.Itoa(MinDelay)
 	}
-	GRevcPk, _ := strconv.Atoi(fps.RevcPk)
-	fps.LossPk = strconv.Itoa(((20 - GRevcPk) / 20) * 100)
-	GAvgDelay, _ := strconv.Atoi(fps.AvgDelay)
-	if(GRevcPk>0){
-		fps.AvgDelay = strconv.Itoa(GAvgDelay / GRevcPk)
+	if AllDelay > 0 {
+		fps.AvgDelay = strconv.Itoa(AllDelay / RevcPK)
 	}
-	seelog.Info("[func:GoPing] Finish Addr:",Addr," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," AvgDelay:",fps.AvgDelay," Revc:",fps.RevcPk," LossPK:",fps.LossPk)
+	fps.SendPk = strconv.Itoa(SendPK)
+	fps.RevcPk = strconv.Itoa(RevcPK)
+	fps.LossPk = strconv.Itoa(((SendPK - RevcPK) / SendPK) * 100)
+	seelog.Info("[func:GoPing] Finish Addr:", Addr, " MaxDelay:", fps.MaxDelay, " MinDelay:", fps.MinDelay, " AvgDelay:", fps.AvgDelay, " Send:", fps.SendPk, " Revc:", fps.RevcPk, " LossPK:", fps.LossPk)
 	return fps
 }

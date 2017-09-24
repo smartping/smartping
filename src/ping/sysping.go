@@ -1,68 +1,70 @@
 package ping
 
 import (
+	"../g"
 	"bufio"
-	//"io"
+	"github.com/gy-games-libs/seelog"
+	"io"
 	"os/exec"
+	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
-	"../g"
-	"github.com/gy-games-libs/seelog"
-	"regexp"
-	//"io"
-	"io"
-	"runtime"
 )
-
-
 
 func SysPing(Addr string) g.PingSt {
 	var args [5]string
 	switch os := runtime.GOOS; os {
 	case "windows":
-		args[0]="-n"
-		args[1]="1"
-		args[2]="-w"
-		args[3]="3000"
+		args[0] = "-n"
+		args[1] = "1"
+		args[2] = "-w"
+		args[3] = "3000"
 	default:
-		args[0]="-c"
-		args[1]="1"
-		args[2]="-w"
-		args[3]="3"
+		args[0] = "-c"
+		args[1] = "1"
+		args[2] = "-w"
+		args[3] = "3"
 	}
-	args[4]=Addr
-	var ps g.PingSt
-	var fps g.PingSt
-	fps.SendPk = "20"
-	fps.RevcPk = "0"
-	fps.MaxDelay = "0"
-	fps.MinDelay = "3000"
-	fps.AvgDelay = "0"
+	args[4] = Addr
+	SendPK := 0
+	RevcPK := 0
+	MaxDelay := 0
+	MinDelay := -1
+	AllDelay := 0
+	RevcBool := false
 	for ic := 0; ic < 20; ic++ {
 		start := time.Now()
-		cmd := exec.Command("ping",args[0:]...)
+		RevcBool = false
+		SendPK = SendPK + 1
+		cmd := exec.Command("ping", args[0:]...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			seelog.Error("[func:SysPing]",Addr," Ping Command Error",err)
+			seelog.Error("[func:SysPing]", Addr, " Ping Command Error", err)
 			break
 		}
 		cmd.Start()
 		reader := bufio.NewReader(stdout)
-		ps.RevcPk   = "0"
-		ps.MaxDelay = "0"
-		ps.MinDelay = "0"
-		ps.AvgDelay = "0"
-		delay := "0"
-		ploop:
+		Delay := 0
+	ploop:
 		for {
 			l, err2 := reader.ReadString('\n')
-			if strings.Contains(l,Addr) && strings.Contains(l,"ms"){
+			if strings.Contains(l, Addr) && strings.Contains(l, "ms") {
 				re := regexp.MustCompile(`([\d.]*\s*)ms`)
-				ms := re.FindAllStringSubmatch(l,-1)
-				if len(ms)>0 && len(ms[0])==2{
-					delay = ms[0][1]
-					ps.RevcPk = "1"
+				ms := re.FindAllStringSubmatch(l, -1)
+				if len(ms) > 0 && len(ms[0]) == 2 {
+					DelayF64, _ := strconv.ParseFloat(strings.Replace(ms[0][1], " ", "", -1), 32)
+					Delay = int(DelayF64)
+					RevcPK = RevcPK + 1
+					RevcBool = true
+					if MinDelay == -1 || MinDelay > Delay {
+						MinDelay = Delay
+					}
+					if MaxDelay < Delay {
+						MaxDelay = Delay
+					}
+					AllDelay = AllDelay + Delay
 					break ploop
 				}
 			}
@@ -71,45 +73,28 @@ func SysPing(Addr string) g.PingSt {
 			}
 		}
 		cmd.Wait()
-
-		DelayF64, _ := strconv.ParseFloat(delay,32)
-		Delay := int(DelayF64)
-
-		GMinDelay, _ := strconv.Atoi(fps.MinDelay)
-		if Delay>0 && GMinDelay > Delay {
-			fps.MinDelay = strconv.Itoa(Delay)
-		}
-
-		GMaxDelay, _ := strconv.Atoi(fps.MaxDelay)
-		if GMaxDelay < Delay {
-			fps.MaxDelay = strconv.Itoa(Delay)
-		}
-
-		GAvgDelay, _ := strconv.Atoi(fps.AvgDelay)
-		fps.AvgDelay = strconv.Itoa(GAvgDelay + Delay)
-
-		if ps.RevcPk == "1" {
-			GRevcPk, _ := strconv.Atoi(fps.RevcPk)
-			fps.RevcPk = strconv.Itoa(GRevcPk + 1)
-		}
 		stop := time.Now()
-		seelog.Debug("[func:SysPing] Addr:",Addr," Cnt:",ic," Current:",Delay," Revc:",fps.RevcPk," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," SMCost:",stop.Sub(start))
+		seelog.Debug("[func:SysPing] Addr:", Addr, " Cnt:", ic, " CurrentStatus:", RevcBool, " CurrentDelay:", Delay, " Send:", SendPK, " Revc:", RevcPK, " MaxDelay:", MaxDelay, " MinDelay:", MinDelay, " SMCost:", stop.Sub(start))
 		if (stop.Sub(start).Nanoseconds() / 1000000) < 3000 {
 			during := time.Duration(3000-int(stop.Sub(start).Nanoseconds()/1000000)) * time.Millisecond
-			seelog.Debug("[func:SysPing]",Addr," Gorouting Sleep.",during)
+			seelog.Debug("[func:SysPing]", Addr, " Gorouting Sleep.", during)
 			time.Sleep(during)
 		}
 
 	}
-	if fps.MinDelay=="3000"{
+	var fps g.PingSt
+	fps.MaxDelay = strconv.Itoa(MaxDelay)
+	if MinDelay == -1 {
 		fps.MinDelay = "0"
+	} else {
+		fps.MinDelay = strconv.Itoa(MinDelay)
 	}
-	GRevcPk, _ := strconv.Atoi(fps.RevcPk)
-	fps.LossPk = strconv.Itoa(((20 - GRevcPk) / 20) * 100)
-	GAvgDelay, _ := strconv.Atoi(fps.AvgDelay)
-	if(GRevcPk>0){
-		fps.AvgDelay = strconv.Itoa(GAvgDelay / GRevcPk)
+	if AllDelay > 0 {
+		fps.AvgDelay = strconv.Itoa(AllDelay / RevcPK)
 	}
-	seelog.Info("[func:SysPing] Finish Addr:",Addr," MaxDelay:",fps.MaxDelay," MinDelay:",fps.MinDelay," AvgDelay:",fps.AvgDelay," Revc:",fps.RevcPk," LossPK:",fps.LossPk)
+	fps.SendPk = strconv.Itoa(SendPK)
+	fps.RevcPk = strconv.Itoa(RevcPK)
+	fps.LossPk = strconv.Itoa(((SendPK - RevcPK) / SendPK) * 100)
+	seelog.Info("[func:SysPing] Finish Addr:", Addr, " MaxDelay:", fps.MaxDelay, " MinDelay:", fps.MinDelay, " AvgDelay:", fps.AvgDelay, " Revc:", fps.RevcPk, " LossPK:", fps.LossPk)
 	return fps
 }

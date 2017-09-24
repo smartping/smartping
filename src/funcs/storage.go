@@ -1,15 +1,15 @@
 package funcs
 
 import (
+	"../g"
 	"database/sql"
+	_ "github.com/gy-games-libs/go-sqlite3"
 	"github.com/gy-games-libs/seelog"
 	"time"
-	"../g"
-	_ "github.com/gy-games-libs/go-sqlite3"
 )
 
 func CreateDB(t g.Target, db *sql.DB) {
-	seelog.Info("[func:CreateDB] CreateDB `pinglog-",t.Addr,"` Start..")
+	seelog.Info("[func:CreateDB] CreateDB `pinglog-", t.Addr, "` Start..")
 	sql := `CREATE TABLE IF NOT EXISTS [pinglog-` + t.Addr + `] (
 	    logtime   VARCHAR (8),
 	    maxdelay  VARCHAR (3),
@@ -31,11 +31,10 @@ func CreateDB(t g.Target, db *sql.DB) {
 	g.DLock.Lock()
 	db.Exec(sql)
 	g.DLock.Unlock()
-	seelog.Info("[func:CreateDB] CreateDB `pinglog-",t.Addr,"` Finish..")
+	seelog.Info("[func:CreateDB] CreateDB `pinglog-", t.Addr, "` Finish..")
 }
 
-
-func StoragePing(pingres g.PingSt,t g.Target, db *sql.DB) {
+func StoragePing(pingres g.PingSt, t g.Target, db *sql.DB) {
 	logtime := time.Now().Format("02 15:04")
 	checktime := time.Now().Format("2006-01-02 15:04")
 	seelog.Info("[func:StartPing] ", "(", checktime, ")Starting runPingTest ", t.Name)
@@ -64,4 +63,3 @@ func StoragePing(pingres g.PingSt,t g.Target, db *sql.DB) {
 	g.DLock.Unlock()
 	seelog.Info("[func:StartPing] ", "(", checktime, ") PingTest on ", t.Name, " finish!")
 }
-

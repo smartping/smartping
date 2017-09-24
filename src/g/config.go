@@ -54,7 +54,7 @@ func ParseConfig(ver string) (Config, *sql.DB) {
 	if cfg.Ip == "" {
 		cfg.Ip = "127.0.0.1"
 	}
-	if cfg.Ping ==""{
+	if cfg.Ping == "" {
 		cfg.Ping = "sysping"
 	}
 	cfg.Ver = ver

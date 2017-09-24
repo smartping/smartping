@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/gy-games-libs/go-fastping"
 	"net"
+	"os"
 	"strconv"
 	"time"
-	"os"
 )
 
 type Str struct {
@@ -21,10 +21,10 @@ func main() {
 	ip := flag.String("ip", "127.0.0.1", "ip address!")
 	debug := flag.Bool("d", false, "debug!")
 	flag.Parse()
-	Ping(*ip,*debug)
+	Ping(*ip, *debug)
 }
 
-func Ping(Addr string,debug bool) {
+func Ping(Addr string, debug bool) {
 	var rt Str
 	rt.Message = "timeout"
 	p := fastping.NewPinger()
@@ -34,10 +34,10 @@ func Ping(Addr string,debug bool) {
 		p.AddIPAddr(ra)
 		p.OnRecv = func(addr *net.IPAddr, rtt time.Duration) {
 			rt.Flag = true
-			rt.Message=""
-			rt.Timeout = strconv.Itoa(int(rtt.Nanoseconds()/1000000))
-			if debug == true{
-				fmt.Println("[func:Ping] Addr:",Addr," Delay:",rt.Timeout)
+			rt.Message = ""
+			rt.Timeout = strconv.Itoa(int(rtt.Nanoseconds() / 1000000))
+			if debug == true {
+				fmt.Println("[func:Ping] Addr:", Addr, " Delay:", rt.Timeout)
 			}
 			out, _ := json.Marshal(rt)
 			fmt.Print(string(out))
