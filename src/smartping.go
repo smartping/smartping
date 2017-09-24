@@ -23,11 +23,15 @@ func main() {
 	c.AddFunc("*/60 * * * * *", func() {
 		if config.Ping == "sysping" {
 			for _, target := range config.Targets {
-				go funcs.StartSysPing(target, db, config)
+				if target.Addr !=config.Ip{
+					go funcs.StartSysPing(target, db, config)
+				}
 			}
 		} else if config.Ping == "goping" {
 			for _, target := range config.Targets {
-				go funcs.StartGoPing(target, db, config)
+				if target.Addr !=config.Ip {
+					go funcs.StartGoPing(target, db, config)
+				}
 			}
 		} else {
 			seelog.Error("[Init] Ping Method Error!")

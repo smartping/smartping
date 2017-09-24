@@ -56,10 +56,10 @@ func GoPing(Addr string) g.PingSt {
 				break
 			}
 			if rt.Flag == true {
-				Delay, _ = strconv.ParseFloat(rt.Timeout,64)
-				if Delay == 0{
+				if rt.Timeout=="0.000"{
 					SendPK = SendPK-1
 				}else{
+					Delay, _ = strconv.ParseFloat(rt.Timeout,64)
 					RevcPK = RevcPK + 1
 					RevcBool = true
 					if MinDelay == -1 || MinDelay > Delay {
@@ -103,7 +103,11 @@ func GoPing(Addr string) g.PingSt {
 	}
 	fps.SendPk = strconv.Itoa(SendPK)
 	fps.RevcPk = strconv.Itoa(RevcPK)
-	fps.LossPk = strconv.Itoa(((SendPK - RevcPK) / SendPK) * 100)
+	if (SendPK) > 0{
+		fps.LossPk = strconv.Itoa(((SendPK - RevcPK) / SendPK) * 100)
+	}else{
+		fps.LossPk = "0"
+	}
 	seelog.Info("[func:GoPing] Finish Addr:", Addr, " MaxDelay:", fps.MaxDelay, " MinDelay:", fps.MinDelay, " AvgDelay:", fps.AvgDelay, " Send:", fps.SendPk, " Revc:", fps.RevcPk, " LossPK:", fps.LossPk)
 	return fps
 }

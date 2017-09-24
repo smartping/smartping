@@ -21,6 +21,11 @@ func SysPing(Addr string) g.PingSt {
 		args[1] = "1"
 		args[2] = "-w"
 		args[3] = "3000"
+	case "darwin":
+		args[0] = "-c"
+		args[1] = "1"
+		args[2] = "-W"
+		args[3] = "3"
 	default:
 		args[0] = "-c"
 		args[1] = "1"
