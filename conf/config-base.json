@@ -2,6 +2,8 @@
 	"Port": 8899 ,
 	"Name": "",
 	"Ip": "",
+	"Timeout": "5",
+	"Ping": "sysping",
 	"Password": "smartping",
 	"Alerthistory": 7,
 	"Alertcycle": 1,
@@ -12,7 +14,6 @@
 	"Thdloss": 30,
 	"Tline": "1",
 	"Tsymbolsize": "70",
-	"Timeout": "5",
 	"Targets": [
 		{
 			"Name": "本机",
