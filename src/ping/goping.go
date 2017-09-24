@@ -27,11 +27,12 @@ func GoPing(Addr string) g.PingSt {
 	default:
 		ping = g.GetRoot() + "/bin/goping"
 	}
+	var MaxDelay,MinDelay,AllDelay,Delay float64
 	SendPK := 0
 	RevcPK := 0
-	MaxDelay := 0
-	MinDelay := -1
-	AllDelay := 0
+	MaxDelay = 0
+	MinDelay = -1
+	AllDelay = 0
 	RevcBool := false
 	for ic := 0; ic < 20; ic++ {
 		start := time.Now()
@@ -45,7 +46,7 @@ func GoPing(Addr string) g.PingSt {
 		}
 		cmd.Start()
 		reader := bufio.NewReader(stdout)
-		Delay := 0
+		Delay = 0
 		for {
 			var rt Str
 			l, err2 := reader.ReadString('\n')
@@ -55,16 +56,20 @@ func GoPing(Addr string) g.PingSt {
 				break
 			}
 			if rt.Flag == true {
-				Delay, _ := strconv.Atoi(rt.Timeout)
-				RevcPK = RevcPK + 1
-				RevcBool = true
-				if MinDelay == -1 || MinDelay > Delay {
-					MinDelay = Delay
+				Delay, _ = strconv.ParseFloat(rt.Timeout,64)
+				if Delay == 0{
+					SendPK = SendPK-1
+				}else{
+					RevcPK = RevcPK + 1
+					RevcBool = true
+					if MinDelay == -1 || MinDelay > Delay {
+						MinDelay = Delay
+					}
+					if MaxDelay < Delay {
+						MaxDelay = Delay
+					}
+					AllDelay = AllDelay + Delay
 				}
-				if MaxDelay < Delay {
-					MaxDelay = Delay
-				}
-				AllDelay = AllDelay + Delay
 				break
 			} else {
 				if rt.Message != "timeout" {
@@ -87,14 +92,14 @@ func GoPing(Addr string) g.PingSt {
 
 	}
 	var fps g.PingSt
-	fps.MaxDelay = strconv.Itoa(MaxDelay)
+	fps.MaxDelay = strconv.FormatFloat(MaxDelay, 'f', 3, 64)
 	if MinDelay == -1 {
 		fps.MinDelay = "0"
 	} else {
-		fps.MinDelay = strconv.Itoa(MinDelay)
+		fps.MinDelay = strconv.FormatFloat(MinDelay, 'f', 3, 64)
 	}
 	if AllDelay > 0 {
-		fps.AvgDelay = strconv.Itoa(AllDelay / RevcPK)
+		fps.AvgDelay = strconv.FormatFloat(AllDelay / float64(RevcPK), 'f', 3, 64)
 	}
 	fps.SendPk = strconv.Itoa(SendPK)
 	fps.RevcPk = strconv.Itoa(RevcPK)

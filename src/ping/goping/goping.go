@@ -35,7 +35,8 @@ func Ping(Addr string, debug bool) {
 		p.OnRecv = func(addr *net.IPAddr, rtt time.Duration) {
 			rt.Flag = true
 			rt.Message = ""
-			rt.Timeout = strconv.Itoa(int(rtt.Nanoseconds() / 1000000))
+			//fmt.Print(rtt.Nanoseconds())
+			rt.Timeout = strconv.FormatFloat((float64(rtt.Nanoseconds()) / float64(1000000)), 'f', 3, 64)
 			if debug == true {
 				fmt.Println("[func:Ping] Addr:", Addr, " Delay:", rt.Timeout)
 			}

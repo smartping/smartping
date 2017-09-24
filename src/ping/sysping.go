@@ -28,11 +28,12 @@ func SysPing(Addr string) g.PingSt {
 		args[3] = "3"
 	}
 	args[4] = Addr
+	var MaxDelay,MinDelay,AllDelay,Delay float64
 	SendPK := 0
 	RevcPK := 0
-	MaxDelay := 0
-	MinDelay := -1
-	AllDelay := 0
+	MaxDelay = 0
+	MinDelay = -1
+	AllDelay = 0
 	RevcBool := false
 	for ic := 0; ic < 20; ic++ {
 		start := time.Now()
@@ -46,7 +47,7 @@ func SysPing(Addr string) g.PingSt {
 		}
 		cmd.Start()
 		reader := bufio.NewReader(stdout)
-		Delay := 0
+		//Delay := 0
 	ploop:
 		for {
 			l, err2 := reader.ReadString('\n')
@@ -54,8 +55,7 @@ func SysPing(Addr string) g.PingSt {
 				re := regexp.MustCompile(`([\d.]*\s*)ms`)
 				ms := re.FindAllStringSubmatch(l, -1)
 				if len(ms) > 0 && len(ms[0]) == 2 {
-					DelayF64, _ := strconv.ParseFloat(strings.Replace(ms[0][1], " ", "", -1), 32)
-					Delay = int(DelayF64)
+					Delay, _ := strconv.ParseFloat(strings.Replace(ms[0][1], " ", "", -1), 64)
 					RevcPK = RevcPK + 1
 					RevcBool = true
 					if MinDelay == -1 || MinDelay > Delay {
@@ -83,14 +83,14 @@ func SysPing(Addr string) g.PingSt {
 
 	}
 	var fps g.PingSt
-	fps.MaxDelay = strconv.Itoa(MaxDelay)
+	fps.MaxDelay = strconv.FormatFloat(MaxDelay, 'f', 3, 64)
 	if MinDelay == -1 {
 		fps.MinDelay = "0"
 	} else {
-		fps.MinDelay = strconv.Itoa(MinDelay)
+		fps.MinDelay = strconv.FormatFloat(MinDelay, 'f', 3, 64)
 	}
 	if AllDelay > 0 {
-		fps.AvgDelay = strconv.Itoa(AllDelay / RevcPK)
+		fps.AvgDelay = strconv.FormatFloat(AllDelay / float64(RevcPK), 'f', 3, 64)
 	}
 	fps.SendPk = strconv.Itoa(SendPK)
 	fps.RevcPk = strconv.Itoa(RevcPK)
