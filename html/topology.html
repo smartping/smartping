@@ -118,6 +118,9 @@
             $("#verion").html("Version: "+result["Ver"])
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS") {
+                    if(field.Addr==result["Ip"]){
+                        return true;
+                    }
                     $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "/topology.html'>" + field.Name + "</a></td></tr>");
                 }
             });
