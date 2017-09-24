@@ -8,6 +8,8 @@ import (
 	"github.com/gy-games-libs/seelog"
 	"os"
 	"runtime"
+	"flag"
+	"fmt"
 )
 
 // Init config
@@ -15,6 +17,12 @@ var Version = "0.4.0"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+	version := flag.Bool("v", false, "show version")
+	flag.Parse()
+	if *version {
+		fmt.Println(Version)
+		os.Exit(0)
+	}
 	config, db := g.ParseConfig(Version)
 	for _, target := range config.Targets {
 		go funcs.CreateDB(target, db)

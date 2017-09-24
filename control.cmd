@@ -24,6 +24,7 @@ echo ©¦        install install smartping as service (use nssm)               ©¦
 echo ©¦        start   start smartping service                               ©¦
 echo ©¦        stop    stop smartping service                                ©¦
 echo ©¦        restart stop and start smartping                              ©¦
+echo ©¦        version show smartping version                                ©¦
 echo ©¦                                                                      ©¦
 echo ©¸©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¼
 
@@ -56,9 +57,13 @@ IF "%select%"=="build" (
                         IF "%select%"=="uninstall" (
                             sc delete smartping 
                         ) ELSE (
-                             echo Param Error Try Again!
-                             pause
-                             GOTO BG
+                             IF "%select%"=="version" (
+                                %~dp0\bin\smartping.exe -v 
+                            ) ELSE (
+                                 echo Param Error Try Again!
+                                 pause
+                                 GOTO BG
+                            )
                         ) 
                     ) 
                 ) 

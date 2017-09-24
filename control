@@ -73,8 +73,18 @@ function build() {
     mv goping ./bin/goping
 }
 
+function version() {
+     ./bin/$app -v
+}
+
+function pack() {
+    build
+    version=`./bin/$app -v`
+    tar zcvf $app-v$version.tar.gz conf/ bin/ html/ db/ control --exclude conf/config.json  --exclude  bin/nssm.exe  --exclude  db/database.db
+}
+
 function help() {
-    echo "$0 build|run|start|stop|restart|status"
+    echo "$0 build|run|start|stop|restart|status|version|pack"
 }
 
 if [ "$1" == "" ]; then
@@ -91,6 +101,10 @@ elif [ "$1" == "status" ];then
     status
 elif [ "$1" == "build" ];then
     build
+elif [ "$1" == "version" ];then
+    version
+elif [ "$1" == "pack" ];then
+    pack
 else
     help
 fi
