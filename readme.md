@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="http://www.xuxueli.com/xxl-conf/">
+    <a href="http://smartping.org">
         <img src="http://smartping.org/logo.png">
     </a>
     <h3 align="center">SmartPing | 开源、高效、便捷的网络质量监控神器</h3>
@@ -12,7 +12,7 @@
         <a href="https://goreportcard.com/report/github.com/gy-games/smartping">
             <img src="https://goreportcard.com/badge/github.com/gy-games/smartping" >
         </a>
-         <a href="https://github.com/xuxueli/xxl-conf/releases">
+         <a href="https://github.com/gy-games/smartping/releases">
              <img src="https://img.shields.io/github/release/gy-games/smartping.svg" >
          </a>
          <a href="https://github.com/gy-games/smartping/blob/master/LICENSE">
