@@ -64,6 +64,13 @@ func pingLinux(Addr string) PingSt {
 func pingWindows(Addr string) PingSt {
 	var ps PingSt
 	var fps PingSt
+	var pingpath string
+	pingfile,err:=PathExists(getCurrentDirectory()+"/ping.exe")
+	if pingfile {
+		pingpath = getCurrentDirectory()+"/ping.exe"
+	}else{
+		pingpath = "ping"
+	}
 	fps.SendPk = "20"
 	fps.RevcPk = "0"
 	fps.MaxDelay = "0"
@@ -71,7 +78,7 @@ func pingWindows(Addr string) PingSt {
 	fps.AvgDelay = "0"
 	for ic := 0; ic < 20; ic++ {
 		start := time.Now()
-		cmd := exec.Command(getCurrentDirectory()+"/ping.exe", "-w", "3000", "-n", "1", Addr)
+		cmd := exec.Command(pingpath, "-w", "3000", "-n", "1", Addr)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			log.Println(err)
@@ -143,6 +150,17 @@ func getCurrentDirectory() string {
 		log.Fatal(err)
 	}
 	return strings.Replace(dir, "\\", "/", -1)
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
 
 func Ping(Addr string) PingSt {
