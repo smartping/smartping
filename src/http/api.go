@@ -242,37 +242,37 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 																	for _, v := range nconfig.Targets {
 																		if v.Name == "" {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(Empty Name Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(Empty Name Agent) "
 																			break
 																		}
 																		if !funcs.ValidIP4(v.Addr) {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal Addr Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal Addr Agent) "
 																			break
 																		}
 																		if v.Type != "CS" && v.Type != "C" {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal Type Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal Type Agent) "
 																			break
 																		}
 																		if v.Thdchecksec <= 0 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT CP Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT CP Agent) "
 																			break
 																		}
 																		if v.Thdloss < 0 || v.Thdloss > 100 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT LP Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT LP Agent) "
 																			break
 																		}
 																		if v.Thdavgdelay <= 0 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT AD Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT AD Agent) "
 																			break
 																		}
 																		if v.Thdoccnum < 0 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT OT Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT OT Agent) "
 																			break
 																		}
 																		reminList["pinglog-"+v.Addr] = true
