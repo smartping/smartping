@@ -104,7 +104,8 @@ func GoPing(Addr string) g.PingSt {
 	fps.SendPk = strconv.Itoa(SendPK)
 	fps.RevcPk = strconv.Itoa(RevcPK)
 	if (SendPK) > 0{
-		fps.LossPk = strconv.Itoa(((SendPK - RevcPK) / SendPK) * 100)
+		//fps.LossPk = strconv.Itoa(((SendPK - RevcPK) / SendPK) * 100)
+		fps.LossPk = strconv.FormatFloat(float64(float64(float64(float64(SendPK) - float64(RevcPK)) / float64(SendPK)) * 100),'f',2,64)
 	}else{
 		fps.LossPk = "0"
 	}

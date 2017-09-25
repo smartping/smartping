@@ -99,7 +99,7 @@ func SysPing(Addr string) g.PingSt {
 	}
 	fps.SendPk = strconv.Itoa(SendPK)
 	fps.RevcPk = strconv.Itoa(RevcPK)
-	fps.LossPk = strconv.Itoa(((SendPK - RevcPK) / SendPK) * 100)
+	fps.LossPk = strconv.FormatFloat(float64(float64(float64(float64(SendPK) - float64(RevcPK)) / float64(SendPK)) * 100),'f',2,64)
 	seelog.Info("[func:SysPing] Finish Addr:", Addr, " MaxDelay:", fps.MaxDelay, " MinDelay:", fps.MinDelay, " AvgDelay:", fps.AvgDelay, " Revc:", fps.RevcPk, " LossPK:", fps.LossPk)
 	return fps
 }
