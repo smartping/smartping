@@ -132,6 +132,9 @@
         $("#verion").html("Version: "+result["Ver"])
         $.each(result["Targets"], function(i, field){
             if (field.Type=="CS") {
+                if(field.Addr==result["Ip"]){
+                    return true;
+                }
                 $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "/reverse.html'>" + field.Name + "</a></td></tr>");
             }
         });
@@ -204,6 +207,9 @@
         $.each(result["Targets"], function(i, field){
 
             if (field.Type=="CS"){
+                if(field.Addr==result["Ip"]){
+                    return true;
+                }
                 $("#main").append("<div id='"+field.Name+"_pannel' style='float:left;width:30%;height:130px;margin-right:3%;margin-top:20px;'  class='showcharts' apiurl='http://"+field.Addr+":"+result['Port']+"/api/ping.json?ip="+result['Ip']+"'></div>");
                 var chart = echarts.init(document.getElementById(field.Name+"_pannel"));
                 chart.setOption(optmini);

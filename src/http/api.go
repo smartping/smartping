@@ -7,8 +7,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/gy-games-libs/seelog"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -88,13 +88,15 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 			tableip = ""
 		}
 		g.DLock.Lock()
-		rows, err := db.Query("SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + "")
+		sql := "SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + ""
+		rows, err := db.Query(sql)
+		seelog.Debug("[func:/api/ping.json] ", sql)
 		if err == nil {
 			for rows.Next() {
 				l := new(g.LogInfo)
 				err := rows.Scan(&l.Logtime, &l.Maxdelay, &l.Mindelay, &l.Avgdelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck)
 				if err != nil {
-					log.Println(err)
+					seelog.Error("[/api/ping.json] ", err)
 				}
 				for n, v := range lastcheck {
 					if v == l.Lastcheck {
@@ -135,17 +137,24 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 			timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
 			preout[v.Name] = "false"
 			g.DLock.Lock()
-			rows, err := db.Query("SELECT max(avgdelay) maxavgdelay, max(losspk) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") ")
+			sql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
+			rows, err := db.Query(sql)
+			seelog.Debug("[func:/api/topology.json] ", sql)
 			if err == nil {
 				for rows.Next() {
 					l := new(g.TopoLog)
-					rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
+					err := rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
+					if err != nil {
+						seelog.Error("[/api/topology.json] ", err)
+					}
 					sec, _ := strconv.Atoi(l.Cnt)
 					if sec < v.Thdoccnum {
 						preout[v.Name] = "true"
 					}
 				}
 				rows.Close()
+			} else {
+				seelog.Error("[/api/topology.json] ", err)
 			}
 
 			g.DLock.Unlock()
@@ -168,17 +177,21 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		}
 		listpreout := []string{}
 		g.DLock.Lock()
-		lrows, lerr := db.Query("SELECT name FROM [sqlite_master] where type='table' and name like '%alertlog%'")
+		sql := "SELECT name FROM [sqlite_master] where type='table' and name like '%alertlog%'"
+		lrows, lerr := db.Query(sql)
+		seelog.Debug("[func:/api/alert.json] ", sql)
 		if lerr == nil {
 			for lrows.Next() {
 				var l string
 				err := lrows.Scan(&l)
 				if err != nil {
-					fmt.Println(err)
+					seelog.Error("[/api/alert.json] ", err)
 				}
 				listpreout = append(listpreout, l)
 			}
 			lrows.Close()
+		} else {
+			seelog.Error("[/api/alert.json] ", lerr)
 		}
 		datapreout := []g.Alterdata{}
 		rows, err := db.Query("SELECT * FROM [" + dtb + "] where 1=1")
@@ -192,6 +205,8 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 				datapreout = append(datapreout, *l)
 			}
 			rows.Close()
+		} else {
+			seelog.Error("[/api/alert.json] ", err)
 		}
 		g.DLock.Unlock()
 		lout, _ := json.Marshal(listpreout)
@@ -227,37 +242,37 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 																	for _, v := range nconfig.Targets {
 																		if v.Name == "" {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(Empty Name Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(Empty Name Agent) "
 																			break
 																		}
 																		if !funcs.ValidIP4(v.Addr) {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal Addr Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal Addr Agent) "
 																			break
 																		}
 																		if v.Type != "CS" && v.Type != "C" {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal Type Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal Type Agent) "
 																			break
 																		}
 																		if v.Thdchecksec <= 0 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT CP Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT CP Agent) "
 																			break
 																		}
 																		if v.Thdloss < 0 || v.Thdloss > 100 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT LP Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT LP Agent) "
 																			break
 																		}
 																		if v.Thdavgdelay <= 0 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT AD Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT AD Agent) "
 																			break
 																		}
 																		if v.Thdoccnum < 0 {
 																			targetcheck = false
-																			preout["info"] = "Agent List Info illegal!(illegal ALERT OT Agent) "
+																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT OT Agent) "
 																			break
 																		}
 																		reminList["pinglog-"+v.Addr] = true
@@ -274,6 +289,8 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 																		err := json.Indent(&out, r, "", "\t")
 																		if err == nil {
 																			ioutil.WriteFile(g.GetRoot()+"/conf/"+"config.json", []byte(out.String()), 0644)
+																		} else {
+																			seelog.Error("[/api/saveconfig.json] ", err)
 																		}
 																		sql := ""
 																		listpreout := []string{}
@@ -283,18 +300,19 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 																				var l string
 																				err := lrows.Scan(&l)
 																				if err != nil {
-																					fmt.Println(err)
+																					seelog.Error("[/api/saveconfig.json] ", err)
 																				}
 																				listpreout = append(listpreout, l)
 																			}
 																			lrows.Close()
+																		} else {
+																			seelog.Error("[/api/saveconfig.json] ", lerr)
 																		}
 																		for _, v := range listpreout {
 																			if _, ok := reminList[v]; !ok {
 																				sql = sql + "DROP TABLE [" + v + "];"
 																			}
 																		}
-																		//log.Print(sql)
 																		g.DLock.Lock()
 																		db.Exec(sql)
 																		g.DLock.Unlock()

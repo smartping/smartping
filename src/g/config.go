@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/gy-games-libs/file"
+	"github.com/gy-games-libs/seelog"
 	"io"
 	"log"
 	"os"
@@ -44,12 +45,17 @@ func ParseConfig(ver string) (Config, *sql.DB) {
 		cfile = "config-base.json"
 	}
 	Root = GetRoot()
+	logger, err := seelog.LoggerFromConfigAsFile(Root + "/conf/" + "seelog.xml")
+	seelog.ReplaceLogger(logger)
 	cfg := ReadConfig(GetRoot() + "/conf/" + cfile)
 	if cfg.Name == "" {
 		cfg.Name, _ = os.Hostname()
 	}
 	if cfg.Ip == "" {
 		cfg.Ip = "127.0.0.1"
+	}
+	if cfg.Ping == "" {
+		cfg.Ping = "sysping"
 	}
 	cfg.Ver = ver
 	if !file.IsExist(GetRoot() + "/db/" + "database.db") {
@@ -69,7 +75,7 @@ func ParseConfig(ver string) (Config, *sql.DB) {
 		io.Copy(dst, src)
 	}
 	cfg.Db = GetRoot() + "/db/database.db"
-	log.Printf("Config loaded")
+	seelog.Info("Config loaded")
 	db, err := sql.Open("sqlite3", cfg.Db)
 	if err != nil {
 		log.Fatalln("[Fault]db open fail .", err)
@@ -88,6 +94,7 @@ func ParseConfig(ver string) (Config, *sql.DB) {
 			cfg.Targets[k].Thdoccnum = cfg.Thdoccnum
 		}
 	}
+
 	return cfg, db
 
 }
@@ -95,7 +102,7 @@ func ParseConfig(ver string) (Config, *sql.DB) {
 func GetRoot() string {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Get Root Path Error:", err)
 	}
 	dirctory := strings.Replace(dir, "\\", "/", -1)
 	runes := []rune(dirctory)

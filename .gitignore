@@ -11,3 +11,5 @@ bin/*
 *.iml
 db/database.db
 conf/config.json
+logs/
+!bin/nssm.exe*
