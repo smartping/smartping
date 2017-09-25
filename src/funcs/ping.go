@@ -2,14 +2,16 @@ package funcs
 
 import (
 	"bufio"
-	"github.com/gy-games-libs/mahonia"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
+	"path/filepath"
+	"regexp"
 )
 
 type PingSt struct {
@@ -69,7 +71,7 @@ func pingWindows(Addr string) PingSt {
 	fps.AvgDelay = "0"
 	for ic := 0; ic < 20; ic++ {
 		start := time.Now()
-		cmd := exec.Command("ping", "-w", "3000", "-n", "1", Addr)
+		cmd := exec.Command(getCurrentDirectory()+"/ping.exe", "-w", "3000", "-n", "1", Addr)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			log.Println(err)
@@ -81,24 +83,20 @@ func pingWindows(Addr string) PingSt {
 		//ps.MinDelay = "3000"
 		ps.AvgDelay = "0"
 		for {
-			l, err2 := reader.ReadString('\n')
+			line, err2 := reader.ReadString('\n')
 			if err2 != nil || io.EOF == err2 {
 				break
 			}
-			var line string
-			var dec mahonia.Decoder
-			dec = mahonia.NewDecoder("gbk")
-			line = dec.ConvertString(l)
 			if strings.Contains(line, "%") {
-				packge := strings.Fields(line)
-				ps.SendPk = strings.Split(packge[3], "，")[0]
-				ps.RevcPk = strings.Split(packge[5], "，")[0]
+				re := regexp.MustCompile(`Packets: Sent = (?P<sent>\d{1,9}), Received = (?P<rec>\d{1,9}), Lost = (?P<loss>\d{0,3}) \(\d{1,3}% loss\),`)
+				ps.SendPk = re.FindStringSubmatch(line)[1]
+				ps.RevcPk = re.FindStringSubmatch(line)[2]
 			}
-			if strings.Contains(line, "最短") {
-				packge := strings.Fields(line)
-				ps.MinDelay = strings.Split(strings.Split(packge[2], "，")[0], "ms")[0]
-				ps.AvgDelay = strings.Split(packge[6], "ms")[0]
-				ps.MaxDelay = strings.Split(strings.Split(packge[4], "，")[0], "ms")[0]
+			if strings.Contains(line, "Minimum") {
+				re := regexp.MustCompile(`Minimum = (?P<min>\d{1,9})ms, Maximum = (?P<max>\d{1,9})ms, Average = (?P<avg>\d{1,9})ms`)
+				ps.MinDelay = re.FindStringSubmatch(line)[1]
+				ps.MaxDelay = re.FindStringSubmatch(line)[2]
+				ps.AvgDelay = re.FindStringSubmatch(line)[3]
 			}
 		}
 		cmd.Wait()
@@ -128,11 +126,23 @@ func pingWindows(Addr string) PingSt {
 			time.Sleep(time.Duration(3000-int(stop.Sub(start).Nanoseconds()/1000000)) * time.Millisecond)
 		}
 	}
-	GRevcPk, _ := strconv.Atoi(fps.RevcPk)
-	fps.LossPk = strconv.Itoa(((20 - GRevcPk) / 20) * 100)
+	GRevcPk, err := strconv.Atoi(fps.RevcPk)
+	if err != nil {
+        panic(err)
+	}
+	LossPkFloat:=(20-float32(GRevcPk))/20
+	fps.LossPk = strconv.Itoa((int)(LossPkFloat*100))
 	GAvgDelay, _ := strconv.Atoi(fps.AvgDelay)
 	fps.AvgDelay = strconv.Itoa(GAvgDelay / 20)
 	return fps
+}
+
+func getCurrentDirectory() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return strings.Replace(dir, "\\", "/", -1)
 }
 
 func Ping(Addr string) PingSt {

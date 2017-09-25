@@ -6,6 +6,7 @@ GOTO FAIL
 :BUILD
 go get -v ./...
 go build -o %~dp0/bin/smartping.exe  %~dp0/src/smartping.go
+IF NOT EXIST "%~dp0bin/ping.exe" COPY "%~dp0ping.ex" "%~dp0bin/ping.exe"
 GOTO EXIT
 
 :RUN
