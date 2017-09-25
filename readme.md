@@ -4,9 +4,9 @@
     </a>
     <h3 align="center">SmartPing | 开源、高效、便捷的网络质量监控神器</h3>
     <p align="center">
-        an opensource ping project .
+        各机器(点)间互PING检测工具，支持正向PING绘制，反向PING绘制，互PING拓扑绘制及报警功能
         <br>
-        <a href="http://smartping.org"><strong>-- Browse website. --</strong></a>
+        <a href="http://smartping.org"><strong>-- Browse website --</strong></a>
         <br>
         <br>
         <a href="https://goreportcard.com/report/github.com/gy-games/smartping">
@@ -20,8 +20,6 @@
          </a>
     </p>    
 </p>
-
-SmartPing为一个各机器(点)间互PING检测工具，支持正向PING绘制，反向PING绘制，互PING拓扑绘制及报警功能。
 
 ## 功能 ##
 
