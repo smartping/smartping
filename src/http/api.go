@@ -133,31 +133,32 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		var timeStart int64
 		var timeStartStr string
 		for _, v := range config.Targets {
-			timeStart = time.Now().Unix() - int64(v.Thdchecksec)
-			timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
-			preout[v.Name] = "false"
-			g.DLock.Lock()
-			sql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
-			rows, err := db.Query(sql)
-			seelog.Debug("[func:/api/topology.json] ", sql)
-			if err == nil {
-				for rows.Next() {
-					l := new(g.TopoLog)
-					err := rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
-					if err != nil {
-						seelog.Error("[/api/topology.json] ", err)
+			if v.Addr != config.Ip{
+				timeStart = time.Now().Unix() - int64(v.Thdchecksec)
+				timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
+				preout[v.Name] = "false"
+				g.DLock.Lock()
+				sql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
+				rows, err := db.Query(sql)
+				seelog.Debug("[func:/api/topology.json] ", sql)
+				if err == nil {
+					for rows.Next() {
+						l := new(g.TopoLog)
+						err := rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
+						if err != nil {
+							seelog.Error("[/api/topology.json] ", err)
+						}
+						sec, _ := strconv.Atoi(l.Cnt)
+						if sec < v.Thdoccnum {
+							preout[v.Name] = "true"
+						}
 					}
-					sec, _ := strconv.Atoi(l.Cnt)
-					if sec < v.Thdoccnum {
-						preout[v.Name] = "true"
-					}
+					rows.Close()
+				} else {
+					seelog.Error("[/api/topology.json] ", err)
 				}
-				rows.Close()
-			} else {
-				seelog.Error("[/api/topology.json] ", err)
+				g.DLock.Unlock()
 			}
-
-			g.DLock.Unlock()
 		}
 		out, _ := json.Marshal(preout)
 		fmt.Fprintln(w, string(out))
