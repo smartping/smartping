@@ -24,9 +24,9 @@ def createdir():
     
 def getpingtable():
     conn = sqlite3.connect(SQLITFILE)
-    c = conn.cursor()
+    cursor = conn.cursor()
     tables=[]
-    for row in c.execute('SELECT name FROM sqlite_master WHERE type=\'table\' and name like \'pinglog-%\' ORDER BY name;'):
+    for row in cursor.execute('SELECT name FROM sqlite_master WHERE type=\'table\' and name like \'pinglog-%\' ORDER BY name;'):
         tables.append(row)
     conn.close()
     return tables
