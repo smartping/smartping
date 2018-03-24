@@ -42,14 +42,23 @@ type PingResult struct {
 	LastCheck string
 }
 
+type ICMP struct {
+	Type      uint8
+	Code      uint8
+	Checksum  uint16
+	ID        uint16
+	Seq       uint16
+	Timestamp int64
+}
+
 //Ping Stuct
 type PingSt struct {
-	SendPk   string
-	RevcPk   string
-	LossPk   string
-	MinDelay string
-	AvgDelay string
-	MaxDelay string
+	SendPk   int
+	RevcPk   int
+	LossPk   int
+	MinDelay float64
+	AvgDelay float64
+	MaxDelay float64
 }
 
 type State struct {

@@ -133,7 +133,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		var timeStart int64
 		var timeStartStr string
 		for _, v := range config.Targets {
-			if v.Addr != config.Ip{
+			if v.Addr != config.Ip {
 				timeStart = time.Now().Unix() - int64(v.Thdchecksec)
 				timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
 				preout[v.Name] = "false"

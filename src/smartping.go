@@ -5,11 +5,11 @@ import (
 	"./g"
 	"./http"
 	"github.com/gy-games-libs/cron"
-	"github.com/gy-games-libs/seelog"
-	"os"
-	"runtime"
+	//"github.com/gy-games-libs/seelog"
 	"flag"
 	"fmt"
+	"os"
+	"runtime"
 )
 
 // Init config
@@ -29,21 +29,10 @@ func main() {
 	}
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
-		if config.Ping == "sysping" {
-			for _, target := range config.Targets {
-				if target.Addr !=config.Ip{
-					go funcs.StartSysPing(target, db, config)
-				}
+		for _, target := range config.Targets {
+			if target.Addr != config.Ip {
+				go funcs.StartPing(target, db, config)
 			}
-		} else if config.Ping == "goping" {
-			for _, target := range config.Targets {
-				if target.Addr !=config.Ip {
-					go funcs.StartGoPing(target, db, config)
-				}
-			}
-		} else {
-			seelog.Error("[Init] Ping Method Error!")
-			os.Exit(0)
 		}
 		go funcs.StartAlert(config, db)
 	}, "ping")

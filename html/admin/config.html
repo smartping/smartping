@@ -5,11 +5,11 @@
 <title>SmartPing Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link href="assets/css/bootstrap.min.css" rel="stylesheet">
-<link href="assets/css/bootstrap-responsive.min.css" rel="stylesheet">
-<link href="assets/css/font-awesome.css" rel="stylesheet">
-<link href="assets/css/style.css" rel="stylesheet">
-<link href="assets/css/pages/dashboard.css" rel="stylesheet">
+<link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="../assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="../assets/css/font-awesome.css" rel="stylesheet">
+<link href="../assets/css/style.css" rel="stylesheet">
+<link href="../assets/css/pages/dashboard.css" rel="stylesheet">
 <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -32,45 +32,14 @@
   <!-- /navbar-inner -->
 </div>
 <!-- /navbar -->
-<div class="subnavbar">
-  <div class="subnavbar-inner">
-    <div class="container">
-      <ul class="mainnav">
-        <li><a href="index.html"><i class="icon-mail-forward"></i><span>Forward Ping</span> </a> </li>
-        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>Reverse Ping</span> </a> </li>
-        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Topology</span> </a> </li>
-        <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
-        <!--<li ><a href="tools.html"><i class="icon-wrench"></i><span>Test Tools</span> </a> </li>-->
-        <li  class="active"><a href="config.html"><i class="icon-cog"></i><span>Config</span> </a> </li>
-      </ul>
-    </div>
-    <!-- /container --> 
-  </div>
-  <!-- /subnavbar-inner --> 
-</div>
-<!-- /subnavbar -->
-<div class="main" style="margin-top:-20px;">
+
+<div class="main" style="margin-top:20px;">
   <div class="main-inner">
     <div class="container" id="main">
 
       <div class="row">
-          <div class="span4">
+          <div class="span12">
 
-            <div class="widget-header">
-              <i class="icon-user"></i>
-              <h3>Save Configuration</h3>
-            </div> <!-- /widget-header -->
-
-            <div class="widget-content">
-              <div style="text-align: center">
-                <span>
-                  <b style="top:-5px;"><a title="Default Password : smartping">Password:</a></b>
-                  <input class="span2 password" type="password" id="pass">
-                  <button style="margin: -10px 0 0 0;" type="submit" class="btn btn-primary" onclick="saveconf()">Save</button>
-                </span>
-              </div>
-            </div>
-            <br/>
             <div class="widget-header">
               <i class="icon-user"></i>
               <h3>Base Configuration</h3>
@@ -99,7 +68,7 @@
                   <input type="text" style="width:100%" id="Timeout" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
-              <!--
+
               <div class="control-group"  style="float: right;width: 60%">
                 <label class="control-label" for="Name" >Ping Type</label>
                 <div class="controls">
@@ -107,8 +76,8 @@
                     <option name="sysping">sysping</option>
                     <option name="goping">goping</option>
                   </select>
-                </div>
-              </div>  /control-group -->
+                </div> <!-- /controls -->
+              </div> <!-- /control-group -->
 
             <hr style="clear:both;">
 
@@ -184,7 +153,8 @@
 
           </div>
           </div>
-          <div class="span8">
+
+          <div class="span12">
               <!-- /widget -->
               <div class="widget widget-table action-table">
                 <div class="widget-header"> <i class="icon-th-list"></i>
@@ -248,8 +218,8 @@
 <!-- Le javascript
 ================================================== --> 
 <!-- Placed at the end of the document so the pages load faster --> 
-<script src="assets/js/jquery-1.7.2.min.js"></script>
-<script src="assets/js/bootstrap.js"></script>
+<script src="../assets/js/jquery-1.7.2.min.js"></script>
+<script src="../assets/js/bootstrap.js"></script>
 <script>
 
     function saveconf(){

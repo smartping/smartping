@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "github.com/gy-games-libs/go-sqlite3"
 	"github.com/gy-games-libs/seelog"
+	"strconv"
 	"time"
 )
 
@@ -56,7 +57,7 @@ func StoragePing(pingres g.PingSt, t g.Target, db *sql.DB) {
 	    lastcheck
 	);
 	`
-	sql = sql + "REPLACE INTO [pinglog-" + t.Addr + "] (logtime, maxdelay, mindelay, avgdelay, sendpk, revcpk, losspk, lastcheck) values('" + logtime + "','" + pingres.MaxDelay + "','" + pingres.MinDelay + "','" + pingres.AvgDelay + "','" + pingres.SendPk + "','" + pingres.RevcPk + "','" + pingres.LossPk + "','" + checktime + "')"
+	sql = sql + "REPLACE INTO [pinglog-" + t.Addr + "] (logtime, maxdelay, mindelay, avgdelay, sendpk, revcpk, losspk, lastcheck) values('" + logtime + "','" + strconv.FormatFloat(pingres.MaxDelay, 'f', 2, 64) + "','" + strconv.FormatFloat(pingres.MinDelay, 'f', 2, 64) + "','" + strconv.FormatFloat(pingres.AvgDelay, 'f', 2, 64) + "','" + strconv.Itoa(pingres.SendPk) + "','" + strconv.Itoa(pingres.RevcPk) + "','" + strconv.Itoa(pingres.LossPk) + "','" + checktime + "')"
 	seelog.Debug("[func:StartPing] ", sql)
 	g.DLock.Lock()
 	db.Exec(sql)
