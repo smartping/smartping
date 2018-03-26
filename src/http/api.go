@@ -4,7 +4,6 @@ import (
 	"../funcs"
 	"../g"
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gy-games-libs/seelog"
@@ -14,14 +13,14 @@ import (
 	"time"
 )
 
-func configApiRoutes(db *sql.DB, config *g.Config) {
+func configApiRoutes() {
 
 	//config api
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		nconf := g.Config{}
-		nconf = *config
+		nconf = g.Cfg
 		nconf.Password = ""
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
@@ -89,7 +88,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		}
 		g.DLock.Lock()
 		sql := "SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + ""
-		rows, err := db.Query(sql)
+		rows, err := g.Db.Query(sql)
 		seelog.Debug("[func:/api/ping.json] ", sql)
 		if err == nil {
 			for rows.Next() {
@@ -121,8 +120,9 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 			"revcpk":    revcpk,
 			"losspk":    losspk,
 		}
-		out, _ := json.Marshal(preout)
-		fmt.Fprintln(w, string(out))
+		RenderJson(w, preout)
+		//out, _ := json.Marshal(preout)
+		//fmt.Fprintln(w, string(out))
 	})
 
 	//Topology data api
@@ -132,14 +132,14 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		preout := make(map[string]string)
 		var timeStart int64
 		var timeStartStr string
-		for _, v := range config.Targets {
-			if v.Addr != config.Ip {
+		for _, v := range g.Cfg.Targets {
+			if v.Addr != g.Cfg.Ip {
 				timeStart = time.Now().Unix() - int64(v.Thdchecksec)
 				timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
 				preout[v.Name] = "false"
 				g.DLock.Lock()
 				sql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
-				rows, err := db.Query(sql)
+				rows, err := g.Db.Query(sql)
 				seelog.Debug("[func:/api/topology.json] ", sql)
 				if err == nil {
 					for rows.Next() {
@@ -160,8 +160,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 				g.DLock.Unlock()
 			}
 		}
-		out, _ := json.Marshal(preout)
-		fmt.Fprintln(w, string(out))
+		RenderJson(w, preout)
 	})
 
 	//alert api
@@ -179,7 +178,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		listpreout := []string{}
 		g.DLock.Lock()
 		sql := "SELECT name FROM [sqlite_master] where type='table' and name like '%alertlog%'"
-		lrows, lerr := db.Query(sql)
+		lrows, lerr := g.Db.Query(sql)
 		seelog.Debug("[func:/api/alert.json] ", sql)
 		if lerr == nil {
 			for lrows.Next() {
@@ -195,7 +194,7 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 			seelog.Error("[/api/alert.json] ", lerr)
 		}
 		datapreout := []g.Alterdata{}
-		rows, err := db.Query("SELECT * FROM [" + dtb + "] where 1=1")
+		rows, err := g.Db.Query("SELECT * FROM [" + dtb + "] where 1=1")
 		if err == nil {
 			for rows.Next() {
 				l := new(g.Alterdata)
@@ -220,152 +219,169 @@ func configApiRoutes(db *sql.DB, config *g.Config) {
 		preout := make(map[string]string)
 		r.ParseForm()
 		preout["status"] = "false"
-		if len(r.Form["password"]) > 0 {
-			if r.Form["password"][0] == config.Password {
-				if len(r.Form["config"]) > 0 {
-					nconfig := g.Config{}
-					nconfig.Targets = []g.Target{}
-					err := json.Unmarshal([]byte(r.Form["config"][0]), &nconfig)
-					if err == nil {
-						if nconfig.Name != "" {
-							if funcs.ValidIP4(nconfig.Ip) {
-								if nconfig.Timeout > "0" {
-									if nconfig.Thdchecksec > 0 {
-										if nconfig.Thdloss >= 0 && nconfig.Thdloss <= 100 {
-											if nconfig.Thdavgdelay > 0 {
-												if nconfig.Thdoccnum >= 0 {
-													if nconfig.Alerthistory > 0 {
-														if nconfig.Tline > "0" {
-															if nconfig.Tsymbolsize > "0" {
-																if nconfig.Alertcycle > 0 {
-																	targetcheck := true
-																	reminList := map[string]bool{}
-																	for _, v := range nconfig.Targets {
-																		if v.Name == "" {
-																			targetcheck = false
-																			preout["info"] = "SmartPing Network Info illegal!(Empty Name Agent) "
-																			break
-																		}
-																		if !funcs.ValidIP4(v.Addr) {
-																			targetcheck = false
-																			preout["info"] = "SmartPing Network Info illegal!(illegal Addr Agent) "
-																			break
-																		}
-																		if v.Type != "CS" && v.Type != "C" {
-																			targetcheck = false
-																			preout["info"] = "SmartPing Network Info illegal!(illegal Type Agent) "
-																			break
-																		}
-																		if v.Thdchecksec <= 0 {
-																			targetcheck = false
-																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT CP Agent) "
-																			break
-																		}
-																		if v.Thdloss < 0 || v.Thdloss > 100 {
-																			targetcheck = false
-																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT LP Agent) "
-																			break
-																		}
-																		if v.Thdavgdelay <= 0 {
-																			targetcheck = false
-																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT AD Agent) "
-																			break
-																		}
-																		if v.Thdoccnum < 0 {
-																			targetcheck = false
-																			preout["info"] = "SmartPing Network Info illegal!(illegal ALERT OT Agent) "
-																			break
-																		}
-																		reminList["pinglog-"+v.Addr] = true
-																	}
-																	if targetcheck {
-																		preout["status"] = "true"
-																		nconfig.Db = config.Db
-																		nconfig.Ver = config.Ver
-																		nconfig.Port = config.Port
-																		nconfig.Password = config.Password
-																		*config = nconfig
-																		r, _ := json.Marshal(nconfig)
-																		var out bytes.Buffer
-																		err := json.Indent(&out, r, "", "\t")
-																		if err == nil {
-																			ioutil.WriteFile(g.GetRoot()+"/conf/"+"config.json", []byte(out.String()), 0644)
-																		} else {
-																			seelog.Error("[/api/saveconfig.json] ", err)
-																		}
-																		sql := ""
-																		listpreout := []string{}
-																		lrows, lerr := db.Query("SELECT name FROM [sqlite_master] where type='table' and name like '%pinglog%'")
-																		if lerr == nil {
-																			for lrows.Next() {
-																				var l string
-																				err := lrows.Scan(&l)
-																				if err != nil {
-																					seelog.Error("[/api/saveconfig.json] ", err)
-																				}
-																				listpreout = append(listpreout, l)
-																			}
-																			lrows.Close()
-																		} else {
-																			seelog.Error("[/api/saveconfig.json] ", lerr)
-																		}
-																		for _, v := range listpreout {
-																			if _, ok := reminList[v]; !ok {
-																				sql = sql + "DROP TABLE [" + v + "];"
-																			}
-																		}
-																		g.DLock.Lock()
-																		db.Exec(sql)
-																		g.DLock.Unlock()
-																	}
-																} else {
-																	preout["info"] = "Refresh illegal!(>0)"
-																}
-															} else {
-																preout["info"] = "Symbol Size illegal!(>0)"
-															}
-
-														} else {
-															preout["info"] = "Line Thickness  illegal!(>0)"
-														}
-													} else {
-														preout["info"] = "Archive Days !(>0)"
-													}
-												} else {
-													preout["info"] = "Occur Times illegal!(>0)"
-												}
-											} else {
-												preout["info"] = "Average Delay illegal!(>0)"
-											}
-										} else {
-											preout["info"] = "Loss Percent illegal!(<=0 and <=100)"
-										}
-									} else {
-										preout["info"] = "Check Period illegal!(>0)"
-									}
-								} else {
-									preout["info"] = "Timeout illegal!(>0)"
-								}
-							} else {
-								preout["info"] = "Agent Ip illegal!"
-							}
-						} else {
-							preout["info"] = "Agent Name illegal!"
-						}
-
-					} else {
-						preout["info"] = "decode json error!" + err.Error()
-					}
-				} else {
-					preout["info"] = "param error!"
-				}
-			} else {
-				preout["info"] = "password error!"
-			}
-		} else {
+		if len(r.Form["password"]) == 0 {
 			preout["info"] = "password empty!"
+			RenderJson(w, preout)
+			return
 		}
-		out, _ := json.Marshal(preout)
-		fmt.Fprintln(w, string(out))
+		if r.Form["password"][0] != g.Cfg.Password {
+			preout["info"] = "password error!"
+			RenderJson(w, preout)
+			return
+		}
+		if len(r.Form["config"]) == 0 {
+			preout["info"] = "param error!"
+			RenderJson(w, preout)
+			return
+		}
+		//Base
+		nconfig := g.Config{}
+		nconfig.Targets = []g.Target{}
+		err := json.Unmarshal([]byte(r.Form["config"][0]), &nconfig)
+		if err != nil {
+			preout["info"] = "decode json error!" + err.Error()
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Name == "" {
+			preout["info"] = "Agent Name illegal!"
+			RenderJson(w, preout)
+			return
+		}
+		if !ValidIP4(nconfig.Ip) {
+			preout["info"] = "Agent Ip illegal!"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Timeout <= "0" {
+			preout["info"] = "Timeout illegal!(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		//Alert
+		if nconfig.Thdchecksec < 0 {
+			preout["info"] = "Check Period illegal!(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Thdloss < 0 || nconfig.Thdloss > 100 {
+			preout["info"] = "Loss Percent illegal!(<=0 and <=100)"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Thdavgdelay <= 0 {
+			preout["info"] = "Average Delay illegal!(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Thdoccnum < 0 {
+			preout["info"] = "Occur Times illegal!(>=0)"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Alerthistory <= 0 {
+			preout["info"] = "Archive Days !(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		//Topology
+		if nconfig.Tline <= "0" {
+			preout["info"] = "Line Thickness  illegal!(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Tsymbolsize < "0" {
+			preout["info"] = "Symbol Size illegal!(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Alertcycle <= 0 {
+			preout["info"] = "Refresh illegal!(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		//SmartPing NetWork
+		targetcheck := true
+		reminList := map[string]bool{}
+		for _, v := range nconfig.Targets {
+			if v.Name == "" {
+				targetcheck = false
+				preout["info"] = "SmartPing Network Info illegal!(Empty Name Agent) "
+				break
+			}
+			if !ValidIP4(v.Addr) {
+				targetcheck = false
+				preout["info"] = "SmartPing Network Info illegal!(illegal Addr Agent) "
+				break
+			}
+			if v.Type != "CS" && v.Type != "C" {
+				targetcheck = false
+				preout["info"] = "SmartPing Network Info illegal!(illegal Type Agent) "
+				break
+			}
+			if v.Thdchecksec <= 0 {
+				targetcheck = false
+				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT CP Agent) "
+				break
+			}
+			if v.Thdloss < 0 || v.Thdloss > 100 {
+				targetcheck = false
+				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT LP Agent) "
+				break
+			}
+			if v.Thdavgdelay <= 0 {
+				targetcheck = false
+				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT AD Agent) "
+				break
+			}
+			if v.Thdoccnum < 0 {
+				targetcheck = false
+				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT OT Agent) "
+				break
+			}
+			reminList["pinglog-"+v.Addr] = true
+		}
+		if !targetcheck {
+			RenderJson(w, preout)
+			return
+		}
+		preout["status"] = "true"
+		nconfig.Db = g.Cfg.Db
+		nconfig.Ver = g.Cfg.Ver
+		nconfig.Port = g.Cfg.Port
+		nconfig.Password = g.Cfg.Password
+		g.Cfg = nconfig
+		rrs, _ := json.Marshal(nconfig)
+		var out bytes.Buffer
+		errjson := json.Indent(&out, rrs, "", "\t")
+		if errjson == nil {
+			ioutil.WriteFile(g.GetRoot()+"/conf/"+"config.json", []byte(out.String()), 0644)
+		} else {
+			seelog.Error("[/api/saveconfig.json] ", err)
+		}
+		sql := ""
+		listpreout := []string{}
+		lrows, lerr := g.Db.Query("SELECT name FROM [sqlite_master] where type='table' and name like '%pinglog%'")
+		if lerr == nil {
+			for lrows.Next() {
+				var l string
+				err := lrows.Scan(&l)
+				if err != nil {
+					seelog.Error("[/api/saveconfig.json] ", err)
+				}
+				listpreout = append(listpreout, l)
+			}
+			lrows.Close()
+		} else {
+			seelog.Error("[/api/saveconfig.json] ", lerr)
+		}
+		for _, v := range listpreout {
+			if _, ok := reminList[v]; !ok {
+				sql = sql + "DROP TABLE [" + v + "];"
+			}
+		}
+		funcs.SqlExec(sql)
+		RenderJson(w, preout)
+
 	})
 }

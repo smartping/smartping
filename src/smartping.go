@@ -4,16 +4,16 @@ import (
 	"./funcs"
 	"./g"
 	"./http"
-	"github.com/gy-games-libs/cron"
-	//"github.com/gy-games-libs/seelog"
 	"flag"
 	"fmt"
+	"github.com/gy-games-libs/cron"
 	"os"
 	"runtime"
+	"sync"
 )
 
 // Init config
-var Version = "0.4.1"
+var Version = "0.4.2"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -23,20 +23,25 @@ func main() {
 		fmt.Println(Version)
 		os.Exit(0)
 	}
-	config, db := g.ParseConfig(Version)
-	for _, target := range config.Targets {
-		go funcs.CreateDB(target, db)
+	g.ParseConfig(Version)
+
+	for _, target := range g.Cfg.Targets {
+		go funcs.CreateDB(target)
 	}
+
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
-		for _, target := range config.Targets {
-			if target.Addr != config.Ip {
-				go funcs.StartPing(target, db, config)
+		//wg := new(sync.WaitGroup)
+		var wg sync.WaitGroup
+		for _, target := range g.Cfg.Targets {
+			if target.Addr != g.Cfg.Ip {
+				wg.Add(1)
+				go funcs.StartPing(target, &wg)
 			}
 		}
-		go funcs.StartAlert(config, db)
+		wg.Wait()
+		go funcs.StartAlert()
 	}, "ping")
 	c.Start()
-	// HTTP
-	http.StartHttp(db, &config)
+	http.StartHttp()
 }

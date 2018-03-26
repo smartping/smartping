@@ -3,7 +3,6 @@ package g
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/gy-games-libs/file"
 	"github.com/gy-games-libs/seelog"
 	"io"
 	"log"
@@ -13,13 +12,14 @@ import (
 	"sync"
 )
 
-var DLock sync.Mutex
-
 var (
-	Root string
+	DLock     sync.Mutex
+	Root      string
+	Db        *sql.DB
+	Cfg       Config
 )
 
-// Opening (or creating) config file in JSON format
+// Opening config file in JSON format
 func ReadConfig(filename string) Config {
 	config := Config{}
 	file, err := os.Open(filename)
@@ -35,68 +35,9 @@ func ReadConfig(filename string) Config {
 	return config
 }
 
-func ParseConfig(ver string) (Config, *sql.DB) {
-
-	cfile := "config.json"
-	if !file.IsExist(GetRoot() + "/conf/" + "config.json") {
-		if !file.IsExist(GetRoot() + "/conf/" + "config-base.json") {
-			log.Fatalln("[Fault]config file:", GetRoot()+"/conf/"+"config(-base).json", "both not existent.")
-		}
-		cfile = "config-base.json"
-	}
-	Root = GetRoot()
-	logger, err := seelog.LoggerFromConfigAsFile(Root + "/conf/" + "seelog.xml")
-	seelog.ReplaceLogger(logger)
-	cfg := ReadConfig(GetRoot() + "/conf/" + cfile)
-	if cfg.Name == "" {
-		cfg.Name, _ = os.Hostname()
-	}
-	if cfg.Ip == "" {
-		cfg.Ip = "127.0.0.1"
-	}
-	if cfg.Ping == "" {
-		cfg.Ping = "sysping"
-	}
-	cfg.Ver = ver
-	if !file.IsExist(GetRoot() + "/db/" + "database.db") {
-		if !file.IsExist(GetRoot() + "/db/" + "database-base.db") {
-			log.Fatalln("[Fault]db file:", GetRoot()+"/db/"+"database(-base).db", "both not existent.")
-		}
-		src, err := os.Open(GetRoot() + "/db/" + "database-base.db")
-		if err != nil {
-			log.Fatalln("[Fault]db-base file open error.")
-		}
-		defer src.Close()
-		dst, err := os.OpenFile(GetRoot()+"/db/"+"database.db", os.O_WRONLY|os.O_CREATE, 0644)
-		if err != nil {
-			log.Fatalln("[Fault]db-base file copy error.")
-		}
-		defer dst.Close()
-		io.Copy(dst, src)
-	}
-	cfg.Db = GetRoot() + "/db/database.db"
-	seelog.Info("Config loaded")
-	db, err := sql.Open("sqlite3", cfg.Db)
-	if err != nil {
-		log.Fatalln("[Fault]db open fail .", err)
-	}
-	for k, target := range cfg.Targets {
-		if target.Thdavgdelay == 0 {
-			cfg.Targets[k].Thdavgdelay = cfg.Thdavgdelay
-		}
-		if target.Thdchecksec == 0 {
-			cfg.Targets[k].Thdchecksec = cfg.Thdchecksec
-		}
-		if target.Thdloss == 0 {
-			cfg.Targets[k].Thdloss = cfg.Thdloss
-		}
-		if target.Thdoccnum == 0 {
-			cfg.Targets[k].Thdoccnum = cfg.Thdoccnum
-		}
-	}
-
-	return cfg, db
-
+func IsExist(fp string) bool {
+	_, err := os.Stat(fp)
+	return err == nil || os.IsExist(err)
 }
 
 func GetRoot() string {
@@ -111,4 +52,62 @@ func GetRoot() string {
 		l = len(runes)
 	}
 	return string(runes[0:l])
+}
+
+func ParseConfig(ver string) {
+	Root = GetRoot()
+	cfile := "config.json"
+	if !IsExist(Root + "/conf/" + "config.json") {
+		if !IsExist(Root + "/conf/" + "config-base.json") {
+			log.Fatalln("[Fault]config file:", Root+"/conf/"+"config(-base).json", "both not existent.")
+		}
+		cfile = "config-base.json"
+	}
+
+	logger, err := seelog.LoggerFromConfigAsFile(Root + "/conf/" + "seelog.xml")
+	seelog.ReplaceLogger(logger)
+	Cfg = ReadConfig(Root + "/conf/" + cfile)
+	if Cfg.Name == "" {
+		Cfg.Name, _ = os.Hostname()
+	}
+	if Cfg.Ip == "" {
+		Cfg.Ip = "127.0.0.1"
+	}
+	Cfg.Ver = ver
+	if !IsExist(Root + "/db/" + "database.db") {
+		if !IsExist(Root + "/db/" + "database-base.db") {
+			log.Fatalln("[Fault]db file:", Root+"/db/"+"database(-base).db", "both not existent.")
+		}
+		src, err := os.Open(Root + "/db/" + "database-base.db")
+		if err != nil {
+			log.Fatalln("[Fault]db-base file open error.")
+		}
+		defer src.Close()
+		dst, err := os.OpenFile(Root+"/db/"+"database.db", os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			log.Fatalln("[Fault]db-base file copy error.")
+		}
+		defer dst.Close()
+		io.Copy(dst, src)
+	}
+	Cfg.Db = Root + "/db/database.db"
+	seelog.Info("Config loaded")
+	Db, err = sql.Open("sqlite3", Cfg.Db)
+	if err != nil {
+		log.Fatalln("[Fault]db open fail .", err)
+	}
+	for k, target := range Cfg.Targets {
+		if target.Thdavgdelay == 0 {
+			Cfg.Targets[k].Thdavgdelay = Cfg.Thdavgdelay
+		}
+		if target.Thdchecksec == 0 {
+			Cfg.Targets[k].Thdchecksec = Cfg.Thdchecksec
+		}
+		if target.Thdloss == 0 {
+			Cfg.Targets[k].Thdloss = Cfg.Thdloss
+		}
+		if target.Thdoccnum == 0 {
+			Cfg.Targets[k].Thdoccnum = Cfg.Thdoccnum
+		}
+	}
 }

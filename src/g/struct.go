@@ -5,11 +5,11 @@ import (
 )
 
 type Config struct {
-	Ver          string
-	Port         int
-	Name         string
-	Timeout      string
-	Ping         string
+	Ver     string
+	Port    int
+	Name    string
+	Timeout string
+	//Ping         string
 	Ip           string
 	Db           string
 	Password     string
@@ -40,15 +40,6 @@ type PingResult struct {
 	RevcPk    string
 	LossPk    string
 	LastCheck string
-}
-
-type ICMP struct {
-	Type      uint8
-	Code      uint8
-	Checksum  uint16
-	ID        uint16
-	Seq       uint16
-	Timestamp int64
 }
 
 //Ping Stuct

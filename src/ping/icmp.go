@@ -1,22 +1,24 @@
 package ping
 
 import (
-	"../g"
+	//"../g"
 	"bytes"
 	"encoding/binary"
 	"github.com/gy-games-libs/seelog"
-	"log"
 	"math/rand"
 	"net"
 	"time"
 )
 
-//timeOut ping请求超时时间
-const timeOut = 3000
+type ICMP struct {
+	Type      uint8
+	Code      uint8
+	Checksum  uint16
+	ID        uint16
+	Seq       uint16
+	Timestamp int64
+}
 
-//ICMP 数据包结构体
-
-//CheckSum 校验和计算
 func CheckSum(data []byte) uint16 {
 	var (
 		sum    uint32
@@ -35,59 +37,49 @@ func CheckSum(data []byte) uint16 {
 	return uint16(^sum)
 }
 
-//sendICMP 向目的地址发送icmp包
-func sendICMP(raddr *net.IPAddr, i int) (float64, error) {
+func SendICMP(raddr *net.IPAddr, i int) (float64, error) {
 	ts := time.Now().UnixNano()
-	//构建发送的ICMP包
-	icmp := g.ICMP{
+	icmp := ICMP{
 		Type:      8,
 		Code:      0,
-		Checksum:  0, //默认校验和为0，后面计算再写入
+		Checksum:  0,
 		ID:        uint16(rand.Intn(65535)),
 		Seq:       uint16(i),
 		Timestamp: ts,
 	}
-	//新建buffer将包内数据写入，以计算校验和并将校验和并存入icmp结构体中
 	var buffer bytes.Buffer
 	binary.Write(&buffer, binary.BigEndian, icmp)
 	icmp.Checksum = CheckSum(buffer.Bytes())
 	buffer.Reset()
-	//与目的ip地址建立连接，第二个参数为空则默认为本地ip，第三个参数为目的ip
 	con, err := net.DialIP("ip4:icmp", nil, raddr)
+	con.SetReadDeadline((time.Now().Add(time.Millisecond * 40)))
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
-	//函数结束后后关闭连接
 	defer con.Close()
-	//构建buffer将要发送的数据存入
 	var sendBuffer bytes.Buffer
 	binary.Write(&sendBuffer, binary.BigEndian, icmp)
 	if _, err := con.Write(sendBuffer.Bytes()); err != nil {
-		//log.Fatal(err)
 		return 0, err
 	}
-	//设置读取超时时间为2s
-	con.SetReadDeadline((time.Now().Add(time.Millisecond * timeOut)))
-	//构建接受的比特数组
 	for {
 		rec := make([]byte, 1024)
-		//读取连接返回的数据，将数据放入rec中
 		recCnt, err := con.Read(rec)
 		if err != nil {
-			//fmt.Println("")
 			return 0, err
 		}
 		timeEnd := time.Now().UnixNano()
 		if icmp.Seq == uint16(binary.BigEndian.Uint16(rec[(recCnt-10):(recCnt-8)])) && icmp.ID == uint16(binary.BigEndian.Uint16(rec[(recCnt-12):(recCnt-10)])) {
 			timeStart := int64(binary.BigEndian.Uint64(rec[(recCnt - 8):recCnt]))
 			durationTime := float64((timeEnd - timeStart)) / 1e6
-			seelog.Debug("[func:IcmpPing] ID:%d | %d bytes from %s: seq=%d time=%.2fms\n", i, recCnt, raddr.String(), icmp.Seq, durationTime)
-			//seelog.Debug("[func:IcmpPing] Finish Addr:", ip, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
+			seelog.Debug("[func:IcmpPing] ID:", i, " | ", recCnt, " bytes from ", raddr.String(), ": seq=", icmp.Seq, " time=", durationTime, "ms")
 			return durationTime, nil
 		}
 	}
 	return 0, nil
 }
+
+/*
 func IcmpPing(addr string) g.PingSt {
 	stat := g.PingSt{}
 	var ip, _ = net.ResolveIPAddr("ip", addr)
@@ -96,8 +88,10 @@ func IcmpPing(addr string) g.PingSt {
 		return stat
 	}
 	stat.MinDelay = -1
-	for i := 0; i < 5; i++ {
-		delay, err := sendICMP(ip, i)
+	lossPK := 0
+	for i := 0; i < 20; i++ {
+		starttime := time.Now().UnixNano()
+		delay, err := SendICMP(ip, i)
 		if err == nil {
 			stat.AvgDelay = stat.AvgDelay + delay
 			if stat.MaxDelay < delay {
@@ -108,14 +102,17 @@ func IcmpPing(addr string) g.PingSt {
 			}
 			stat.RevcPk = stat.RevcPk + 1
 		} else {
-			log.Print(err)
-			stat.LossPk = stat.LossPk + 1
+			seelog.Debug("[func:IcmpPing] ID:", i, " | ", err)
+			//stat.LossPk = stat.LossPk + 1
+			lossPK = lossPK + 1
 		}
 		stat.SendPk = stat.SendPk + 1
-		//每间隔3s ping一次
-		time.Sleep(3000 * time.Millisecond)
+		stat.LossPk = int((float64(lossPK)/float64(stat.SendPk)) * 100 )
+		duringtime := time.Now().UnixNano()-starttime
+		time.Sleep(time.Duration(3000*1000000-duringtime) * time.Nanosecond)
 	}
 	stat.AvgDelay = stat.AvgDelay / float64(stat.SendPk)
-	seelog.Info("[func:IcmpPing] Finish Addr:", ip, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
+	seelog.Debug("[func:IcmpPing] Finish Addr:", ip, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
 	return stat
 }
+*/
