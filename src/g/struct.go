@@ -1,15 +1,11 @@
 package g
 
-import (
-	"sync"
-)
-
+//Main Config
 type Config struct {
 	Ver     string
 	Port    int
 	Name    string
 	Timeout string
-	//Ping         string
 	Ip           string
 	Db           string
 	Password     string
@@ -24,22 +20,15 @@ type Config struct {
 	Tsymbolsize  string
 	Targets      []Target
 }
-
-//Ping Db Result List
-type PingResultList struct {
-	Lock       sync.Mutex
-	PingResult map[string]PingResult
-}
-
-//Ping Db Result
-type PingResult struct {
-	MaxDelay  string
-	MinDelay  string
-	AvgDelay  string
-	SendPk    string
-	RevcPk    string
-	LossPk    string
-	LastCheck string
+//Target Config
+type Target struct {
+	Name        string
+	Addr        string
+	Type        string
+	Thdchecksec int
+	Thdoccnum   int
+	Thdavgdelay int
+	Thdloss     int
 }
 
 //Ping Stuct
@@ -52,51 +41,6 @@ type PingSt struct {
 	MaxDelay float64
 }
 
-type State struct {
-	Conf      Config
-	Localname string
-	Localip   string
-	Showtype  string
-	Lock      sync.Mutex
-	State     map[*Target]TargetStatus
-}
-
-type Target struct {
-	Name        string
-	Addr        string
-	Type        string
-	Thdchecksec int
-	Thdoccnum   int
-	Thdavgdelay int
-	Thdloss     int
-}
-
-type Topo struct {
-	From  map[string]string
-	To    map[string]string
-	Color string
-}
-
-type Showlist struct {
-	Tlist       []*Topo
-	Nlist       []map[string]string
-	Status      map[string]string
-	AGraph      []map[string]string
-	Alert       string
-	Tline       string
-	Tsymbolsize string
-}
-
-type TargetStatus struct {
-	Target    *Target
-	MaxDelay  string
-	MinDelay  string
-	AvgDelay  string
-	SendPk    string
-	RevcPk    string
-	LossPk    string
-	LastCheck string
-}
 
 type LogInfo struct {
 	Logtime   string
@@ -111,19 +55,26 @@ type LogInfo struct {
 	Lastcheck string
 }
 
+//Topology
+type Topo struct {
+	From  map[string]string
+	To    map[string]string
+	Color string
+}
+
 type TopoLog struct {
 	Maxavgdelay string
 	Maxlosspk   string
 	Cnt         string
 }
 
-type ToitemStyle struct {
-	Normal map[string]string `json:"normal"`
-}
-
 type Todataarea struct {
 	Name      string      `json:"name"`
 	ItemStyle ToitemStyle `json:"itemStyle"`
+}
+
+type ToitemStyle struct {
+	Normal map[string]string `json:"normal"`
 }
 
 type Todataline struct {

@@ -1,13 +1,11 @@
 package http
 
 import (
-	"../funcs"
 	"../g"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gy-games-libs/seelog"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -87,15 +85,19 @@ func configApiRoutes() {
 			tableip = ""
 		}
 		g.DLock.Lock()
-		sql := "SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + ""
-		rows, err := g.Db.Query(sql)
-		seelog.Debug("[func:/api/ping.json] ", sql)
-		if err == nil {
+		querySql := "SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + ""
+		rows, err := g.Db.Query(querySql)
+		g.DLock.Unlock()
+		seelog.Debug("[func:/api/ping.json] Query", querySql)
+		if err != nil {
+			seelog.Error("[func:/api/ping.json] Query", err)
+		} else {
 			for rows.Next() {
 				l := new(g.LogInfo)
 				err := rows.Scan(&l.Logtime, &l.Maxdelay, &l.Mindelay, &l.Avgdelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck)
 				if err != nil {
-					seelog.Error("[/api/ping.json] ", err)
+					seelog.Error("[/api/ping.json] Rows", err)
+					continue
 				}
 				for n, v := range lastcheck {
 					if v == l.Lastcheck {
@@ -110,7 +112,7 @@ func configApiRoutes() {
 			}
 			rows.Close()
 		}
-		g.DLock.Unlock()
+
 		preout := map[string][]string{
 			"lastcheck": lastcheck,
 			"maxdelay":  maxdelay,
@@ -121,8 +123,6 @@ func configApiRoutes() {
 			"losspk":    losspk,
 		}
 		RenderJson(w, preout)
-		//out, _ := json.Marshal(preout)
-		//fmt.Fprintln(w, string(out))
 	})
 
 	//Topology data api
@@ -138,15 +138,19 @@ func configApiRoutes() {
 				timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
 				preout[v.Name] = "false"
 				g.DLock.Lock()
-				sql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
-				rows, err := g.Db.Query(sql)
-				seelog.Debug("[func:/api/topology.json] ", sql)
-				if err == nil {
+				querySql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
+				rows, err := g.Db.Query(querySql)
+				g.DLock.Unlock()
+				seelog.Debug("[func:/api/topology.json] Query Topology", querySql)
+				if err != nil {
+					seelog.Error("[/api/topology.json] ", err)
+				} else {
 					for rows.Next() {
 						l := new(g.TopoLog)
 						err := rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
 						if err != nil {
 							seelog.Error("[/api/topology.json] ", err)
+							continue
 						}
 						sec, _ := strconv.Atoi(l.Cnt)
 						if sec < v.Thdoccnum {
@@ -154,10 +158,7 @@ func configApiRoutes() {
 						}
 					}
 					rows.Close()
-				} else {
-					seelog.Error("[/api/topology.json] ", err)
 				}
-				g.DLock.Unlock()
 			}
 		}
 		RenderJson(w, preout)
@@ -177,38 +178,45 @@ func configApiRoutes() {
 		}
 		listpreout := []string{}
 		g.DLock.Lock()
-		sql := "SELECT name FROM [sqlite_master] where type='table' and name like '%alertlog%'"
-		lrows, lerr := g.Db.Query(sql)
-		seelog.Debug("[func:/api/alert.json] ", sql)
-		if lerr == nil {
+		querySql := "SELECT name FROM [sqlite_master] where type='table' and name like '%alertlog%'"
+		lrows, lerr := g.Db.Query(querySql)
+		g.DLock.Unlock()
+		seelog.Debug("[func:/api/alert.json] Query Table List", querySql)
+		if lerr != nil {
+			seelog.Error("[/api/alert.json] ", lerr)
+		} else {
 			for lrows.Next() {
 				var l string
 				err := lrows.Scan(&l)
 				if err != nil {
-					seelog.Error("[/api/alert.json] ", err)
+					seelog.Error("[/api/alert.json]  Rows Table List", err)
+					continue
 				}
 				listpreout = append(listpreout, l)
 			}
 			lrows.Close()
-		} else {
-			seelog.Error("[/api/alert.json] ", lerr)
 		}
 		datapreout := []g.Alterdata{}
-		rows, err := g.Db.Query("SELECT * FROM [" + dtb + "] where 1=1")
-		if err == nil {
+		g.DLock.Lock()
+		querySql = "SELECT * FROM [" + dtb + "] where 1=1"
+		rows, err := g.Db.Query(querySql)
+		g.DLock.Unlock()
+		seelog.Debug("[func:/api/alert.json] Query Detail Data", querySql)
+		if err != nil {
+			seelog.Error("[/api/alert.json] Query Detail Data", err)
+		} else {
 			for rows.Next() {
 				l := new(g.Alterdata)
 				err := rows.Scan(&l.Logtime, &l.Fromname, &l.Toname, &l.Alerttype)
 				if err != nil {
-					fmt.Println(err)
+					seelog.Error("[/api/alert.json]  Rows Detail Data", err)
+					continue
 				}
 				datapreout = append(datapreout, *l)
 			}
 			rows.Close()
-		} else {
-			seelog.Error("[/api/alert.json] ", err)
 		}
-		g.DLock.Unlock()
+
 		lout, _ := json.Marshal(listpreout)
 		dout, _ := json.Marshal(datapreout)
 		fmt.Fprintln(w, "["+string(lout)+","+string(dout)+"]")
@@ -301,87 +309,55 @@ func configApiRoutes() {
 			return
 		}
 		//SmartPing NetWork
-		targetcheck := true
-		reminList := map[string]bool{}
 		for _, v := range nconfig.Targets {
 			if v.Name == "" {
-				targetcheck = false
 				preout["info"] = "SmartPing Network Info illegal!(Empty Name Agent) "
-				break
+				RenderJson(w, preout)
+				return
 			}
 			if !ValidIP4(v.Addr) {
-				targetcheck = false
 				preout["info"] = "SmartPing Network Info illegal!(illegal Addr Agent) "
-				break
+				RenderJson(w, preout)
+				return
 			}
 			if v.Type != "CS" && v.Type != "C" {
-				targetcheck = false
 				preout["info"] = "SmartPing Network Info illegal!(illegal Type Agent) "
-				break
+				RenderJson(w, preout)
+				return
 			}
 			if v.Thdchecksec <= 0 {
-				targetcheck = false
 				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT CP Agent) "
-				break
+				RenderJson(w, preout)
+				return
 			}
 			if v.Thdloss < 0 || v.Thdloss > 100 {
-				targetcheck = false
 				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT LP Agent) "
-				break
+				RenderJson(w, preout)
+				return
 			}
 			if v.Thdavgdelay <= 0 {
-				targetcheck = false
 				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT AD Agent) "
-				break
+				RenderJson(w, preout)
+				return
 			}
 			if v.Thdoccnum < 0 {
-				targetcheck = false
 				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT OT Agent) "
-				break
+				RenderJson(w, preout)
+				return
 			}
-			reminList["pinglog-"+v.Addr] = true
 		}
-		if !targetcheck {
-			RenderJson(w, preout)
-			return
-		}
-		preout["status"] = "true"
 		nconfig.Db = g.Cfg.Db
 		nconfig.Ver = g.Cfg.Ver
 		nconfig.Port = g.Cfg.Port
 		nconfig.Password = g.Cfg.Password
 		g.Cfg = nconfig
-		rrs, _ := json.Marshal(nconfig)
-		var out bytes.Buffer
-		errjson := json.Indent(&out, rrs, "", "\t")
-		if errjson == nil {
-			ioutil.WriteFile(g.GetRoot()+"/conf/"+"config.json", []byte(out.String()), 0644)
-		} else {
-			seelog.Error("[/api/saveconfig.json] ", err)
+		saveerr := g.SaveConfig()
+		if saveerr!=nil{
+			preout["info"] = saveerr.Error()
+			RenderJson(w, preout)
+			return
 		}
-		sql := ""
-		listpreout := []string{}
-		lrows, lerr := g.Db.Query("SELECT name FROM [sqlite_master] where type='table' and name like '%pinglog%'")
-		if lerr == nil {
-			for lrows.Next() {
-				var l string
-				err := lrows.Scan(&l)
-				if err != nil {
-					seelog.Error("[/api/saveconfig.json] ", err)
-				}
-				listpreout = append(listpreout, l)
-			}
-			lrows.Close()
-		} else {
-			seelog.Error("[/api/saveconfig.json] ", lerr)
-		}
-		for _, v := range listpreout {
-			if _, ok := reminList[v]; !ok {
-				sql = sql + "DROP TABLE [" + v + "];"
-			}
-		}
-		funcs.SqlExec(sql)
+		preout["status"] = "true"
 		RenderJson(w, preout)
-
 	})
 }

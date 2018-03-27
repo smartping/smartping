@@ -10,14 +10,21 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"bytes"
+	"io/ioutil"
 )
 
 var (
-	DLock     sync.Mutex
-	Root      string
-	Db        *sql.DB
-	Cfg       Config
+	DLock sync.Mutex
+	Root  string
+	Db    *sql.DB
+	Cfg   Config
 )
+
+func IsExist(fp string) bool {
+	_, err := os.Stat(fp)
+	return err == nil || os.IsExist(err)
+}
 
 // Opening config file in JSON format
 func ReadConfig(filename string) Config {
@@ -33,11 +40,6 @@ func ReadConfig(filename string) Config {
 		}
 	}
 	return config
-}
-
-func IsExist(fp string) bool {
-	_, err := os.Stat(fp)
-	return err == nil || os.IsExist(err)
 }
 
 func GetRoot() string {
@@ -110,4 +112,20 @@ func ParseConfig(ver string) {
 			Cfg.Targets[k].Thdoccnum = Cfg.Thdoccnum
 		}
 	}
+}
+
+func SaveConfig() error{
+	rrs, _ := json.Marshal(Cfg)
+	var out bytes.Buffer
+	errjson := json.Indent(&out, rrs, "", "\t")
+	if errjson != nil{
+		seelog.Error("[func:SaveConfig] Json Parse ", errjson)
+		return errjson
+	}
+	err := ioutil.WriteFile(Root+"/conf/"+"config.json", []byte(out.String()), 0644)
+	if err != nil{
+		seelog.Error("[func:SaveConfig] Config File Write", err)
+		return err
+	}
+	return nil
 }

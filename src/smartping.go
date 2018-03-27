@@ -26,12 +26,10 @@ func main() {
 	g.ParseConfig(Version)
 
 	for _, target := range g.Cfg.Targets {
-		go funcs.CreateDB(target)
+		go funcs.CreatePingTable(target)
 	}
-
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
-		//wg := new(sync.WaitGroup)
 		var wg sync.WaitGroup
 		for _, target := range g.Cfg.Targets {
 			if target.Addr != g.Cfg.Ip {
@@ -42,6 +40,10 @@ func main() {
 		wg.Wait()
 		go funcs.StartAlert()
 	}, "ping")
+	c.AddFunc("0 0 0 * * *", func() {
+		go funcs.ClearAlertTable()
+		go funcs.ClearPingTable()
+	}, "mtc")
 	c.Start()
 	http.StartHttp()
 }
