@@ -2,6 +2,9 @@ package funcs
 
 import (
 	"../g"
+	"../nettools"
+	"bytes"
+	"fmt"
 	"github.com/gy-games-libs/seelog"
 	"strconv"
 	"time"
@@ -14,9 +17,9 @@ func StartAlert() {
 	dateStartStr := time.Unix(time.Now().Unix(), 0).Format("20060102")
 	sql := `CREATE TABLE IF NOT EXISTS [alertlog-` + dateStartStr + `] (
 			logtime   VARCHAR (8),
-				fromname  VARCHAR (15),
-				toname    VARCHAR (15),
-				alerttype INT (1)
+			fromname  VARCHAR (15),
+			toname    VARCHAR (15),
+			tracert	  TEXT
 	);`
 	for _, v := range g.Cfg.Targets {
 		if v.Addr != g.Cfg.Ip {
@@ -39,7 +42,23 @@ func StartAlert() {
 				}
 				sec, _ := strconv.Atoi(l.Cnt)
 				if sec >= v.Thdoccnum {
-					sql = sql + "insert into [alertlog-" + dateStartStr + "] (logtime,fromname,toname,alerttype) values('" + timeStartStr + "','" + g.Cfg.Name + "','" + v.Name + "','1');"
+					tracrtString := ""
+					hops, err := nettools.RunTrace(v.Addr, time.Second, 60, 3)
+					if nil != err {
+						seelog.Error("[func:StartAlert] Traceroute error ", err)
+						tracrtString = err.Error()
+					} else {
+						tracrt := bytes.NewBufferString("")
+						for i, hop := range hops {
+							if hop.Addr == nil {
+								fmt.Fprintf(tracrt, "* * *\n")
+							} else {
+								fmt.Fprintf(tracrt, "%d (%s) %v %v %v\n", i+1, hop.Addr, hop.MaxRTT, hop.AvgRTT, hop.MinRTT)
+							}
+						}
+						tracrtString = tracrt.String()
+					}
+					sql = sql + "insert into [alertlog-" + dateStartStr + "] (logtime,fromname,toname,tracert) values('" + timeStartStr + "','" + g.Cfg.Name + "','" + v.Name + "','" + tracrtString + "');"
 				}
 			}
 			rows.Close()

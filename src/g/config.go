@@ -1,17 +1,17 @@
 package g
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"github.com/gy-games-libs/seelog"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"bytes"
-	"io/ioutil"
 )
 
 var (
@@ -114,16 +114,16 @@ func ParseConfig(ver string) {
 	}
 }
 
-func SaveConfig() error{
+func SaveConfig() error {
 	rrs, _ := json.Marshal(Cfg)
 	var out bytes.Buffer
 	errjson := json.Indent(&out, rrs, "", "\t")
-	if errjson != nil{
+	if errjson != nil {
 		seelog.Error("[func:SaveConfig] Json Parse ", errjson)
 		return errjson
 	}
 	err := ioutil.WriteFile(Root+"/conf/"+"config.json", []byte(out.String()), 0644)
-	if err != nil{
+	if err != nil {
 		seelog.Error("[func:SaveConfig] Config File Write", err)
 		return err
 	}

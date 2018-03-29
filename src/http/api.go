@@ -207,7 +207,7 @@ func configApiRoutes() {
 		} else {
 			for rows.Next() {
 				l := new(g.Alterdata)
-				err := rows.Scan(&l.Logtime, &l.Fromname, &l.Toname, &l.Alerttype)
+				err := rows.Scan(&l.Logtime, &l.Fromname, &l.Toname, &l.Tracert)
 				if err != nil {
 					seelog.Error("[/api/alert.json]  Rows Detail Data", err)
 					continue
@@ -352,7 +352,7 @@ func configApiRoutes() {
 		nconfig.Password = g.Cfg.Password
 		g.Cfg = nconfig
 		saveerr := g.SaveConfig()
-		if saveerr!=nil{
+		if saveerr != nil {
 			preout["info"] = saveerr.Error()
 			RenderJson(w, preout)
 			return

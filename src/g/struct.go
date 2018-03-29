@@ -2,10 +2,10 @@ package g
 
 //Main Config
 type Config struct {
-	Ver     string
-	Port    int
-	Name    string
-	Timeout string
+	Ver          string
+	Port         int
+	Name         string
+	Timeout      string
 	Ip           string
 	Db           string
 	Password     string
@@ -20,6 +20,7 @@ type Config struct {
 	Tsymbolsize  string
 	Targets      []Target
 }
+
 //Target Config
 type Target struct {
 	Name        string
@@ -40,7 +41,6 @@ type PingSt struct {
 	AvgDelay float64
 	MaxDelay float64
 }
-
 
 type LogInfo struct {
 	Logtime   string
@@ -89,8 +89,8 @@ type Todata struct {
 }
 
 type Alterdata struct {
-	Logtime   string
-	Fromname  string
-	Toname    string
-	Alerttype int
+	Logtime  string
+	Fromname string
+	Toname   string
+	Tracert  string
 }

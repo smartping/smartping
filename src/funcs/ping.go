@@ -2,7 +2,7 @@ package funcs
 
 import (
 	"../g"
-	"../ping"
+	"../nettools"
 	"github.com/gy-games-libs/seelog"
 	"net"
 	"strconv"
@@ -24,7 +24,7 @@ func StartPing(t g.Target, wg *sync.WaitGroup) {
 	lossPK := 0
 	for i := 0; i < 20; i++ {
 		starttime := time.Now().UnixNano()
-		delay, err := ping.SendICMP(ip, i)
+		delay, err := nettools.SendICMP(ip, i, 3)
 		if err == nil {
 			stat.AvgDelay = stat.AvgDelay + delay
 			if stat.MaxDelay < delay {
