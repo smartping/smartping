@@ -4,7 +4,6 @@ import (
 	"../g"
 	"../nettools"
 	"github.com/gy-games-libs/seelog"
-	"net"
 	"strconv"
 	"sync"
 	"time"
@@ -14,17 +13,11 @@ import (
 func StartPing(t g.Target, wg *sync.WaitGroup) {
 	seelog.Info("Start Ping " + t.Addr + "..")
 	stat := g.PingSt{}
-	var ip, _ = net.ResolveIPAddr("ip", t.Addr)
-	if ip == nil {
-		seelog.Error("[func:IcmpPing] Finish Addr:", ip, " Domain or Ip not valid!")
-		wg.Done()
-		return
-	}
 	stat.MinDelay = -1
 	lossPK := 0
 	for i := 0; i < 20; i++ {
 		starttime := time.Now().UnixNano()
-		delay, err := nettools.SendICMP(ip, i, 3)
+		delay, err := nettools.RunPing(t.Addr, 3*time.Second, 64, i)
 		if err == nil {
 			stat.AvgDelay = stat.AvgDelay + delay
 			if stat.MaxDelay < delay {
@@ -44,7 +37,7 @@ func StartPing(t g.Target, wg *sync.WaitGroup) {
 		time.Sleep(time.Duration(3000*1000000-duringtime) * time.Nanosecond)
 	}
 	stat.AvgDelay = stat.AvgDelay / float64(stat.SendPk)
-	seelog.Debug("[func:IcmpPing] Finish Addr:", ip, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
+	seelog.Debug("[func:IcmpPing] Finish Addr:", t.Addr, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
 	StoragePing(stat, t)
 	wg.Done()
 	seelog.Info("Finish Ping " + t.Addr + "..")

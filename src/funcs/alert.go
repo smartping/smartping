@@ -21,6 +21,7 @@ func StartAlert() {
 			toname    VARCHAR (15),
 			tracert	  TEXT
 	);`
+	flag := false
 	for _, v := range g.Cfg.Targets {
 		if v.Addr != g.Cfg.Ip {
 			checktimeStartStr := time.Unix((time.Now().Unix() - int64(v.Thdchecksec)), 0).Format("2006-01-02 15:04")
@@ -43,7 +44,7 @@ func StartAlert() {
 				sec, _ := strconv.Atoi(l.Cnt)
 				if sec >= v.Thdoccnum {
 					tracrtString := ""
-					hops, err := nettools.RunTrace(v.Addr, time.Second, 60, 3)
+					hops, err := nettools.RunTrace(v.Addr, time.Second, 64, 3)
 					if nil != err {
 						seelog.Error("[func:StartAlert] Traceroute error ", err)
 						tracrtString = err.Error()
@@ -59,11 +60,14 @@ func StartAlert() {
 						tracrtString = tracrt.String()
 					}
 					sql = sql + "insert into [alertlog-" + dateStartStr + "] (logtime,fromname,toname,tracert) values('" + timeStartStr + "','" + g.Cfg.Name + "','" + v.Name + "','" + tracrtString + "');"
+					flag = true
 				}
 			}
 			rows.Close()
 		}
 	}
-	SqlExec(sql)
+	if flag {
+		SqlExec(sql)
+	}
 	seelog.Info("[func:StartAlert] ", "AlertCheck finish ")
 }
