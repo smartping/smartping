@@ -5,12 +5,12 @@
 <title>SmartPing Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<link href="css/bootstrap-responsive.min.css" rel="stylesheet">
-<link href="css/font-awesome.css" rel="stylesheet">
-<link href="css/style.css" rel="stylesheet">
-<link href="css/pages/dashboard.css" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="datatable/css/jquery.dataTables.min.css">
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="assets/css/font-awesome.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
+<link href="assets/css/pages/dashboard.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="assets/datatable/css/jquery.dataTables.min.css">
 <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -89,7 +89,7 @@
                   <th> Logtime </th>
                   <th> From </th>
                   <th> To </th>
-                  <!--<th> Type </th>-->
+                  <th> NetTool </th>
                 </tr>
                 </thead>
                 <tbody class="alertlist"></tbody>
@@ -131,6 +131,15 @@
 </div>
 <!-- /main -->
 
+<div id="alert" class="modal fade" tabindex="-1" style="width: 450px;height:500px;background-color: #0c0c0c;color: white">
+  <div class="modal-dialog">
+       <div class="modal-content" >
+         <pre style="background-color: #0c0c0c;color: white" class="tracertdata"></pre>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <div class="footer">
   <div class="footer-inner">
     <div class="container">
@@ -148,13 +157,14 @@
 <!-- Le javascript
 ================================================== --> 
 <!-- Placed at the end of the document so the pages load faster --> 
-<script src="js/jquery-1.7.2.min.js"></script>
-<script src="js/bootstrap.js"></script>
-<script src="datatable/js/jquery.dataTables.min.js"></script>
+<script src="assets/js/jquery-1.7.2.min.js"></script>
+<script src="assets/js/bootstrap.js"></script>
+<script src="assets/datatable/js/jquery.dataTables.min.js"></script>
 <script>
-
+    function Refresh(){
+        window.location.reload();
+    }
     var ajaxcnt  = 0;
-
     function getdata(d){
         $(".alertlist").html("");
         $.getJSON("/api/config.json",function(result){
@@ -201,21 +211,20 @@
             });
         });
     }
-
+    function gettracertdata(d){
+        $(".tracertdata").html($(d).attr("value"))
+        //console.log($(d).attr("value"))
+        $("#alert").modal('show');
+    }
     function pageFinish(){
         $('#mytable').DataTable({
             "paging": false,
             "aaSorting": [[ 0, "desc" ]]
         });
     }
-
-  $(function(){
-
-      //$('#mytable').DataTable({
-      //     "paging": false
-      //});
-
+    $(function(){
       $.getJSON("/api/config.json",function(result){
+          //setTimeout('Refresh()',result["Alertcycle"]*60*1000);
           $("#verion").html("Version: "+result["Ver"])
           $.each(result["Targets"], function(i, field){
               if(field.Type=="CS") {
@@ -224,7 +233,6 @@
                   }
                   $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "/alerts.html'>" + field.Name + "</a></td></tr>");
                   ajaxcnt = ajaxcnt +1 ;
-                  //console.log(ajaxcnt)
               }
           });
           $.each(result["Targets"], function(i, field){
@@ -234,7 +242,6 @@
                       url: 'http://' + field.Addr + ':' + result['Port'] + '/api/alert.json',
                       success: function (result) {
                           $(".alerticon-" + field.Name + "").remove();
-
                           for (var del in result[0]) {
                               var ard = false
                               $(".datelist").find("tr").each(function () {
@@ -245,18 +252,9 @@
                               if (ard == false) {
                                   $(".datelist").append("<tr><td><a onclick=getdata(\"" + result[0][del] + "\")>" + result[0][del] + "</a></td></tr>");
                               }
-                          }
-                          ;
+                          };
                           for (var dal in result[1]) {
-                              /*
-                              if(result[1][dal]['Alerttype']==1){
-                                  alert='<span class="label label-warning">ConnectWarning</span>'
-                              }
-                              if(result[1][dal]['Alerttype']==2){
-                                  alert='<span class="label label-danger">AgentError</span>'
-                              }
-                              */
-                              $(".alertlist").append("<tr><td>" + result[1][dal]['Logtime'] + "</td><td>" + result[1][dal]['Fromname'] + "</td><td>" + result[1][dal]['Toname'] + "</td></tr>");
+                              $(".alertlist").append("<tr><td>" + result[1][dal]['Logtime'] + "</td><td>" + result[1][dal]['Fromname'] + "</td><td>" + result[1][dal]['Toname'] + "</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>Tracert</a></td></td></tr>");
                           }
                           ;
                           $(".alerticon-" + field.Name + "").removeClass("icon-spinner");
@@ -264,7 +262,6 @@
                           if(ajaxcnt==0){
                               pageFinish();
                           }
-                          //console.log(ajaxcnt)
                       },
                       timeout: result["Timeout"] * 1000
                   }).fail(function (xhr, status) {
@@ -274,12 +271,12 @@
                       if(ajaxcnt==0){
                           pageFinish();
                       }
-                      //console.log(ajaxcnt)
                   });
               }
           });
       });
-  });
+    });
+    setTimeout('Refresh()',result["Alertcycle"]*60*1000);
 </script>
 </body>
 </html>

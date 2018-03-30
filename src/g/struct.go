@@ -1,15 +1,11 @@
 package g
 
-import (
-	"sync"
-)
-
+//Main Config
 type Config struct {
 	Ver          string
 	Port         int
 	Name         string
 	Timeout      string
-	Ping         string
 	Ip           string
 	Db           string
 	Password     string
@@ -25,42 +21,7 @@ type Config struct {
 	Targets      []Target
 }
 
-//Ping Db Result List
-type PingResultList struct {
-	Lock       sync.Mutex
-	PingResult map[string]PingResult
-}
-
-//Ping Db Result
-type PingResult struct {
-	MaxDelay  string
-	MinDelay  string
-	AvgDelay  string
-	SendPk    string
-	RevcPk    string
-	LossPk    string
-	LastCheck string
-}
-
-//Ping Stuct
-type PingSt struct {
-	SendPk   string
-	RevcPk   string
-	LossPk   string
-	MinDelay string
-	AvgDelay string
-	MaxDelay string
-}
-
-type State struct {
-	Conf      Config
-	Localname string
-	Localip   string
-	Showtype  string
-	Lock      sync.Mutex
-	State     map[*Target]TargetStatus
-}
-
+//Target Config
 type Target struct {
 	Name        string
 	Addr        string
@@ -71,31 +32,14 @@ type Target struct {
 	Thdloss     int
 }
 
-type Topo struct {
-	From  map[string]string
-	To    map[string]string
-	Color string
-}
-
-type Showlist struct {
-	Tlist       []*Topo
-	Nlist       []map[string]string
-	Status      map[string]string
-	AGraph      []map[string]string
-	Alert       string
-	Tline       string
-	Tsymbolsize string
-}
-
-type TargetStatus struct {
-	Target    *Target
-	MaxDelay  string
-	MinDelay  string
-	AvgDelay  string
-	SendPk    string
-	RevcPk    string
-	LossPk    string
-	LastCheck string
+//Ping Stuct
+type PingSt struct {
+	SendPk   int
+	RevcPk   int
+	LossPk   int
+	MinDelay float64
+	AvgDelay float64
+	MaxDelay float64
 }
 
 type LogInfo struct {
@@ -111,19 +55,26 @@ type LogInfo struct {
 	Lastcheck string
 }
 
+//Topology
+type Topo struct {
+	From  map[string]string
+	To    map[string]string
+	Color string
+}
+
 type TopoLog struct {
 	Maxavgdelay string
 	Maxlosspk   string
 	Cnt         string
 }
 
-type ToitemStyle struct {
-	Normal map[string]string `json:"normal"`
-}
-
 type Todataarea struct {
 	Name      string      `json:"name"`
 	ItemStyle ToitemStyle `json:"itemStyle"`
+}
+
+type ToitemStyle struct {
+	Normal map[string]string `json:"normal"`
 }
 
 type Todataline struct {
@@ -138,8 +89,8 @@ type Todata struct {
 }
 
 type Alterdata struct {
-	Logtime   string
-	Fromname  string
-	Toname    string
-	Alerttype int
+	Logtime  string
+	Fromname string
+	Toname   string
+	Tracert  string
 }

@@ -5,11 +5,11 @@
 <title>SmartPing Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<link href="css/bootstrap-responsive.min.css" rel="stylesheet">
-<link href="css/font-awesome.css" rel="stylesheet">
-<link href="css/style.css" rel="stylesheet">
-<link href="css/pages/dashboard.css" rel="stylesheet">
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="assets/css/font-awesome.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
+<link href="assets/css/pages/dashboard.css" rel="stylesheet">
 <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -55,7 +55,7 @@
 
       <div class="row">
         <div  id="main" class="span10">
-          <div id="echarts" style="width:100%;"></div>
+          <!-- ping charts -->
         </div>
         <!-- /span10 -->
         <div class="span2">
@@ -123,158 +123,167 @@
 <!-- Le javascript
 ================================================== --> 
 <!-- Placed at the end of the document so the pages load faster --> 
-<script src="js/jquery-1.7.2.min.js"></script>
-<script src="js/bootstrap.js"></script>
-<script src="js/echarts.min.js"></script>
-<script language="JavaScript" type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script src="assets/js/jquery-1.7.2.min.js"></script>
+<script src="assets/js/bootstrap.js"></script>
+<script src="assets/js/echarts.min.js"></script>
+<script language="JavaScript" type="text/javascript" src="assets/js/My97DatePicker/WdatePicker.js"></script>
 <script>
-    $.getJSON("/api/config.json",function(result){
-        $("#verion").html("Version: "+result["Ver"])
-        $.each(result["Targets"], function(i, field){
-            if(field.Type=="CS") {
-                if(field.Addr==result["Ip"]){
-                    return true;
-                }
-                $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "'>" + field.Name + "</a></td></tr>");
-            }
-        });
-        optmini={
-            title:{
-                text: '',
-                'x':'center'
-            },
-            tooltip: {},
-            grid: {
-                left: '3%',
-                right: '3%',
-                bottom: '3%',
-                top: '3%',
-                containLabel: true
-            },
-            xAxis: {
-                data: []
-            },
-            yAxis: [{
-                type: 'value',
-                position: 'left'
-            }, {
-                type: 'value',
-                min: 0,
-                max: 100,
-                position: 'right'
-            }],
-            series: [
-                {
-                    name: 'avgDelay',
-                    type: 'line',
-                    data: [],
-                    itemStyle: {
-                        normal: {
-                            color : '#00CC66'
-                        }
-                    },
-                    animation: false,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 0
-                        }
-                    }
-                },
-                {
-                    name: 'lossPk',
-                    type: 'line',
-                    yAxisIndex: 1,
-                    data: [],
-                    itemStyle: {
-                        normal: {
-                            color : '#FF0000'
-                        }
-                    },
-                    animation: false,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 0
-                        }
-                    }
-                }]
-        }
-        $.each(result["Targets"], function(i, field){
-            if(field.Addr==result["Ip"]){
-                return true;
-            }
-            $("#main").append("<div id='"+field.Name+"_pannel' style='float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;'  class='showcharts' apiurl='/api/ping.json?ip="+field.Addr+"'></div>");
-            var chart = echarts.init(document.getElementById(field.Name+"_pannel"));
-            chart.setOption(optmini);
-            chart.setOption({title:{text:result["Name"]+"->"+field.Name,textStyle:{'fontSize':13}}});
-            $.ajax({
-                dataType: "json",
-                url: '/api/ping.json?ip='+field.Addr,
-                success: function (data) {
-                    $(".alerticon-"+field.Name+"").remove();
-                    chart.setOption({
-                        xAxis: {
-                            data: data.lastcheck
-                        },
-                        series: [{
-                            name: 'avgDelay',
-                            data: data.avgdelay
-                        },{
-                            name: 'lossPk',
-                            data: data.losspk
-                        }]
-                    });
-                },
-                timeout: result["Timeout"]*1000
-            }).fail( function( xhr, status ) {
-                $(".alerticon-"+field.Name+"").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
-                $(".alerticon-"+field.Name+"").addClass("icon-warning-sign");
-            });
-        });
-        $("#main").on("click",".showcharts",function(){
-            var modalWidth = $("#charts").width();
-            var left = "-" + parseInt(modalWidth) / 2 + "px";
-            $('#charts').modal('show').css({"margin-left":left});
-            url=$(this).attr("apiurl");
-            $("#pannelurl").attr("value",url);
-            $.get(url).done(function (data) {
-                //var data = JSON.parse(data);
-                myChart.setOption({
-                    xAxis: {
-                        data: data.lastcheck
-                    },
-                    series: [{
-                        name: 'maxDelay',
-                        data: data.maxdelay
-                    },
-                        {
-                            name: 'minDelay',
-                            data: data.mindelay
-                        },
-                        {
-                            name: 'avgDelay',
-                            data: data.avgdelay
-                        },
-                        {
-                            name: 'lossPk',
-                            data: data.losspk
-                        }]
-                });
-            });
-        });
-    });
+    var int
+    function Refresh(){
+        window.location.reload();
+    }
+    getLineChart();
+    function getLineChart(){
+      $("#main").html("");
+      $(".agentlist").html("");
+      $.getJSON("/api/config.json",function(result){
+          int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
+          $("#verion").html("Version: "+result["Ver"])
+          $.each(result["Targets"], function(i, field){
+              if(field.Type=="CS") {
+                  if(field.Addr==result["Ip"]){
+                      return true;
+                  }
+                  $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "'>" + field.Name + "</a></td></tr>");
+              }
+          });
+          optmini={
+              title:{
+                  text: '',
+                  'x':'center'
+              },
+              tooltip: {},
+              grid: {
+                  left: '3%',
+                  right: '3%',
+                  bottom: '3%',
+                  top: '3%',
+                  containLabel: true
+              },
+              xAxis: {
+                  data: []
+              },
+              yAxis: [{
+                  type: 'value',
+                  position: 'left'
+              }, {
+                  type: 'value',
+                  min: 0,
+                  max: 100,
+                  position: 'right'
+              }],
+              series: [
+                  {
+                      name: 'avgDelay',
+                      type: 'line',
+                      data: [],
+                      itemStyle: {
+                          normal: {
+                              color : '#00CC66'
+                          }
+                      },
+                      animation: false,
+                      areaStyle: {
+                          normal: {}
+                      },
+                      lineStyle: {
+                          normal: {
+                              width: 0
+                          }
+                      }
+                  },
+                  {
+                      name: 'lossPk',
+                      type: 'line',
+                      yAxisIndex: 1,
+                      data: [],
+                      itemStyle: {
+                          normal: {
+                              color : '#FF0000'
+                          }
+                      },
+                      animation: false,
+                      areaStyle: {
+                          normal: {}
+                      },
+                      lineStyle: {
+                          normal: {
+                              width: 0
+                          }
+                      }
+                  }]
+          }
+          $.each(result["Targets"], function(i, field){
+              if(field.Addr==result["Ip"]){
+                  return true;
+              }
+              $("#main").append("<div id='"+field.Name+"_pannel' style='float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;'  class='showcharts' apiurl='/api/ping.json?ip="+field.Addr+"'></div>");
+              var chart = echarts.init(document.getElementById(field.Name+"_pannel"));
+              chart.setOption(optmini);
+              chart.setOption({title:{text:result["Name"]+"->"+field.Name,textStyle:{'fontSize':13}}});
+              $.ajax({
+                  dataType: "json",
+                  url: '/api/ping.json?ip='+field.Addr,
+                  success: function (data) {
+                      $(".alerticon-"+field.Name+"").remove();
+                      chart.setOption({
+                          xAxis: {
+                              data: data.lastcheck
+                          },
+                          series: [{
+                              name: 'avgDelay',
+                              data: data.avgdelay
+                          },{
+                              name: 'lossPk',
+                              data: data.losspk
+                          }]
+                      });
+                  },
+                  timeout: result["Timeout"]*1000
+              }).fail( function( xhr, status ) {
+                  $(".alerticon-"+field.Name+"").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
+                  $(".alerticon-"+field.Name+"").addClass("icon-warning-sign");
+              });
+          });
+          $("#main").on("click",".showcharts",function(){
+              window.clearInterval(int)
+              var modalWidth = $("#charts").width();
+              var left = "-" + parseInt(modalWidth) / 2 + "px";
+              $('#charts').modal('show').css({"margin-left":left});
+              url=$(this).attr("apiurl");
+              $("#pannelurl").attr("value",url);
+              $.get(url).done(function (data) {
+                  //var data = JSON.parse(data);
+                  myChart.setOption({
+                      xAxis: {
+                          data: data.lastcheck
+                      },
+                      series: [{
+                          name: 'maxDelay',
+                          data: data.maxdelay
+                      },
+                          {
+                              name: 'minDelay',
+                              data: data.mindelay
+                          },
+                          {
+                              name: 'avgDelay',
+                              data: data.avgdelay
+                          },
+                          {
+                              name: 'lossPk',
+                              data: data.losspk
+                          }]
+                  });
+              });
+          });
+      });
+    }
     $(".sgraph").click(function(){
         start   = $("#starttime").val();
         endtime = $("#endtime").val();
         url = $("#pannelurl").attr("value");
         $.get(url+"&starttime="+start+"&endtime="+endtime).done(function (data) {
-            //console.log(data)
-            //var data = JSON.parse(data);
             myChart.setOption({
                 xAxis: {
                     data: data.lastcheck
@@ -307,6 +316,14 @@
             selected: {
                 'maxDelay' : false,
                 'minDelay' : false
+            }
+        },
+        toolbox: {
+            feature: {
+                dataView: {},
+                saveAsImage: {
+                    pixelRatio: 2
+                }
             }
         },
         tooltip: {

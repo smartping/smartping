@@ -4,16 +4,16 @@ import (
 	"./funcs"
 	"./g"
 	"./http"
-	"github.com/gy-games-libs/cron"
-	"github.com/gy-games-libs/seelog"
-	"os"
-	"runtime"
 	"flag"
 	"fmt"
+	"github.com/gy-games-libs/cron"
+	"os"
+	"runtime"
+	"sync"
 )
 
 // Init config
-var Version = "0.4.1"
+var Version = "0.5.0"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -23,31 +23,27 @@ func main() {
 		fmt.Println(Version)
 		os.Exit(0)
 	}
-	config, db := g.ParseConfig(Version)
-	for _, target := range config.Targets {
-		go funcs.CreateDB(target, db)
+	g.ParseConfig(Version)
+
+	for _, target := range g.Cfg.Targets {
+		go funcs.CreatePingTable(target)
 	}
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
-		if config.Ping == "sysping" {
-			for _, target := range config.Targets {
-				if target.Addr !=config.Ip{
-					go funcs.StartSysPing(target, db, config)
-				}
+		var wg sync.WaitGroup
+		for _, target := range g.Cfg.Targets {
+			if target.Addr != g.Cfg.Ip {
+				wg.Add(1)
+				go funcs.StartPing(target, &wg)
 			}
-		} else if config.Ping == "goping" {
-			for _, target := range config.Targets {
-				if target.Addr !=config.Ip {
-					go funcs.StartGoPing(target, db, config)
-				}
-			}
-		} else {
-			seelog.Error("[Init] Ping Method Error!")
-			os.Exit(0)
 		}
-		go funcs.StartAlert(config, db)
+		wg.Wait()
+		go funcs.StartAlert()
 	}, "ping")
+	c.AddFunc("0 0 0 * * *", func() {
+		go funcs.ClearAlertTable()
+		go funcs.ClearPingTable()
+	}, "mtc")
 	c.Start()
-	// HTTP
-	http.StartHttp(db, &config)
+	http.StartHttp()
 }
