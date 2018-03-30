@@ -1,6 +1,7 @@
 package nettools
 
 import (
+	"encoding/binary"
 	"github.com/gy-games-libs/golang/x/net/icmp"
 	"github.com/gy-games-libs/golang/x/net/ipv4"
 	"net"
@@ -80,6 +81,24 @@ func (t *pkg) Send(ttl int) ICMP {
 			if rply, ok := result.Body.(*icmp.Echo); ok {
 				if t.id == rply.ID && t.seq == rply.Seq {
 					hop.Final = true
+					hop.RTT = time.Since(sendOn)
+					return hop
+				}
+
+			}
+		case ipv4.ICMPTypeTimeExceeded:
+			if rply, ok := result.Body.(*icmp.TimeExceeded); ok {
+				if len(rply.Data) > 24 {
+					if uint16(t.id) == binary.BigEndian.Uint16(rply.Data[24:26]) {
+						hop.RTT = time.Since(sendOn)
+						return hop
+					}
+				}
+			}
+		case ipv4.ICMPTypeDestinationUnreachable:
+			if rply, ok := result.Body.(*icmp.Echo); ok {
+				if t.id == rply.ID && t.seq == rply.Seq {
+					hop.Down = true
 					hop.RTT = time.Since(sendOn)
 					return hop
 				}

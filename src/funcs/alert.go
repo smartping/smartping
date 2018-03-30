@@ -44,7 +44,7 @@ func StartAlert() {
 				sec, _ := strconv.Atoi(l.Cnt)
 				if sec >= v.Thdoccnum {
 					tracrtString := ""
-					hops, err := nettools.RunTrace(v.Addr, time.Second, 64, 3)
+					hops, err := nettools.RunTrace(v.Addr, time.Second, 64, 6)
 					if nil != err {
 						seelog.Error("[func:StartAlert] Traceroute error ", err)
 						tracrtString = err.Error()
