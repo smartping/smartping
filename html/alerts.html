@@ -131,7 +131,7 @@
 </div>
 <!-- /main -->
 
-<div id="alert" class="modal fade" tabindex="-1" style="width: 400px;height:500px;background-color: #0c0c0c;color: white">
+<div id="alert" class="modal fade" tabindex="-1" style="width: 450px;height:500px;background-color: #0c0c0c;color: white">
   <div class="modal-dialog">
        <div class="modal-content" >
          <pre style="background-color: #0c0c0c;color: white" class="tracertdata"></pre>
@@ -161,9 +161,10 @@
 <script src="assets/js/bootstrap.js"></script>
 <script src="assets/datatable/js/jquery.dataTables.min.js"></script>
 <script>
-
+    function Refresh(){
+        window.location.reload();
+    }
     var ajaxcnt  = 0;
-
     function getdata(d){
         $(".alertlist").html("");
         $.getJSON("/api/config.json",function(result){
@@ -210,22 +211,20 @@
             });
         });
     }
-
     function gettracertdata(d){
         $(".tracertdata").html($(d).attr("value"))
-        console.log($(d).attr("value"))
+        //console.log($(d).attr("value"))
         $("#alert").modal('show');
     }
-
     function pageFinish(){
         $('#mytable').DataTable({
             "paging": false,
             "aaSorting": [[ 0, "desc" ]]
         });
     }
-
-  $(function(){
+    $(function(){
       $.getJSON("/api/config.json",function(result){
+          //setTimeout('Refresh()',result["Alertcycle"]*60*1000);
           $("#verion").html("Version: "+result["Ver"])
           $.each(result["Targets"], function(i, field){
               if(field.Type=="CS") {
@@ -255,14 +254,6 @@
                               }
                           };
                           for (var dal in result[1]) {
-                              /*
-                              if(result[1][dal]['Alerttype']==1){
-                                  alert='<span class="label label-warning">ConnectWarning</span>'
-                              }
-                              if(result[1][dal]['Alerttype']==2){
-                                  alert='<span class="label label-danger">AgentError</span>'
-                              }
-                              */
                               $(".alertlist").append("<tr><td>" + result[1][dal]['Logtime'] + "</td><td>" + result[1][dal]['Fromname'] + "</td><td>" + result[1][dal]['Toname'] + "</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>Tracert</a></td></td></tr>");
                           }
                           ;
@@ -284,7 +275,8 @@
               }
           });
       });
-  });
+    });
+    setTimeout('Refresh()',result["Alertcycle"]*60*1000);
 </script>
 </body>
 </html>

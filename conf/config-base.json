@@ -3,7 +3,6 @@
 	"Name": "",
 	"Ip": "",
 	"Timeout": "5",
-	"Ping": "sysping",
 	"Password": "smartping",
 	"Alerthistory": 7,
 	"Alertcycle": 1,

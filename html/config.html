@@ -79,36 +79,33 @@
             <div class="widget-content">
 
             <h4>Base</h4><br>
-            <div class="control-group"  style="float: left;width: 30%">
+            <div class="control-group"  style="float: left;width: 30%;">
               <label class="control-label" for="Name" >Agent Name</label>
               <div class="controls">
                 <input type="text" style="width:100%" id="Name" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group" style="float: right;width: 60%;margin-right: 3%;">
+            <div class="control-group" style="float: left;width: 60%;margin-left: 20px;">
               <label class="control-label" for="Ip">Agent Ip</label>
               <div class="controls">
                 <input type="text"  style="width:100%" id="Ip" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-              <div class="control-group"  style="float: left;width: 30%">
+              <div class="control-group"  style="float: left;width: 30%;">
                 <label class="control-label" for="Name" >Timeout(s)</label>
                 <div class="controls">
                   <input type="text" style="width:100%" id="Timeout" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
-              <!--
-              <div class="control-group"  style="float: right;width: 60%">
-                <label class="control-label" for="Name" >Ping Type</label>
+
+              <div class="control-group"  style="float: left;width: 20%;margin-left: 20px;">
+                <label class="control-label" for="Alertcycle">Refresh(min)</label>
                 <div class="controls">
-                  <select id="Ping"  style="width:100%">
-                    <option name="sysping">sysping</option>
-                    <option name="goping">goping</option>
-                  </select>
-                </div>
-              </div>  /control-group -->
+                  <input type="text"   style="width:100%" id="Alertcycle" value="">
+                </div> <!-- /controls -->
+              </div> <!-- /control-group -->
 
             <hr style="clear:both;">
 
@@ -159,25 +156,18 @@
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group"  style="float: left">
-              <label class="control-label" for="Tline">Line Thickness&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <div class="control-group"  style="width: 28%;float: left">
+              <label class="control-label" for="Tline">Line Thickness</label>
               <div class="controls">
-                <input type="text"  class="span1" id="Tline" value="">
+                <input type="text"  style="width:100%"  id="Tline" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group"  style="float: left">
-              <label class="control-label" for="Tsymbolsize">Symbol Size&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <div class="control-group"  style="width: 25%;float: left;margin-left: 20px;">
+              <label class="control-label" for="Tsymbolsize">Symbol Size</label>
               <div class="controls">
-                <input type="text"  class="span1" id="Tsymbolsize" value="">
+                <input type="text" style="width:100%"   id="Tsymbolsize" value="">
               </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="float: left">
-                <label class="control-label" for="Alertcycle">Refresh(min)</label>
-                <div class="controls">
-                  <input type="text"  class="span1" id="Alertcycle" value="">
-                </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
             <br/><br/>
@@ -257,12 +247,13 @@
         $("input[name^='tsnum']").each(function(i, t) {
             eval($(this).val());
         });
-        $("input[name^='targets']").each(function(i, el) {
+        $("[name^='targets']").each(function(i, el) {
             if (el.name.indexOf("Thdchecksec")>0 || el.name.indexOf("Thdoccnum")>0 || el.name.indexOf("Thdloss")>0 || el.name.indexOf("Thdavgdelay")>0){
                 eval(el.name+"="+$(this).val()+"");
             }else{
                 eval(el.name+"=\""+$(this).val()+"\"");
             }
+            console.log(el.name)
         });
         //$.grep(targets, function(n) {return $.trim(n).length > 0;})
         ntargets  = []
@@ -315,7 +306,7 @@
     }
     function addTr(){
         i = $(".agentnum").val()
-        $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input  name='targets["+i+"][\"Name\"]' value='' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]' style='width:90%' value=''></td><td><input  name='targets["+i+"][\"Type\"]'  style='width:90%' value=''></td><td><input  name='targets["+i+"][\"Thdchecksec\"]'  style='width:90%' value='"+$("#Thdchecksec").val()+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+$("#Thdloss").val()+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]'  style='width:90%' value='"+$("#Thdavgdelay").val()+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+$("#Thdoccnum").val()+"'> </td><td><input style='margin-top: -10px;' type='button' onclick='deleteTr(this);' class='btn btn-small' value='D'></td></tr>");
+        $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input  name='targets["+i+"][\"Name\"]' value='' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]' style='width:90%' value=''></td><td><select name='targets["+i+"][\"Type\"]'  style='width:47px;'><option value='C'>C</option><option value='CS'>CS</option></select></td><td><input  name='targets["+i+"][\"Thdchecksec\"]'  style='width:90%' value='"+$("#Thdchecksec").val()+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+$("#Thdloss").val()+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]'  style='width:90%' value='"+$("#Thdavgdelay").val()+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+$("#Thdoccnum").val()+"'> </td><td> <i onclick='deleteTr(this);' class='icon-large icon-trash'></i> </td></tr>");
         $(".agentnum").val(parseInt(i)+1);
     }
     $(function(){
@@ -342,7 +333,14 @@
             $("#Alertcycle").val(result["Alertcycle"]);
             $("#Alerthistory").val(result["Alerthistory"]);
             $.each(result["Targets"], function(i, field){
-                $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input name='targets["+i+"][\"Name\"]' value='"+field.Name+"' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]'  style='width:90%' value='"+field.Addr+"'></td><td><input  name='targets["+i+"][\"Type\"]'  style='width:90%' value='"+field.Type+"'></td><td><input   name='targets["+i+"][\"Thdchecksec\"]' style='width:90%' value='"+field.Thdchecksec+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+field.Thdloss+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]' style='width:90%' value='"+field.Thdavgdelay+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+field.Thdoccnum+"'> </td><td><input style='margin-top: -10px;' type='button' onclick='deleteTr(this);' class='btn btn-small' value='D'></td></tr>");
+                Ctype=""
+                CStype=""
+                if(field.Type=="C"){
+                    Ctype="selected"
+                }else{
+                    CStype="selected"
+                }
+                $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input name='targets["+i+"][\"Name\"]' value='"+field.Name+"' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]'  style='width:90%' value='"+field.Addr+"'></td><td><select name='targets["+i+"][\"Type\"]'  style='width:47px;'><option value='C' "+Ctype+">C</option><option value='CS'"+CStype+">CS</option></select></td><td><input   name='targets["+i+"][\"Thdchecksec\"]' style='width:90%' value='"+field.Thdchecksec+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+field.Thdloss+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]' style='width:90%' value='"+field.Thdavgdelay+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+field.Thdoccnum+"'> </td><td><i onclick='deleteTr(this);' class='icon-large icon-trash'></i></td></tr>");
                 $(".agentnum").val(i+1);
             });
         });

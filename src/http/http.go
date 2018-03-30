@@ -2,7 +2,6 @@ package http
 
 import (
 	"../g"
-	//"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gy-games-libs/seelog"
@@ -33,7 +32,6 @@ func RenderJson(w http.ResponseWriter, v interface{}) {
 }
 
 func StartHttp() {
-
 	configApiRoutes()
 	configIndexRoutes()
 	seelog.Info("[func:StartHttp] starting to listen on ", g.Cfg.Port)
