@@ -36,7 +36,7 @@ func StartPing(t g.Target, wg *sync.WaitGroup) {
 		duringtime := time.Now().UnixNano() - starttime
 		time.Sleep(time.Duration(3000*1000000-duringtime) * time.Nanosecond)
 	}
-	stat.AvgDelay = stat.AvgDelay / float64(stat.SendPk)
+	stat.AvgDelay = stat.AvgDelay / float64(stat.RevcPk)
 	seelog.Debug("[func:IcmpPing] Finish Addr:", t.Addr, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
 	StoragePing(stat, t)
 	wg.Done()
