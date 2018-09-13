@@ -20,12 +20,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord </a>
-      <div class="nav-collapse">
-        <ul class="nav pull-right">
-          <li></li>
-        </ul>
-      </div>
+      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud)</span> </a>
       <!--/.nav-collapse -->
     </div>
     <!-- /container -->
@@ -156,7 +151,7 @@
 <!-- /footer --> 
 <!-- Le javascript
 ================================================== --> 
-<!-- Placed at the end of the document so the pages load faster --> 
+<!-- Placed at the end of the document so the pages load faster -->
 <script src="assets/js/jquery-1.7.2.min.js"></script>
 <script src="assets/js/bootstrap.js"></script>
 <script src="assets/datatable/js/jquery.dataTables.min.js"></script>
@@ -168,6 +163,12 @@
     function getdata(d){
         $(".alertlist").html("");
         $.getJSON("/api/config.json",function(result){
+            if(result["Mode"]=="cloud"){
+                $(".localmode").remove();
+                $(".cloudmode").show();
+            }else{
+                $(".cloudmode").remove();
+            }
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS"){
                     $.ajax({
@@ -214,7 +215,7 @@
     }
     $(function(){
       $.getJSON("/api/config.json",function(result){
-          //setTimeout('Refresh()',result["Alertcycle"]*60*1000);
+          setTimeout('Refresh()',result["Alertcycle"]*60*1000);
           $("#verion").html("Version: "+result["Ver"])
           $.each(result["Targets"], function(i, field){
               if(field.Type=="CS") {
@@ -266,7 +267,7 @@
           });
       });
     });
-    setTimeout('Refresh()',result["Alertcycle"]*60*1000);
+
 </script>
 </body>
 </html>

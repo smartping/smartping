@@ -19,13 +19,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord </a>
-      <div class="nav-collapse">
-        <ul class="nav pull-right">
-          <li></li>
-        </ul>
-      </div>
-      <!--/.nav-collapse -->
+      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud)</span> </a>
     </div>
     <!-- /container -->
   </div>
@@ -40,7 +34,6 @@
         <li class="active"><a href="reverse.html"><i class="icon-mail-reply"></i><span>Reverse Ping</span> </a> </li>
         <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Topology</span> </a> </li>
         <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
-        <!--<li><a href="tools.html"><i class="icon-wrench"></i><span>Test Tools</span> </a> </li>-->
         <li><a href="config.html"><i class="icon-cog"></i><span>Config</span> </a> </li>
       </ul>
     </div>
@@ -137,6 +130,12 @@
         $("#main").html("");
         $(".agentlist").html("");
         $.getJSON("/api/config.json", function (result) {
+            if(result["Mode"]=="cloud"){
+                $(".localmode").remove();
+                $(".cloudmode").show();
+            }else{
+                $(".cloudmode").remove();
+            }
             int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
             $("#verion").html("Version: " + result["Ver"])
             $.each(result["Targets"], function (i, field) {

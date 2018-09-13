@@ -1,11 +1,11 @@
 package http
 
 import (
-	"../g"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gy-games-libs/seelog"
+	"github.com/gy-games/smartping/src/g"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,10 +15,28 @@ func configApiRoutes() {
 
 	//config api
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
+		if(!AuthUserIp(r.RemoteAddr)){
+			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
+			http.Error(w,o,401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		r.ParseForm()
 		nconf := g.Config{}
-		nconf = g.Cfg
+		if len(r.Form["cloudendpoint"]) > 0 {
+			cloudnconf, err := g.SaveCloudConfig(r.Form["cloudendpoint"][0], false)
+			if err != nil {
+				preout := make(map[string]string)
+				preout["status"] = "false"
+				preout["info"] = err.Error()
+				RenderJson(w, preout)
+				return
+			}
+			nconf = cloudnconf
+		} else {
+			nconf = g.Cfg
+		}
 		nconf.Password = ""
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
@@ -29,6 +47,11 @@ func configApiRoutes() {
 
 	//graph data api
 	http.HandleFunc("/api/ping.json", func(w http.ResponseWriter, r *http.Request) {
+		if(!AuthUserIp(r.RemoteAddr)){
+			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
+			http.Error(w,o,401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
@@ -88,15 +111,15 @@ func configApiRoutes() {
 		querySql := "SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + ""
 		rows, err := g.Db.Query(querySql)
 		g.DLock.Unlock()
-		seelog.Debug("[func:/api/ping.json] Query", querySql)
+		seelog.Debug("[func:/api/ping.json] Query ", querySql)
 		if err != nil {
-			seelog.Error("[func:/api/ping.json] Query", err)
+			seelog.Error("[func:/api/ping.json] Query ", err)
 		} else {
 			for rows.Next() {
 				l := new(g.LogInfo)
 				err := rows.Scan(&l.Logtime, &l.Maxdelay, &l.Mindelay, &l.Avgdelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck)
 				if err != nil {
-					seelog.Error("[/api/ping.json] Rows", err)
+					seelog.Error("[/api/ping.json] Rows ", err)
 					continue
 				}
 				for n, v := range lastcheck {
@@ -127,6 +150,11 @@ func configApiRoutes() {
 
 	//Topology data api
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
+		if(!AuthUserIp(r.RemoteAddr)){
+			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
+			http.Error(w,o,401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		preout := make(map[string]string)
@@ -166,6 +194,11 @@ func configApiRoutes() {
 
 	//alert api
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
+		if(!AuthUserIp(r.RemoteAddr)){
+			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
+			http.Error(w,o,401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
@@ -224,6 +257,11 @@ func configApiRoutes() {
 
 	//save config
 	http.HandleFunc("/api/saveconfig.json", func(w http.ResponseWriter, r *http.Request) {
+		if(!AuthUserIp(r.RemoteAddr)){
+			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
+			http.Error(w,o,401)
+			return
+		}
 		preout := make(map[string]string)
 		r.ParseForm()
 		preout["status"] = "false"
@@ -346,11 +384,77 @@ func configApiRoutes() {
 				return
 			}
 		}
-		nconfig.Db = g.Cfg.Db
+		//nconfig.Db = g.Cfg.Db
 		nconfig.Ver = g.Cfg.Ver
-		nconfig.Port = g.Cfg.Port
+		//nconfig.Port = g.Cfg.Port
+		nconfig.Mode = "local"
 		nconfig.Password = g.Cfg.Password
+		nconfig.Port = g.Cfg.Port
 		g.Cfg = nconfig
+		saveerr := g.SaveConfig()
+		if saveerr != nil {
+			preout["info"] = saveerr.Error()
+			RenderJson(w, preout)
+			return
+		}
+		preout["status"] = "true"
+		RenderJson(w, preout)
+	})
+
+	//save cloud config
+	http.HandleFunc("/api/savecloudconfig.json", func(w http.ResponseWriter, r *http.Request) {
+		if(!AuthUserIp(r.RemoteAddr)){
+			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
+			http.Error(w,o,401)
+			return
+		}
+		preout := make(map[string]string)
+		r.ParseForm()
+		preout["status"] = "false"
+		if len(r.Form["password"]) == 0 {
+			preout["info"] = "password empty!"
+			RenderJson(w, preout)
+			return
+		}
+		if r.Form["password"][0] != g.Cfg.Password {
+			preout["info"] = "password error!"
+			RenderJson(w, preout)
+			return
+		}
+		nconfig := g.Config{}
+		nconfig.Targets = []g.Target{}
+		err := json.Unmarshal([]byte(r.Form["config"][0]), &nconfig)
+		if err != nil {
+			preout["info"] = "Decode json error!" + err.Error()
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Name == "" {
+			preout["info"] = "Agent Name illegal!"
+			RenderJson(w, preout)
+			return
+		}
+		if nconfig.Cendpoint == "" {
+			preout["info"] = "Cloud Endpoint illegal!"
+			RenderJson(w, preout)
+			return
+		}
+		if !ValidIP4(nconfig.Ip) {
+			preout["info"] = "Agent Ip illegal!"
+			RenderJson(w, preout)
+			return
+		}
+		_, err = g.SaveCloudConfig(nconfig.Cendpoint, true)
+		if err != nil {
+			preout["info"] = err.Error()
+			RenderJson(w, preout)
+			return
+		}
+		g.Cfg.Name = nconfig.Name
+		g.Cfg.Cendpoint = nconfig.Cendpoint
+		g.Cfg.Alertsound = nconfig.Alertsound
+		g.Cfg.Ip = nconfig.Ip
+		g.Cfg.Password = g.Cfg.Password
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			preout["info"] = saveerr.Error()

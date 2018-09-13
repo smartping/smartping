@@ -1,10 +1,10 @@
 package http
 
 import (
-	"../g"
+	"github.com/gy-games/smartping/src/g"
 	"encoding/json"
 	"fmt"
-	"github.com/gy-games-libs/seelog"
+	"github.com/cihub/seelog"
 	"log"
 	"net/http"
 	"os"
@@ -29,6 +29,19 @@ func RenderJson(w http.ResponseWriter, v interface{}) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(bs)
+}
+
+func AuthUserIp(RemoteAddr string)bool{
+	if len(g.AuthipMap) == 0{
+		return true
+	}
+	ips := strings.Split(RemoteAddr, ":")
+	if len(ips)==2{
+		if _, ok := g.AuthipMap[ips[0]]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 func StartHttp() {

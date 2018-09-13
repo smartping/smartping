@@ -1,10 +1,13 @@
 {
-	"Port": 8899 ,
+	"Ver": "0.6.0",
+	"Mode": "local",
+	"Cendpoint": "",
 	"Name": "",
-	"Ip": "",
-	"Timeout": "5",
 	"Password": "smartping",
-	"Alerthistory": 7,
+	"Ip": "",
+	"Port": 8899,
+	"Timeout": "5",
+	"Alerthistory": 10,
 	"Alertcycle": 1,
 	"Alertsound": "/alert.mp3",
 	"Thdchecksec": 900,
@@ -50,5 +53,6 @@
 			"Thdavgdelay": 200,
 			"Thdloss": 50
 		}
-	]
+	],
+	"Authiplist": ""
 }

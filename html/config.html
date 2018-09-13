@@ -17,19 +17,24 @@
 </head>
 <body>
 <div class="navbar navbar-fixed-top">
-  <div class="navbar-inner">
-    <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord </a>
-      <div class="nav-collapse">
-        <ul class="nav pull-right">
-          <li></li>
-        </ul>
-      </div>
-      <!--/.nav-collapse -->
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud)</span> </a>
+            <div class="nav-collapse">
+                <ul class="nav pull-right">
+                    <li class="dropdown">
+                        <a target="_blank" href="http://smartping.cn/" >
+                            <i class="icon-cloud"></i>
+                            Know About The SmartPing.CN ?
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+        <!-- /container -->
     </div>
-    <!-- /container -->
-  </div>
-  <!-- /navbar-inner -->
+    <!-- /navbar-inner -->
 </div>
 <!-- /navbar -->
 <div class="subnavbar">
@@ -49,7 +54,7 @@
   <!-- /subnavbar-inner --> 
 </div>
 <!-- /subnavbar -->
-<div class="main" style="margin-top:-20px;">
+<div class="main localmode" style="margin-top:-20px;">
   <div class="main-inner">
     <div class="container" id="main">
 
@@ -58,16 +63,18 @@
 
             <div class="widget-header">
               <i class="icon-user"></i>
-              <h3>Save Configuration</h3>
+              <h3>Save Configuration </h3>
+               <span style="float: right;margin-right: 25px;"><a  target="_blank" href="/api/config.json"><i class="icon-file"></i></a></span>
             </div> <!-- /widget-header -->
 
             <div class="widget-content">
               <div style="text-align: center">
                 <span>
-                  <b style="top:-5px;"><a title="Default Password : smartping">Password:</a></b>
+                  <b style="top:-5px;">Password:</b>
                   <input class="span2 password" type="password" id="pass">
                   <button style="margin: -10px 0 0 0;" type="submit" class="btn btn-primary" onclick="saveconf()">Save</button>
                 </span>
+                <div style="text-align: center"><a href="?cloud"><i class="icon-cloud"></i> Change To Cloud Mode</a></div>
               </div>
             </div>
             <br/>
@@ -79,28 +86,28 @@
             <div class="widget-content">
 
             <h4>Base</h4><br>
-            <div class="control-group"  style="float: left;width: 30%;">
+            <div class="control-group"  style="float: left;width: 45%;">
               <label class="control-label" for="Name" >Agent Name</label>
               <div class="controls">
                 <input type="text" style="width:100%" id="Name" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group" style="float: left;width: 60%;margin-left: 20px;">
+            <div class="control-group" style="float: left;width: 45%;margin-left: 20px;">
               <label class="control-label" for="Ip">Agent Ip</label>
               <div class="controls">
                 <input type="text"  style="width:100%" id="Ip" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-              <div class="control-group"  style="float: left;width: 30%;">
+              <div class="control-group"  style="float: left;width: 45%;">
                 <label class="control-label" for="Name" >Timeout(s)</label>
                 <div class="controls">
                   <input type="text" style="width:100%" id="Timeout" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
-              <div class="control-group"  style="float: left;width: 20%;margin-left: 20px;">
+              <div class="control-group"  style="float: left;width: 45%;margin-left: 20px;">
                 <label class="control-label" for="Alertcycle">Refresh(min)</label>
                 <div class="controls">
                   <input type="text"   style="width:100%" id="Alertcycle" value="">
@@ -111,38 +118,38 @@
 
             <h4>Alert</h4><br>
 
-            <div class="control-group"  style="float: left">
+            <div class="control-group"  style="width: 45%;float: left">
               <label class="control-label" for="Thdchecksec">Check Period(s)&nbsp;&nbsp;&nbsp;</label>
               <div class="controls">
-                <input type="text"  class="span1" id="Thdchecksec" value="">
+                <input type="text" style="width:100%"   id="Thdchecksec" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group" style="float: left">
+            <div class="control-group" style="width: 45%;float: left;margin-left: 20px;">
               <label class="control-label" for="Thdloss">Loss Percent(%)&nbsp;&nbsp;</label>
               <div class="controls">
-                <input type="text"  class="span1" id="Thdloss" value="">
+                <input type="text" style="width:100%"   id="Thdloss" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group"  style="float: left">
+            <div class="control-group"  style="width: 45%;float: left">
               <label class="control-label" for="Thdavgdelay">Average Delay(ms)</label>
               <div class="controls">
-                <input type="text"  class="span1" id="Thdavgdelay" value="">
+                <input type="text" style="width:100%"   id="Thdavgdelay" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-              <div class="control-group"  style="float: left">
+              <div class="control-group"  style="width: 45%;float: left;margin-left: 20px;">
                 <label class="control-label" for="Thdoccnum">Occur Times&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                 <div class="controls">
-                  <input type="text"  class="span1" id="Thdoccnum" value="">
+                  <input type="text" style="width:100%"   id="Thdoccnum" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
-              <div class="control-group"  style="float: left">
+              <div class="control-group"  style="width: 45%;float: left">
                 <label class="control-label" for="Alerthistory">Archive Days&nbsp;&nbsp;</label>
                 <div class="controls">
-                  <input type="text"  class="span1" id="Alerthistory" value="">
+                  <input type="text" style="width:100%"   id="Alerthistory" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
@@ -156,21 +163,29 @@
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group"  style="width: 28%;float: left">
+            <div class="control-group"  style="width: 45%;float: left">
               <label class="control-label" for="Tline">Line Thickness</label>
               <div class="controls">
                 <input type="text"  style="width:100%"  id="Tline" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group"  style="width: 25%;float: left;margin-left: 20px;">
+            <div class="control-group"  style="width: 45%;float: left;margin-left: 20px;">
               <label class="control-label" for="Tsymbolsize">Symbol Size</label>
               <div class="controls">
                 <input type="text" style="width:100%"   id="Tsymbolsize" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <br/><br/>
+            <hr style="clear:both;">
+            <h4>Authorization</h4><br>
+            <div class="control-group"  style="width: 96%;">
+                <label class="control-label" for="Authiplist">Auth Ip List</label>
+                <div class="controls">
+                    <input type="text" style="width:100%"  id="Authiplist" value="" >
+                </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <br/>
 
           </div>
           </div>
@@ -221,6 +236,167 @@
 </div>
 <!-- /main -->
 
+<div class="main cloudmode" style="margin-top:-20px;">
+  <div class="main-inner">
+    <div class="container" >
+
+      <div class="row">
+        <div class="span4">
+
+          <div class="widget-header">
+            <i class="icon-user"></i>
+            <h3>Save Configuration</h3>
+
+          </div> <!-- /widget-header -->
+
+          <div class="widget-content">
+
+            <div class="control-group">
+              <label class="control-label">Cloud Endpoint</label>
+
+              <div class="controls">
+                <div class="input-append">
+                  <input  style="width:76%" class="m-wrap" id="Cendpoint" value="http://" type="text">
+                  <button style="margin-top: -10px;" class="btn"  onclick="checkCloud()">Check!</button>
+                </div>
+              </div>	<!-- /controls -->
+            </div> <!-- /control-group -->
+
+
+            <div class="control-group">
+              <label class="control-label">Password</label>
+              <div class="controls">
+                <input class="password" type="password" style="width:97%"  id="pass" value="">
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <button style="width:97%"  type="submit" class="btn btn-primary" onclick="savecloudconf()">Save</button>
+            <div style="text-align: center;margin-top: 10px;"><a  href="?local"><i class="icon-home"></i> Change To Local Mode</a></div>
+          </div>
+          <br/>
+          <div class="widget-header">
+            <i class="icon-user"></i>
+            <h3>Base Configuration</h3>
+          </div> <!-- /widget-header -->
+
+          <div class="widget-content">
+
+            <h4>Base</h4><br>
+
+            <div class="control-group"  style="float: left;width: 45%;">
+              <label class="control-label" for="Name" >Agent Name</label>
+              <div class="controls">
+                <input type="text" style="width:100%" id="Name" value="">
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <div class="control-group" style="float: left;width: 45%;margin-left: 20px;">
+              <label class="control-label" for="Ip">Agent Ip</label>
+              <div class="controls">
+                <input type="text"  style="width:100%" id="Ip" value="">
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <div class="control-group"  style="float: left;width: 45%;">
+              <label class="control-label" for="Name" >Timeout(s)</label>
+              <div class="controls">
+                <input type="text" style="width:100%" id="Timeout" value=""  readonly>
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <div class="control-group"  style="float: left;width: 45%;margin-left: 20px;">
+              <label class="control-label" for="Alertcycle">Refresh(min)</label>
+              <div class="controls">
+                <input type="text"   style="width:100%" id="Alertcycle" value="" readonly>
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <hr style="clear:both;">
+
+            <h4>Alert</h4><br>
+            <div class="control-group"  style="float: left;width: 45%;">
+              <label class="control-label" for="Alerthistory">Archive Days&nbsp;&nbsp;</label>
+              <div class="controls">
+                <input type="text" style="width:100%" id="Alerthistory" value="" readonly>
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <hr style="clear:both;">
+            <h4>Topology</h4><br>
+
+            <div class="control-group">
+              <label class="control-label" for="Alertsound">Alert Sound</label>
+              <div class="controls">
+                <input type="text"  style="width:97%" id="Alertsound" value="" >
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <div class="control-group"  style="width: 45%;float: left">
+              <label class="control-label" for="Tline">Line Thickness</label>
+              <div class="controls">
+                <input type="text"  style="width:100%"  id="Tline" value="" readonly>
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <div class="control-group"  style="width: 45%;float: left;margin-left: 20px;">
+              <label class="control-label" for="Tsymbolsize">Symbol Size</label>
+              <div class="controls">
+                <input type="text" style="width:100%"   id="Tsymbolsize" value="" readonly>
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+            <hr style="clear:both;">
+            <h4>Authorization</h4><br>
+            <div class="control-group"  style="width: 96%;">
+              <label class="control-label" for="Authiplist">Auth Ip List</label>
+              <div class="controls">
+                <input type="text" style="width:100%"   id="Authiplist" value="" readonly>
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <br/>
+
+          </div>
+        </div>
+        <div class="span8">
+          <!-- /widget -->
+          <div class="widget widget-table action-table">
+            <div class="widget-header"> <i class="icon-th-list"></i>
+              <h3>SmartPing(Cloud)  NetWork</h3>
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+              <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                  <th> Name </th>
+                  <th> Ip </th>
+                  <th> <a title="Check Period">Alert CP(s)</a> </th>
+                  <th> <a title="Loss Percent">Alert LP(%)</a>  </th>
+                  <th> <a title="Average Delay">Alert AD(ms)</a>  </th>
+                  <th> <a title="Occur Times">Alert OT(t)</a>  </th>
+                </tr>
+                </thead>
+                <tbody class="agentlist">
+                <tr>
+
+                </tr>
+                </tbody>
+
+              </table>
+              <input type="hidden" value="0" class="agentnum" />
+            </div>
+            <!-- /widget-content -->
+          </div>
+          <!-- /widget -->
+        </div>
+      </div>
+      <hr>
+    </div>
+    <!-- /container -->
+  </div>
+  <!-- /main-inner -->
+</div>
+
+
 <div class="footer">
   <div class="footer-inner">
     <div class="container">
@@ -237,11 +413,10 @@
 <!-- /footer --> 
 <!-- Le javascript
 ================================================== --> 
-<!-- Placed at the end of the document so the pages load faster --> 
+<!-- Placed at the end of the document so the pages load faster -->
 <script src="assets/js/jquery-1.7.2.min.js"></script>
 <script src="assets/js/bootstrap.js"></script>
 <script>
-
     function saveconf(){
         targets = []
         $("input[name^='tsnum']").each(function(i, t) {
@@ -253,9 +428,7 @@
             }else{
                 eval(el.name+"=\""+$(this).val()+"\"");
             }
-            console.log(el.name)
         });
-        //$.grep(targets, function(n) {return $.trim(n).length > 0;})
         ntargets  = []
         $.each(targets,function(index,value){
             if (value) {
@@ -276,6 +449,7 @@
         config["Timeout"] = $("#Timeout").val();
         config["Alertcycle"] = parseInt($("#Alertcycle").val());
         config["Alerthistory"] = parseInt($("#Alerthistory").val());
+        config["Authiplist"] = $("#Authiplist").val();
         config["Targets"] = ntargets;
         data = {}
         data['config'] = JSON.stringify(config)
@@ -286,19 +460,45 @@
             url: "/api/saveconfig.json",
             data: data,
             success: function( retdata ) {
-                //console.log(retdata)
                 if (retdata["status"]=="true"){
                     alert("Config saved success!")
+                    window.location.reload();
                 }else{
                     alert("Config saved fail ("+retdata["info"]+")")
                 }
             },
             timeout: 10*1000
-          }).fail( function( xhr, status ) {
+        }).fail( function( xhr, status ) {
             alert("Config saved fail (api error!)")
-          });
+        });
     }
-
+    function savecloudconf(){
+        config = {}
+        config["Name"] = $("#Name").val();
+        config["Ip"] = $("#Ip").val();
+        config["Cendpoint"] = $("#Cendpoint").val();
+        config["Alertsound"] = $("#Alertsound").val();
+        data = {}
+        data['config'] = JSON.stringify(config)
+        data['password'] = $(".password").val()
+        $.ajax({
+            dataType: "json",
+            type: 'POST',
+            url: "/api/savecloudconfig.json",
+            data: data,
+            success: function( retdata ) {
+                if (retdata["status"]=="true"){
+                    alert("Config saved success!")
+                    window.location.reload();
+                }else{
+                    alert("Config saved fail ("+retdata["info"]+")")
+                }
+            },
+            timeout: 10*1000
+        }).fail( function( xhr, status ) {
+            alert("Config saved fail (api error!)")
+        });
+    }
     function deleteTr(nowTr){
         i = $(".agentnum").val()
         $(nowTr).parent().parent().remove();
@@ -309,41 +509,79 @@
         $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input  name='targets["+i+"][\"Name\"]' value='' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]' style='width:90%' value=''></td><td><select name='targets["+i+"][\"Type\"]'  style='width:47px;'><option value='C'>C</option><option value='CS'>CS</option></select></td><td><input  name='targets["+i+"][\"Thdchecksec\"]'  style='width:90%' value='"+$("#Thdchecksec").val()+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+$("#Thdloss").val()+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]'  style='width:90%' value='"+$("#Thdavgdelay").val()+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+$("#Thdoccnum").val()+"'> </td><td> <i onclick='deleteTr(this);' class='icon-large icon-trash'></i> </td></tr>");
         $(".agentnum").val(parseInt(i)+1);
     }
-    $(function(){
-        $.getJSON("/api/config.json",function(result){
-            if(result["Ping"]=="sysping"){
-                $("#Ping").find("option[name='sysping']").attr("selected",true);
+    function checkCloud(){
+        endpoint = $("#Cendpoint").val();
+        $.getJSON("/api/config.json?cloudendpoint="+endpoint,function(result){
+            if (result["status"]=="false"){
+                alert("Check Cloud Endpoint Error: "+result["info"]);
+            }else{
+                $(".agentlist").html("")
+                updateForm(result);
             }
-            if(result["Ping"]=="goping"){
-                console.log(result["Ping"])
-                $("#Ping option[name='goping']").attr("selected",true);
-            }
-            //console.log(result["Ping"])
-            $("#verion").html("Version: "+result["Ver"])
-            $("#Name").val(result["Name"]);
-            $("#Ip").val(result["Ip"]);
-            $("#Thdchecksec").val(result["Thdchecksec"]);
-            $("#Thdoccnum").val(result["Thdoccnum"]);
-            $("#Thdloss").val(result["Thdloss"]);
-            $("#Thdavgdelay").val(result["Thdavgdelay"]);
-            $("#Alertsound").val(result["Alertsound"]);
-            $("#Tline").val(result["Tline"]);
-            $("#Tsymbolsize").val(result["Tsymbolsize"]);
-            $("#Timeout").val(result["Timeout"]);
-            $("#Alertcycle").val(result["Alertcycle"]);
-            $("#Alerthistory").val(result["Alerthistory"]);
-            $.each(result["Targets"], function(i, field){
-                Ctype=""
-                CStype=""
-                if(field.Type=="C"){
-                    Ctype="selected"
-                }else{
-                    CStype="selected"
+        })
+    }
+    function updateForm(result){
+        if (result["Mode"] == "cloud") {
+            $(".localmode").remove();
+            $(".cloudmode").show();
+        } else {
+            $(".cloudmode").remove();
+        }
+        if(result["Ping"]=="sysping"){
+            $("#Ping").find("option[name='sysping']").attr("selected",true);
+        }
+        if(result["Ping"]=="goping"){
+            $("#Ping option[name='goping']").attr("selected",true);
+        }
+        //console.log(result["Ping"])
+        $("#verion").html("Version: "+result["Ver"])
+        $("#Name").val(result["Name"]);
+        $("#Ip").val(result["Ip"]);
+        $("#Thdchecksec").val(result["Thdchecksec"]);
+        $("#Thdoccnum").val(result["Thdoccnum"]);
+        $("#Thdloss").val(result["Thdloss"]);
+        $("#Thdavgdelay").val(result["Thdavgdelay"]);
+        $("#Alertsound").val(result["Alertsound"]);
+        $("#Tline").val(result["Tline"]);
+        $("#Tsymbolsize").val(result["Tsymbolsize"]);
+        $("#Timeout").val(result["Timeout"]);
+        $("#Alertcycle").val(result["Alertcycle"]);
+        $("#Alerthistory").val(result["Alerthistory"]);
+        $("#Cendpoint").val(result["Cendpoint"]);
+        $("#Authiplist").val(result["Authiplist"]);
+        $.each(result["Targets"], function(i, field){
+            if (result["Mode"] == "local") {
+                Ctype = ""
+                CStype = ""
+                if (field.Type == "C") {
+                    Ctype = "selected"
+                } else {
+                    CStype = "selected"
                 }
-                $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input name='targets["+i+"][\"Name\"]' value='"+field.Name+"' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]'  style='width:90%' value='"+field.Addr+"'></td><td><select name='targets["+i+"][\"Type\"]'  style='width:47px;'><option value='C' "+Ctype+">C</option><option value='CS'"+CStype+">CS</option></select></td><td><input   name='targets["+i+"][\"Thdchecksec\"]' style='width:90%' value='"+field.Thdchecksec+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+field.Thdloss+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]' style='width:90%' value='"+field.Thdavgdelay+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+field.Thdoccnum+"'> </td><td><i onclick='deleteTr(this);' class='icon-large icon-trash'></i></td></tr>");
-                $(".agentnum").val(i+1);
-            });
+                $(".agentlist").append("<tr><td><input name='tsnum[" + i + "]' value='targets[" + i + "]={}' type='hidden'><input name='targets[" + i + "][\"Name\"]' value='" + field.Name + "' style='width:90%'></td><td><input  name='targets[" + i + "][\"Addr\"]'  style='width:90%' value='" + field.Addr + "'></td><td><select name='targets[" + i + "][\"Type\"]'  style='width:47px;'><option value='C' " + Ctype + ">C</option><option value='CS'" + CStype + ">CS</option></select></td><td><input   name='targets[" + i + "][\"Thdchecksec\"]' style='width:90%' value='" + field.Thdchecksec + "'> </td><td><input  name='targets[" + i + "][\"Thdloss\"]' style='width:90%' value='" + field.Thdloss + "'> </td><td><input  name='targets[" + i + "][\"Thdavgdelay\"]' style='width:90%' value='" + field.Thdavgdelay + "'> </td><td><input  name='targets[" + i + "][\"Thdoccnum\"]' style='width:90%' value='" + field.Thdoccnum + "'> </td><td><i onclick='deleteTr(this);' class='icon-large icon-trash'></i></td></tr>");
+                $(".agentnum").val(i + 1);
+            }
+            if (result["Mode"] == "cloud"){
+                $(".agentlist").append("<tr><td><input name='tsnum[" + i + "]' value='targets[" + i + "]={}' type='hidden'><input readonly name='targets[" + i + "][\"Name\"]' value='" + field.Name + "' style='width:90%'></td><td><input readonly  name='targets[" + i + "][\"Addr\"]'  style='width:90%' value='" + field.Addr + "'></td><td><input readonly  name='targets[" + i + "][\"Thdchecksec\"]' style='width:90%' value='" + field.Thdchecksec + "'> </td><td><input readonly name='targets[" + i + "][\"Thdloss\"]' style='width:90%' value='" + field.Thdloss + "'> </td><td><input readonly name='targets[" + i + "][\"Thdavgdelay\"]' style='width:90%' value='" + field.Thdavgdelay + "'> </td><td><input readonly name='targets[" + i + "][\"Thdoccnum\"]' style='width:90%' value='" + field.Thdoccnum + "'> </td></tr>");
+                $(".agentnum").val(i + 1);
+            }
         });
+    }
+    $(function(){
+        var tp = window.location.search;
+        if(tp=="?cloud"){
+            $(".localmode").remove();
+            $(".cloudmode").show();
+        }
+        if(tp=="?local"){
+            $(".localmode").show();
+            $(".cloudmode").remove();
+        }
+        if(tp!="?cloud" && tp!="?local") {
+          $.getJSON("/api/config.json",function(result){
+              updateForm(result);
+          });
+        }
     });
 </script>
 

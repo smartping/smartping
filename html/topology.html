@@ -20,12 +20,6 @@
   <div class="navbar-inner">
     <div class="container">
       <a class="brand" href="index.html">SmartPing Dashbord </a>
-      <div class="nav-collapse">
-        <ul class="nav pull-right">
-          <li></li>
-        </ul>
-      </div>
-      <!--/.nav-collapse -->
     </div>
     <!-- /container -->
   </div>
@@ -39,8 +33,7 @@
         <li><a href="index.html"><i class="icon-mail-forward"></i><span>Forward Ping</span> </a> </li>
         <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>Reverse Ping</span> </a> </li>
         <li class="active"><a href="topology.html"><i class="icon-bar-chart"></i><span>Topology</span> </a> </li>
-        <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
-        <!--<li><a href="tools.html"><i class="icon-wrench"></i><span>Test Tools</span> </a> </li>-->
+        <li ><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
         <li><a href="config.html"><i class="icon-cog"></i><span>Config</span> </a> </li>
       </ul>
     </div>
@@ -115,6 +108,12 @@
         $("#echarts").height($(window).height()-220);
 
         $.getJSON("/api/config.json",function(result){
+            if(result["Mode"]=="cloud"){
+                $(".localmode").remove();
+                $(".cloudmode").show();
+            }else{
+                $(".cloudmode").remove();
+            }
             $("#verion").html("Version: "+result["Ver"])
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS") {

@@ -1,19 +1,20 @@
 package main
 
 import (
-	"./funcs"
-	"./g"
-	"./http"
+	"github.com/gy-games/smartping/src/funcs"
+	"github.com/gy-games/smartping/src/g"
+	"github.com/gy-games/smartping/src/http"
 	"flag"
 	"fmt"
-	"github.com/gy-games-libs/cron"
+	"github.com/jakecoffman/cron"
 	"os"
 	"runtime"
 	"sync"
+	"github.com/cihub/seelog"
 )
 
 // Init config
-var Version = "0.5.0"
+var Version = "0.6.0"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -39,6 +40,10 @@ func main() {
 		}
 		wg.Wait()
 		go funcs.StartAlert()
+		seelog.Info(g.Cfg.Mode)
+		if g.Cfg.Mode=="cloud"{
+			go funcs.StartCloudMonitor()
+		}
 	}, "ping")
 	c.AddFunc("0 0 0 * * *", func() {
 		go funcs.ClearAlertTable()

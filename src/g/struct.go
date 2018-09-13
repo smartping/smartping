@@ -3,12 +3,14 @@ package g
 //Main Config
 type Config struct {
 	Ver          string
-	Port         int
+	Mode         string	//local,cloud
+	Cendpoint    string     //cloud Endpoint
 	Name         string
-	Timeout      string
-	Ip           string
-	Db           string
 	Password     string
+	Ip           string
+	Port         int
+	Timeout      string
+//	Db           string
 	Alerthistory int
 	Alertcycle   int
 	Alertsound   string
@@ -19,6 +21,7 @@ type Config struct {
 	Tline        string
 	Tsymbolsize  string
 	Targets      []Target
+	Authiplist   string
 }
 
 //Target Config

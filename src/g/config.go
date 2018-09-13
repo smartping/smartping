@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"github.com/gy-games-libs/seelog"
+	"github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"net/http"
+	"time"
 )
 
 var (
@@ -19,6 +21,7 @@ var (
 	Root  string
 	Db    *sql.DB
 	Cfg   Config
+	AuthipMap map[string]bool
 )
 
 func IsExist(fp string) bool {
@@ -43,6 +46,7 @@ func ReadConfig(filename string) Config {
 }
 
 func GetRoot() string {
+	return "D:\\gopath\\src\\github.com\\gy-games\\smartping"
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal("Get Root Path Error:", err)
@@ -75,6 +79,9 @@ func ParseConfig(ver string) {
 	if Cfg.Ip == "" {
 		Cfg.Ip = "127.0.0.1"
 	}
+	if Cfg.Mode == "" {
+		Cfg.Mode = "local"
+	}
 	Cfg.Ver = ver
 	if !IsExist(Root + "/db/" + "database.db") {
 		if !IsExist(Root + "/db/" + "database-base.db") {
@@ -92,9 +99,9 @@ func ParseConfig(ver string) {
 		defer dst.Close()
 		io.Copy(dst, src)
 	}
-	Cfg.Db = Root + "/db/database.db"
+	dbpath := Root + "/db/database.db"
 	seelog.Info("Config loaded")
-	Db, err = sql.Open("sqlite3", Cfg.Db)
+	Db, err = sql.Open("sqlite3", dbpath)
 	if err != nil {
 		log.Fatalln("[Fault]db open fail .", err)
 	}
@@ -112,9 +119,53 @@ func ParseConfig(ver string) {
 			Cfg.Targets[k].Thdoccnum = Cfg.Thdoccnum
 		}
 	}
+	saveAuth()
+}
+
+func SaveCloudConfig(url string,flag bool) (Config,error){
+	config := Config{}
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	resp, err := client.Get(url)
+	if err!=nil{
+		return config,err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body,&config)
+	if err != nil {
+		return config,err
+	}
+	if flag == true{
+		Cfg.Targets = config.Targets
+		Cfg.Mode = "cloud"
+		Cfg.Timeout = config.Timeout
+		Cfg.Alertcycle = config.Alertcycle
+		Cfg.Alerthistory = config.Alerthistory
+		Cfg.Alertcycle = config.Alertcycle
+		Cfg.Tsymbolsize = config.Tsymbolsize
+		Cfg.Tline = config.Tline
+		Cfg.Alertsound = config.Alertsound
+		Cfg.Cendpoint = url
+		Cfg.Authiplist = config.Authiplist
+		saveAuth()
+	}else{
+		config.Mode = "cloud"
+		config.Cendpoint = url
+		config.Ip=Cfg.Ip
+		config.Name=Cfg.Name
+		config.Ver=Cfg.Ver
+	}
+	if err!=nil{
+		return config,err
+	}
+	return config,nil
 }
 
 func SaveConfig() error {
+	saveAuth()
 	rrs, _ := json.Marshal(Cfg)
 	var out bytes.Buffer
 	errjson := json.Indent(&out, rrs, "", "\t")
@@ -128,4 +179,15 @@ func SaveConfig() error {
 		return err
 	}
 	return nil
+}
+
+func saveAuth(){
+	AuthipMap = map[string]bool{}
+	Cfg.Authiplist = strings.Replace(Cfg.Authiplist, " ", "", -1)
+	if Cfg.Authiplist!=""{
+		authiplist := strings.Split(Cfg.Authiplist,",")
+		for _, ip := range authiplist {
+			AuthipMap[ip]=true
+		}
+	}
 }
