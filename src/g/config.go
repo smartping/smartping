@@ -46,7 +46,7 @@ func ReadConfig(filename string) Config {
 }
 
 func GetRoot() string {
-	return "D:\\gopath\\src\\github.com\\gy-games\\smartping"
+	//return "D:\\gopath\\src\\github.com\\gy-games\\smartping"
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal("Get Root Path Error:", err)
