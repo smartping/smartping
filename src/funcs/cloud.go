@@ -1,14 +1,14 @@
 package funcs
 
 import (
-	"github.com/gy-games/smartping/src/g"
 	"github.com/cihub/seelog"
+	"github.com/gy-games/smartping/src/g"
 )
 
 func StartCloudMonitor() {
 	seelog.Info("[func:StartCloudMonitor] ", "starting run StartCloudMonitor ")
-	_,err:=g.SaveCloudConfig(g.Cfg.Cendpoint,true)
-	if err!=nil{
+	_, err := g.SaveCloudConfig(g.Cfg.Cendpoint, true)
+	if err != nil {
 		seelog.Error("[func:StartCloudMonitor] Cloud Monitor Error", err)
 	}
 	saveerr := g.SaveConfig()
@@ -18,4 +18,3 @@ func StartCloudMonitor() {
 	}
 	seelog.Info("[func:StartCloudMonitor] ", "StartCloudMonitor finish ")
 }
-

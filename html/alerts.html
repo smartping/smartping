@@ -216,6 +216,12 @@
     $(function(){
       $.getJSON("/api/config.json",function(result){
           setTimeout('Refresh()',result["Alertcycle"]*60*1000);
+          if(result["Mode"]=="cloud"){
+              $(".localmode").remove();
+              $(".cloudmode").show();
+          }else{
+              $(".cloudmode").remove();
+          }
           $("#verion").html("Version: "+result["Ver"])
           $.each(result["Targets"], function(i, field){
               if(field.Type=="CS") {

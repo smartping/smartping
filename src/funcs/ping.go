@@ -1,9 +1,9 @@
 package funcs
 
 import (
+	"github.com/cihub/seelog"
 	"github.com/gy-games/smartping/src/g"
 	"github.com/gy-games/smartping/src/nettools"
-	"github.com/cihub/seelog"
 	"strconv"
 	"sync"
 	"time"
@@ -37,7 +37,7 @@ func StartPing(t g.Target, wg *sync.WaitGroup) {
 		time.Sleep(time.Duration(3000*1000000-duringtime) * time.Nanosecond)
 	}
 	if stat.RevcPk > 0 {
-		stat.AvgDelay = stat.AvgDelay / float64(stat.RevcPk)		
+		stat.AvgDelay = stat.AvgDelay / float64(stat.RevcPk)
 	} else {
 		stat.AvgDelay = 0.0
 	}

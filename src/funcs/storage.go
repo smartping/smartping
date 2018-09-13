@@ -1,9 +1,9 @@
 package funcs
 
 import (
+	"github.com/cihub/seelog"
 	"github.com/gy-games/smartping/src/g"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/cihub/seelog"
 	"time"
 )
 

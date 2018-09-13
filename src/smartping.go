@@ -1,16 +1,16 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"github.com/cihub/seelog"
 	"github.com/gy-games/smartping/src/funcs"
 	"github.com/gy-games/smartping/src/g"
 	"github.com/gy-games/smartping/src/http"
-	"flag"
-	"fmt"
 	"github.com/jakecoffman/cron"
 	"os"
 	"runtime"
 	"sync"
-	"github.com/cihub/seelog"
 )
 
 // Init config
@@ -41,7 +41,7 @@ func main() {
 		wg.Wait()
 		go funcs.StartAlert()
 		seelog.Info(g.Cfg.Mode)
-		if g.Cfg.Mode=="cloud"{
+		if g.Cfg.Mode == "cloud" {
 			go funcs.StartCloudMonitor()
 		}
 	}, "ping")

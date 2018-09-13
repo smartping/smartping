@@ -10,9 +10,9 @@ import (
 func configIndexRoutes() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if(!AuthUserIp(r.RemoteAddr)){
-			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
-			http.Error(w,o,401)
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
 			return
 		}
 		if strings.HasSuffix(r.URL.Path, "/") {

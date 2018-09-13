@@ -15,9 +15,9 @@ func configApiRoutes() {
 
 	//config api
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
-		if(!AuthUserIp(r.RemoteAddr)){
-			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
-			http.Error(w,o,401)
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -47,9 +47,9 @@ func configApiRoutes() {
 
 	//graph data api
 	http.HandleFunc("/api/ping.json", func(w http.ResponseWriter, r *http.Request) {
-		if(!AuthUserIp(r.RemoteAddr)){
-			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
-			http.Error(w,o,401)
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -150,9 +150,9 @@ func configApiRoutes() {
 
 	//Topology data api
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
-		if(!AuthUserIp(r.RemoteAddr)){
-			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
-			http.Error(w,o,401)
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -194,9 +194,9 @@ func configApiRoutes() {
 
 	//alert api
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
-		if(!AuthUserIp(r.RemoteAddr)){
-			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
-			http.Error(w,o,401)
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -257,9 +257,9 @@ func configApiRoutes() {
 
 	//save config
 	http.HandleFunc("/api/saveconfig.json", func(w http.ResponseWriter, r *http.Request) {
-		if(!AuthUserIp(r.RemoteAddr)){
-			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
-			http.Error(w,o,401)
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
 			return
 		}
 		preout := make(map[string]string)
@@ -403,9 +403,9 @@ func configApiRoutes() {
 
 	//save cloud config
 	http.HandleFunc("/api/savecloudconfig.json", func(w http.ResponseWriter, r *http.Request) {
-		if(!AuthUserIp(r.RemoteAddr)){
-			o := "Your ip address ("+r.RemoteAddr+")  is not allowed to access this site!"
-			http.Error(w,o,401)
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
 			return
 		}
 		preout := make(map[string]string)

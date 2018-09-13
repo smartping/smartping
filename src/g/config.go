@@ -8,19 +8,19 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"net/http"
 	"time"
 )
 
 var (
-	DLock sync.Mutex
-	Root  string
-	Db    *sql.DB
-	Cfg   Config
+	DLock     sync.Mutex
+	Root      string
+	Db        *sql.DB
+	Cfg       Config
 	AuthipMap map[string]bool
 )
 
@@ -122,23 +122,23 @@ func ParseConfig(ver string) {
 	saveAuth()
 }
 
-func SaveCloudConfig(url string,flag bool) (Config,error){
+func SaveCloudConfig(url string, flag bool) (Config, error) {
 	config := Config{}
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
 	resp, err := client.Get(url)
-	if err!=nil{
-		return config,err
+	if err != nil {
+		return config, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	err = json.Unmarshal(body,&config)
+	err = json.Unmarshal(body, &config)
 	if err != nil {
-		return config,err
+		return config, err
 	}
-	if flag == true{
+	if flag == true {
 		Cfg.Targets = config.Targets
 		Cfg.Mode = "cloud"
 		Cfg.Timeout = config.Timeout
@@ -151,17 +151,17 @@ func SaveCloudConfig(url string,flag bool) (Config,error){
 		Cfg.Cendpoint = url
 		Cfg.Authiplist = config.Authiplist
 		saveAuth()
-	}else{
+	} else {
 		config.Mode = "cloud"
 		config.Cendpoint = url
-		config.Ip=Cfg.Ip
-		config.Name=Cfg.Name
-		config.Ver=Cfg.Ver
+		config.Ip = Cfg.Ip
+		config.Name = Cfg.Name
+		config.Ver = Cfg.Ver
 	}
-	if err!=nil{
-		return config,err
+	if err != nil {
+		return config, err
 	}
-	return config,nil
+	return config, nil
 }
 
 func SaveConfig() error {
@@ -181,13 +181,13 @@ func SaveConfig() error {
 	return nil
 }
 
-func saveAuth(){
+func saveAuth() {
 	AuthipMap = map[string]bool{}
 	Cfg.Authiplist = strings.Replace(Cfg.Authiplist, " ", "", -1)
-	if Cfg.Authiplist!=""{
-		authiplist := strings.Split(Cfg.Authiplist,",")
+	if Cfg.Authiplist != "" {
+		authiplist := strings.Split(Cfg.Authiplist, ",")
 		for _, ip := range authiplist {
-			AuthipMap[ip]=true
+			AuthipMap[ip] = true
 		}
 	}
 }
