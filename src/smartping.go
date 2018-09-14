@@ -42,7 +42,7 @@ func main() {
 		go funcs.StartAlert()
 		seelog.Info(g.Cfg.Mode)
 		if g.Cfg.Mode == "cloud" {
-			go funcs.StartCloudMonitor()
+			go funcs.StartCloudMonitor(1)
 		}
 	}, "ping")
 	c.AddFunc("0 0 0 * * *", func() {

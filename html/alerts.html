@@ -20,7 +20,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud)</span> </a>
+      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud <span class="cloudmodeonline">Online</span><span class="cloudmodeoffline">Offline</span>)</span> </a>
       <!--/.nav-collapse -->
     </div>
     <!-- /container -->
@@ -155,10 +155,8 @@
 <script src="assets/js/jquery-1.7.2.min.js"></script>
 <script src="assets/js/bootstrap.js"></script>
 <script src="assets/datatable/js/jquery.dataTables.min.js"></script>
+<script src="assets/js/funcs.js"></script>
 <script>
-    function Refresh(){
-        window.location.reload();
-    }
     var ajaxcnt  = 0;
     function getdata(d){
         $(".alertlist").html("");
@@ -216,12 +214,7 @@
     $(function(){
       $.getJSON("/api/config.json",function(result){
           setTimeout('Refresh()',result["Alertcycle"]*60*1000);
-          if(result["Mode"]=="cloud"){
-              $(".localmode").remove();
-              $(".cloudmode").show();
-          }else{
-              $(".cloudmode").remove();
-          }
+          AgentMode(result["Mode"],result["Cstatus"])
           $("#verion").html("Version: "+result["Ver"])
           $.each(result["Targets"], function(i, field){
               if(field.Type=="CS") {

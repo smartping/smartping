@@ -136,6 +136,7 @@ func SaveCloudConfig(url string, flag bool) (Config, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(body, &config)
 	if err != nil {
+		config.Name=string(body)
 		return config, err
 	}
 	if flag == true {
@@ -157,9 +158,6 @@ func SaveCloudConfig(url string, flag bool) (Config, error) {
 		config.Ip = Cfg.Ip
 		config.Name = Cfg.Name
 		config.Ver = Cfg.Ver
-	}
-	if err != nil {
-		return config, err
 	}
 	return config, nil
 }

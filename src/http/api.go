@@ -29,7 +29,7 @@ func configApiRoutes() {
 			if err != nil {
 				preout := make(map[string]string)
 				preout["status"] = "false"
-				preout["info"] = err.Error()
+				preout["info"] = cloudnconf.Name+"("+err.Error()+")"
 				RenderJson(w, preout)
 				return
 			}
@@ -178,6 +178,7 @@ func configApiRoutes() {
 						err := rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
 						if err != nil {
 							seelog.Error("[/api/topology.json] ", err)
+							preout[v.Name] = "unknown"
 							continue
 						}
 						sec, _ := strconv.Atoi(l.Cnt)
@@ -455,6 +456,7 @@ func configApiRoutes() {
 		g.Cfg.Alertsound = nconfig.Alertsound
 		g.Cfg.Ip = nconfig.Ip
 		g.Cfg.Password = g.Cfg.Password
+		g.Cfg.Cstatus = true
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			preout["info"] = saveerr.Error()

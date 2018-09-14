@@ -5,6 +5,7 @@ type Config struct {
 	Ver       string
 	Mode      string //local,cloud
 	Cendpoint string //cloud Endpoint
+	Cstatus   bool   //cloud status
 	Name      string
 	Password  string
 	Ip        string

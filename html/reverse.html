@@ -19,7 +19,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud)</span> </a>
+      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud <span class="cloudmodeonline">Online</span><span class="cloudmodeoffline">Offline</span>)</span> </a>
     </div>
     <!-- /container -->
   </div>
@@ -120,22 +120,15 @@
 <script src="assets/js/bootstrap.js"></script>
 <script src="assets/js/echarts.min.js"></script>
 <script language="JavaScript" type="text/javascript" src="assets/js/My97DatePicker/WdatePicker.js"></script>
+<script src="assets/js/funcs.js"></script>
 <script>
     var int
-    function Refresh(){
-        window.location.reload();
-    }
     getLineChart();
     function getLineChart() {
         $("#main").html("");
         $(".agentlist").html("");
         $.getJSON("/api/config.json", function (result) {
-            if(result["Mode"]=="cloud"){
-                $(".localmode").remove();
-                $(".cloudmode").show();
-            }else{
-                $(".cloudmode").remove();
-            }
+            AgentMode(result["Mode"],result["Cstatus"])
             int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
             $("#verion").html("Version: " + result["Ver"])
             $.each(result["Targets"], function (i, field) {
