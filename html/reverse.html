@@ -19,7 +19,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud <span class="cloudmodeonline">Online</span><span class="cloudmodeoffline">Offline</span>)</span> </a>
+      <a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
     </div>
     <!-- /container -->
   </div>
@@ -122,21 +122,26 @@
 <script language="JavaScript" type="text/javascript" src="assets/js/My97DatePicker/WdatePicker.js"></script>
 <script src="assets/js/funcs.js"></script>
 <script>
-    var int
-    getLineChart();
-    function getLineChart() {
-        $("#main").html("");
-        $(".agentlist").html("");
-        $.getJSON("/api/config.json", function (result) {
+    //var int
+    getLineChart("");
+    function changeAgent(n,url){
+        $(".alerticon-" + n).addClass("icon-spinner").addClass("icon-spin").addClass("animated");
+        getLineChart(url)
+    }
+    function getLineChart(url) {
+        if(url!=""){
+            url="/api/agentproxy.json?g="+url
+        }
+        $.getJSON(url+"/api/config.json", function (result) {
+            $("#main").html("");
+            $(".agentlist").html("");
+            $("#agentname").html(" ("+result["Name"]+")")
             AgentMode(result["Mode"],result["Cstatus"])
-            int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
+            //int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
             $("#verion").html("Version: " + result["Ver"])
             $.each(result["Targets"], function (i, field) {
                 if (field.Type == "CS") {
-                    if (field.Addr == result["Ip"]) {
-                        return true;
-                    }
-                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "/reverse.html'>" + field.Name + "</a></td></tr>");
+                    $(".agentlist").append("<tr><td><i class='alerticon-" + field.Name + "'></i>&nbsp;<a onclick=changeAgent('"+field.Name+"','http://" + field.Addr + ":" + result["Port"] + "')>" + field.Name + "</a></td></tr>");
                 }
             });
             optmini = {
@@ -210,38 +215,11 @@
                     if (field.Addr == result["Ip"]) {
                         return true;
                     }
-                    $("#main").append("<div id='" + field.Name + "_pannel' style='float:left;width:30%;height:130px;margin-right:3%;margin-top:20px;'  class='showcharts' apiurl='http://" + field.Addr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Ip'] + "'></div>");
-                    var chart = echarts.init(document.getElementById(field.Name + "_pannel"));
-                    chart.setOption(optmini);
-                    chart.setOption({title: {text: field.Name + "->" + result["Name"], textStyle: {'fontSize': 13}}});
-                    $.ajax({
-                        dataType: "json",
-                        url: 'http://' + field.Addr + ':' + result["Port"] + '/api/ping.json?ip=' + result["Ip"],
-                        success: function (data) {
-                            $(".alerticon-" + field.Name + "").remove();
-                            //var data = JSON.parse(data);
-                            chart.setOption({
-                                xAxis: {
-                                    data: data.lastcheck
-                                },
-                                series: [{
-                                    name: 'avgDelay',
-                                    data: data.avgdelay
-                                }, {
-                                    name: 'lossPk',
-                                    data: data.losspk
-                                }]
-                            });
-                        },
-                        timeout: result["Timeout"] * 1000
-                    }).fail(function (xhr, status) {
-                        $(".alerticon-" + field.Name + "").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
-                        $(".alerticon-" + field.Name + "").addClass("icon-warning-sign");
-                    });
+                    $("#main").append("<div style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;background: url(/api/graph.png?g=http://"+field.Addr+":"+result["Port"]+"/api/ping.json?ip="+result["Ip"]+");background-size:100% 100%;' class='showcharts' apiurl='http://" + field.Addr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Ip'] + "' ><b style='font-color:#333333'>"+field.Name+"->"+result["Name"]+"</b></div>");
                 }
             });
             $("#main").on("click", ".showcharts", function () {
-                window.clearInterval(int)
+                //window.clearInterval(int)
                 var modalWidth = $("#charts").width();
                 var left = "-" + parseInt(modalWidth) / 2 + "px";
                 $('#charts').modal('show').css({"margin-left": left});
@@ -272,6 +250,9 @@
                     });
                 });
             });
+        }).fail(function (xhr, status) {
+            alert(xhr.responseText);
+            Refresh();
         });
     }
     $(".sgraph").click(function(){

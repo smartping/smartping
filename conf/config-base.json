@@ -2,6 +2,7 @@
 	"Ver": "0.6.0",
 	"Mode": "local",
 	"Cendpoint": "",
+	"Cstatus": false,
 	"Name": "",
 	"Password": "smartping",
 	"Ip": "",

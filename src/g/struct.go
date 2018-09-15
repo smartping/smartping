@@ -46,6 +46,12 @@ type PingSt struct {
 	MaxDelay float64
 }
 
+type PingStMini struct {
+	Lastcheck []string `json:"lastcheck"`
+	LossPk    []string `json:"losspk"`
+	AvgDelay  []string `json:"avgdelay"`
+}
+
 type LogInfo struct {
 	Logtime   string
 	Ip        string

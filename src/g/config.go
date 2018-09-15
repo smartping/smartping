@@ -17,11 +17,12 @@ import (
 )
 
 var (
-	DLock     sync.Mutex
-	Root      string
-	Db        *sql.DB
-	Cfg       Config
-	AuthipMap map[string]bool
+	DLock          sync.Mutex
+	Root           string
+	Db             *sql.DB
+	Cfg            Config
+	AuthUserIpMap  map[string]bool
+	AuthAgentIpMap map[string]bool
 )
 
 func IsExist(fp string) bool {
@@ -136,7 +137,7 @@ func SaveCloudConfig(url string, flag bool) (Config, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(body, &config)
 	if err != nil {
-		config.Name=string(body)
+		config.Name = string(body)
 		return config, err
 	}
 	if flag == true {
@@ -180,12 +181,16 @@ func SaveConfig() error {
 }
 
 func saveAuth() {
-	AuthipMap = map[string]bool{}
+	AuthUserIpMap = map[string]bool{}
+	AuthAgentIpMap = map[string]bool{}
 	Cfg.Authiplist = strings.Replace(Cfg.Authiplist, " ", "", -1)
 	if Cfg.Authiplist != "" {
 		authiplist := strings.Split(Cfg.Authiplist, ",")
 		for _, ip := range authiplist {
-			AuthipMap[ip] = true
+			AuthUserIpMap[ip] = true
+		}
+		for _, k := range Cfg.Targets {
+			AuthAgentIpMap[k.Addr] = true
 		}
 	}
 }

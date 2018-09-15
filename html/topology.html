@@ -19,7 +19,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud <span class="cloudmodeonline">Online</span><span class="cloudmodeoffline">Offline</span>)</span> </a>
+      <a class="brand" href="index.html">SmartPing Dashbord</a>
     </div>
     <!-- /container -->
   </div>
@@ -111,7 +111,7 @@
                     if(field.Addr==result["Ip"]){
                         return true;
                     }
-                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "/topology.html'>" + field.Name + "</a></td></tr>");
+                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'  data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;<a>" + field.Name + "</a></td></tr>");
                 }
             });
             setTimeout('Refresh()',result["Alertcycle"]*60*1000);
@@ -164,7 +164,7 @@
                 if(field.Type=="CS") {
                     $.ajax({
                         dataType: "json",
-                        url: 'http://' + field.Addr + ':' + result['Port'] + '/api/topology.json',
+                        url: '/api/agentproxy.json?g=http://' + field.Addr + ':' + result['Port'] + '/api/topology.json',
                         //data: topodata,
                         success: function (topodata) {
                             $(".alerticon-" + field.Name + "").remove();
@@ -205,6 +205,8 @@
                     }).fail(function (xhr, status) {
                         $(".alerticon-" + field.Name + "").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
                         $(".alerticon-" + field.Name + "").addClass("icon-warning-sign");
+                        $(".alerticon-" + field.Name + "").attr("title",xhr.responseText);
+                        $(".alerticon-" + field.Name + "").tooltip();
                         dataarea.push({
                             name: field.Name,
                             draggable: "true",
@@ -232,6 +234,8 @@
                     myChart.setOption(option);
                 }
             });
+        }).fail(function (xhr, status) {
+            //alert("");
         });
     });
 </script>

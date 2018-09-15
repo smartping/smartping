@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gy-games-libs/seelog"
+	"github.com/cihub/seelog"
 	"github.com/gy-games/smartping/src/g"
+	"github.com/wcharczuk/go-chart"
+	"github.com/wcharczuk/go-chart/drawing"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,7 +18,7 @@ func configApiRoutes() {
 
 	//config api
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -29,7 +32,7 @@ func configApiRoutes() {
 			if err != nil {
 				preout := make(map[string]string)
 				preout["status"] = "false"
-				preout["info"] = cloudnconf.Name+"("+err.Error()+")"
+				preout["info"] = cloudnconf.Name + "(" + err.Error() + ")"
 				RenderJson(w, preout)
 				return
 			}
@@ -47,7 +50,7 @@ func configApiRoutes() {
 
 	//graph data api
 	http.HandleFunc("/api/ping.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -148,9 +151,9 @@ func configApiRoutes() {
 		RenderJson(w, preout)
 	})
 
-	//Topology data api
+	//topology data api
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -195,7 +198,7 @@ func configApiRoutes() {
 
 	//alert api
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -258,7 +261,7 @@ func configApiRoutes() {
 
 	//save config
 	http.HandleFunc("/api/saveconfig.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -404,7 +407,7 @@ func configApiRoutes() {
 
 	//save cloud config
 	http.HandleFunc("/api/savecloudconfig.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -466,4 +469,188 @@ func configApiRoutes() {
 		preout["status"] = "true"
 		RenderJson(w, preout)
 	})
+
+	//show graph
+	http.HandleFunc("/api/graph.png", func(w http.ResponseWriter, r *http.Request) {
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		r.ParseForm()
+		if len(r.Form["g"]) == 0 {
+			GraphText(83, 70, "GET PARAM ERROR").Save(w)
+			return
+		}
+		url := r.Form["g"][0]
+		config := g.PingStMini{}
+		timeout := time.Duration(3 * time.Second)
+		client := http.Client{
+			Timeout: timeout,
+		}
+		resp, err := client.Get(url)
+		if err != nil {
+			GraphText(80, 70, "REQUEST API ERROR").Save(w)
+			return
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode == 401 {
+			GraphText(80, 70, "401-UNAUTHORIZED").Save(w)
+			return
+		}
+		if resp.StatusCode != 200 {
+			GraphText(85, 70, "ERROR CODE "+strconv.Itoa(resp.StatusCode)).Save(w)
+			return
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		err = json.Unmarshal(body, &config)
+		if err != nil {
+			GraphText(80, 70, "PARSE DATA ERROR").Save(w)
+			return
+		}
+		Xals := []float64{}
+		AvgDelay := []float64{}
+		LossPk := []float64{}
+		Bkg := []float64{}
+		MaxDelay := 0.0
+		for i := 0; i < len(config.LossPk); i = i + 1 {
+			avg, _ := strconv.ParseFloat(config.AvgDelay[i], 64)
+			if MaxDelay < avg {
+				MaxDelay = avg
+			}
+			AvgDelay = append(AvgDelay, avg)
+			losspk, _ := strconv.ParseFloat(config.LossPk[i], 64)
+			LossPk = append(LossPk, losspk)
+			Xals = append(Xals, float64(i))
+			Bkg = append(Bkg, 100.0)
+		}
+		graph := chart.Chart{
+			Width:  300 * 3,
+			Height: 130 * 3,
+			Background: chart.Style{
+				FillColor: drawing.Color{249, 246, 241, 255},
+			},
+			XAxis: chart.XAxis{
+				Style: chart.Style{
+					Show:     true,
+					FontSize: 20,
+				},
+				TickPosition: chart.TickPositionBetweenTicks,
+				ValueFormatter: func(v interface{}) string {
+					return config.Lastcheck[int(v.(float64))][11:16]
+				},
+			},
+			YAxis: chart.YAxis{
+				Style: chart.Style{
+					Show:     true,
+					FontSize: 20,
+				},
+				Range: &chart.ContinuousRange{
+					Min: 0.0,
+					Max: 100.0,
+				},
+				ValueFormatter: func(v interface{}) string {
+					if vf, isFloat := v.(float64); isFloat {
+						return fmt.Sprintf("%0.0f", vf)
+					}
+					return ""
+				},
+			},
+			YAxisSecondary: chart.YAxis{
+				NameStyle: chart.StyleShow(),
+				Style: chart.Style{
+					Show:     true,
+					FontSize: 20,
+				},
+				Range: &chart.ContinuousRange{
+					Min: 0.0,
+					Max: MaxDelay + MaxDelay/10,
+				},
+				ValueFormatter: func(v interface{}) string {
+					if vf, isFloat := v.(float64); isFloat {
+						return fmt.Sprintf("%0.0f", vf)
+					}
+					return ""
+				},
+			},
+			Series: []chart.Series{
+				chart.ContinuousSeries{
+					Style: chart.Style{
+						Show:        true,
+						StrokeColor: drawing.Color{249, 246, 241, 255},
+						FillColor:   drawing.Color{249, 246, 241, 255},
+					},
+					XValues: Xals,
+					YValues: Bkg,
+				},
+				chart.ContinuousSeries{
+					Style: chart.Style{
+						Show:        true,
+						StrokeColor: drawing.Color{0, 204, 102, 200},
+						FillColor:   drawing.Color{0, 204, 102, 200},
+					},
+					XValues: Xals,
+					YValues: AvgDelay,
+					YAxis:   chart.YAxisSecondary,
+				},
+				chart.ContinuousSeries{
+					Style: chart.Style{
+						Show:        true,
+						StrokeColor: drawing.Color{255, 0, 0, 200},
+						FillColor:   drawing.Color{255, 0, 0, 200},
+					},
+					XValues: Xals,
+					YValues: LossPk,
+				},
+			},
+		}
+		graph.Render(chart.PNG, w)
+
+	})
+
+	//remote apip roxy
+	http.HandleFunc("/api/agentproxy.json", func(w http.ResponseWriter, r *http.Request) {
+		if !AuthUserIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		//w.Header().Set("Access-Control-Allow-Origin", "*")
+		r.ParseForm()
+		if len(r.Form["g"]) == 0 {
+			o := "Param Error!"
+			http.Error(w, o, 406)
+		}
+		url := r.Form["g"][0]
+		timeout := time.Duration(3 * time.Second)
+		client := http.Client{
+			Timeout: timeout,
+		}
+		resp, err := client.Get(url)
+		if err != nil {
+			o := "Request Remote Data Error:" + err.Error()
+			http.Error(w, o, 503)
+			return
+		}
+		defer resp.Body.Close()
+		resCode := resp.StatusCode
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			o := "Read Remote Data Error:" + err.Error()
+			http.Error(w, o, 503)
+			return
+		}
+		if resCode != 200 {
+			o := "Get Remote Data Status Error:" + err.Error()
+			http.Error(w, o, resCode)
+		}
+		var out bytes.Buffer
+		json.Indent(&out, body, "", "\t")
+		o := out.String()
+		fmt.Fprintln(w, o)
+		//RenderJson(w, body)
+	})
+
 }

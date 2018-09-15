@@ -20,7 +20,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord <span class="cloudmode">(Cloud <span class="cloudmodeonline">Online</span><span class="cloudmodeoffline">Offline</span>)</span> </a>
+      <a class="brand" href="index.html">SmartPing Dashbord</a>
       <!--/.nav-collapse -->
     </div>
     <!-- /container -->
@@ -161,17 +161,21 @@
     function getdata(d){
         $(".alertlist").html("");
         $.getJSON("/api/config.json",function(result){
-            if(result["Mode"]=="cloud"){
-                $(".localmode").remove();
-                $(".cloudmode").show();
-            }else{
-                $(".cloudmode").remove();
-            }
+            $(".agentlist").html("")
+            $.each(result["Targets"], function(i, field){
+                if(field.Type=="CS") {
+                    if(field.Addr==result["Ip"]){
+                        return true;
+                    }
+                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;<a >" + field.Name + "</a></td></tr>");
+                    ajaxcnt = ajaxcnt +1 ;
+                }
+            });
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS"){
                     $.ajax({
                         dataType: "json",
-                        url: 'http://'+field.Addr+':'+result['Port']+'/api/alert.json?date='+d,
+                        url: '/api/agentproxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json?date='+d,
                         success: function( result) {
                             $(".alerticon-"+field.Name+"").remove();
                             for(var del in result[0]){
@@ -195,6 +199,8 @@
                     }).fail( function( xhr, status ) {
                         $(".alerticon-"+field.Name+"").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
                         $(".alerticon-"+field.Name+"").addClass("icon-warning-sign");
+                        $(".alerticon-" + field.Name + "").attr("title",xhr.responseText);
+                        $(".alerticon-" + field.Name + "").tooltip();
                     });
                 }
             });
@@ -202,7 +208,6 @@
     }
     function gettracertdata(d){
         $(".tracertdata").html($(d).attr("value"))
-        //console.log($(d).attr("value"))
         $("#alert").modal('show');
     }
     function pageFinish(){
@@ -221,7 +226,7 @@
                   if(field.Addr==result["Ip"]){
                       return true;
                   }
-                  $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "/alerts.html'>" + field.Name + "</a></td></tr>");
+                  $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;<a >" + field.Name + "</a></td></tr>");
                   ajaxcnt = ajaxcnt +1 ;
               }
           });
@@ -229,7 +234,7 @@
               if(field.Type=="CS") {
                   $.ajax({
                       dataType: "json",
-                      url: 'http://' + field.Addr + ':' + result['Port'] + '/api/alert.json',
+                      url: '/api/agentproxy.json?g=http://' + field.Addr + ':' + result['Port'] + '/api/alert.json',
                       success: function (result) {
                           $(".alerticon-" + field.Name + "").remove();
                           for (var del in result[0]) {
@@ -257,6 +262,8 @@
                   }).fail(function (xhr, status) {
                       $(".alerticon-" + field.Name + "").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
                       $(".alerticon-" + field.Name + "").addClass("icon-warning-sign");
+                      $(".alerticon-" + field.Name + "").attr("title",xhr.responseText);
+                      $(".alerticon-" + field.Name + "").tooltip();
                       ajaxcnt = ajaxcnt -1;
                       if(ajaxcnt==0){
                           pageFinish();
