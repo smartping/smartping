@@ -12,7 +12,5 @@ bin/*
 db/database.db
 conf/config.json
 !bin/nssm.exe*
-logs/debug.log
-logs/info.log
-logs/error.log
+logs/*
 html/admin/*

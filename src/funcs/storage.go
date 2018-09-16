@@ -2,7 +2,7 @@ package funcs
 
 import (
 	"github.com/cihub/seelog"
-	"github.com/gy-games/smartping/src/g"
+	"github.com/smartping/smartping/src/g"
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 )

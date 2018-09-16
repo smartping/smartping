@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/gy-games/smartping/src/g"
+	"github.com/smartping/smartping/src/g"
 	"net/http"
 	"path/filepath"
 	"strings"

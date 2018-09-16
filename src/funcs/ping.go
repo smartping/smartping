@@ -2,8 +2,8 @@ package funcs
 
 import (
 	"github.com/cihub/seelog"
-	"github.com/gy-games/smartping/src/g"
-	"github.com/gy-games/smartping/src/nettools"
+	"github.com/smartping/smartping/src/g"
+	"github.com/smartping/smartping/src/nettools"
 	"strconv"
 	"sync"
 	"time"
