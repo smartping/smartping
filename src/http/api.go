@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 	"github.com/boltdb/bolt"
-	//"github.com/cihub/seelog"
+	"github.com/cihub/seelog"
 	//"strings"
 	"github.com/smartping/smartping/src/funcs"
 	//"context"
@@ -99,8 +99,8 @@ func configApiRoutes() {
 		var maxdelay []string
 		var mindelay []string
 		var avgdelay []string
-		var sendpk []string
-		var revcpk []string
+		//var sendpk []string
+		//var revcpk []string
 		var losspk []string
 		timwwnum := map[string]int{}
 		for i := 0; i < cnt+1; i++ {
@@ -110,8 +110,8 @@ func configApiRoutes() {
 			maxdelay = append(maxdelay, "0")
 			mindelay = append(mindelay, "0")
 			avgdelay = append(avgdelay, "0")
-			sendpk = append(sendpk, "0")
-			revcpk = append(revcpk, "0")
+			//sendpk = append(sendpk, "0")
+			//revcpk = append(revcpk, "0")
 			losspk = append(losspk, "0")
 			timeStart = timeStart + 60
 		}
@@ -144,8 +144,6 @@ func configApiRoutes() {
 			"maxdelay":  maxdelay,
 			"mindelay":  mindelay,
 			"avgdelay":  avgdelay,
-			"sendpk":    sendpk,
-			"revcpk":    revcpk,
 			"losspk":    losspk,
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -192,7 +190,7 @@ func configApiRoutes() {
 		datapreout := []g.AlertLog{}
 		db:=g.GetDb("alert",dtb)
 		db.View(func(tx *bolt.Tx) error {
-			b := tx.Bucket([]byte(dtb))
+			b := tx.Bucket([]byte("alertlog"))
 			if b==nil{
 				return nil
 			}
@@ -579,7 +577,8 @@ func configApiRoutes() {
 			o := "Param Error!"
 			http.Error(w, o, 406)
 		}
-		url := r.Form["g"][0]
+		url := strings.Replace(strings.Replace(r.Form["g"][0],"%26","&",-1)," ","%20",-1)
+		seelog.Debug("[/api/agentproxy.json] GET ",url)
 		defaultto,err := strconv.Atoi(g.Cfg.Timeout)
 		if err!=nil{
 			defaultto = 3
@@ -603,7 +602,7 @@ func configApiRoutes() {
 			return
 		}
 		if resCode != 200 {
-			o := "Get Remote Data Status Error:" + err.Error()
+			o := "Get Remote Data Status Error"
 			http.Error(w, o, resCode)
 		}
 		var out bytes.Buffer

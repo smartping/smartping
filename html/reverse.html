@@ -144,80 +144,16 @@
                     $(".agentlist").append("<tr><td><i class='alerticon-" + field.Name + "'></i>&nbsp;<a onclick=changeAgent('"+field.Name+"','http://" + field.Addr + ":" + result["Port"] + "')>" + field.Name + "</a></td></tr>");
                 }
             });
-            optmini = {
-                title: {
-                    text: '',
-                    'x': 'center'
-                },
-                tooltip: {},
-                grid: {
-                    left: '3%',
-                    right: '3%',
-                    bottom: '3%',
-                    top: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    data: []
-                },
-                yAxis: [{
-                    type: 'value',
-                    position: 'left'
-                }, {
-                    type: 'value',
-                    min: 0,
-                    max: 100,
-                    position: 'right'
-                }],
-                series: [
-                    {
-                        name: 'avgDelay',
-                        type: 'line',
-                        data: [],
-                        itemStyle: {
-                            normal: {
-                                color: '#00CC66'
-                            }
-                        },
-                        animation: false,
-                        areaStyle: {
-                            normal: {}
-                        },
-                        lineStyle: {
-                            normal: {
-                                width: 0
-                            }
-                        }
-                    },
-                    {
-                        name: 'lossPk',
-                        type: 'line',
-                        yAxisIndex: 1,
-                        data: [],
-                        itemStyle: {
-                            normal: {
-                                color: '#FF0000'
-                            }
-                        },
-                        animation: false,
-                        areaStyle: {
-                            normal: {}
-                        },
-                        lineStyle: {
-                            normal: {
-                                width: 0
-                            }
-                        }
-                    }]
-            }
+
             $.each(result["Targets"], function (i, field) {
                 if (field.Type == "CS") {
                     if (field.Addr == result["Ip"]) {
                         return true;
                     }
-                    $("#main").append("<div style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;background: url(/api/graph.png?g=http://"+field.Addr+":"+result["Port"]+"/api/ping.json?ip="+result["Ip"]+");background-size:100% 100%;' class='showcharts' apiurl='http://" + field.Addr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Ip'] + "' ><b style='font-color:#333333'>"+field.Name+"->"+result["Name"]+"</b></div>");
+                    $("#main").append("<div style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;background-size:100% 100%;' class='img showcharts' imgsrc='/api/graph.png?g=http://"+field.Addr+":"+result["Port"]+"/api/ping.json?ip="+result["Ip"]+"' apiurl='/api/agentproxy.json?g=http://" + field.Addr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Ip'] + "' ><b style='font-color:#333333'>"+field.Name+"->"+result["Name"]+"</b></div>");
                 }
             });
+            layzeImg()
             $("#main").on("click", ".showcharts", function () {
                 //window.clearInterval(int)
                 var modalWidth = $("#charts").width();
@@ -259,7 +195,7 @@
         start   = $("#starttime").val();
         endtime = $("#endtime").val();
         url = $("#pannelurl").attr("value");
-        $.get(url+"&starttime="+start+"&endtime="+endtime).done(function (data) {
+        $.get(url+"%26starttime="+start+"%26endtime="+endtime).done(function (data) {
             //var data = JSON.parse(data);
             myChart.setOption({
                 xAxis: {
@@ -394,6 +330,29 @@
     }
     var myChart = echarts.init(document.getElementById('pannel-show'));
     myChart.setOption(opt);
+    function layzeImg() {
+        var aImg = document.querySelectorAll('div.img');
+        var len = aImg.length;
+        var n = 0;
+        for (var i = n; i < len; i++) {
+            if (aImg[i].offsetTop < document.documentElement.clientHeight + (document.body.scrollTop || document.documentElement.scrollTop)) {
+                if (aImg[i].style.backgroundImage == '') {
+                    aImg[i].style.backgroundImage = "url('"+aImg[i].getAttribute('imgsrc')+"')";
+                }
+                n = i + 1;
+            }
+        }
+        window.onscroll = function () {
+            for (var i = n; i < len; i++) {
+                if (aImg[i].offsetTop < document.documentElement.clientHeight + (document.body.scrollTop || document.documentElement.scrollTop)) {
+                    if (aImg[i].style.backgroundImage == '') {
+                        aImg[i].style.backgroundImage = "url('"+aImg[i].getAttribute('imgsrc')+"')";
+                    }
+                    n = i + 1;
+                }
+            }
+        };
+    };
 </script>
 </body>
 </html>
