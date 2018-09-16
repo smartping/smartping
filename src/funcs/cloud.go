@@ -16,6 +16,7 @@ func StartCloudMonitor(cnt int) {
 			StartCloudMonitor(cnt + 1)
 			return
 		}
+		g.Cfg.Cstatus = true
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			seelog.Error("[func:StartCloudMonitor] Save Cloud Config Error", err)
@@ -23,7 +24,6 @@ func StartCloudMonitor(cnt int) {
 			StartCloudMonitor(cnt + 1)
 			return
 		}
-		g.Cfg.Cstatus = true
 		seelog.Info("[func:StartCloudMonitor] ", "StartCloudMonitor finish ")
 		time.Sleep(5 * time.Second)
 	}
