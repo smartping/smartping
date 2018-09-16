@@ -48,8 +48,9 @@ func StartAlert() {
 					tracrtString = tracrt.String()
 				}
 				l.Tracert = tracrtString
-				err = g.Db.Update(func(tx *bolt.Tx) error {
-					b, err := tx.CreateBucketIfNotExists([]byte("alertlog-" + dateStartStr))
+				db:=g.GetDb("alert",dateStartStr)
+				err = db.Update(func(tx *bolt.Tx) error {
+					b, err := tx.CreateBucketIfNotExists([]byte("alertlog"))
 					if err != nil {
 						return fmt.Errorf("create bucket error : %s", err)
 					}
@@ -74,15 +75,16 @@ func CheckAlertStatus(v g.Target) string{
 	timeStartStr := time.Unix((time.Now().Unix() - int64(v.Thdchecksec)), 0).Format("2006-01-02 15:04")
 	timeEndStr := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
 	result := "false"
-	g.Db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("pinglog-"+v.Addr))
+	db:=g.GetDb("ping",v.Addr)
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("pinglog"))
 		if b==nil{
 			result = "unknown"
 			return nil
 		}
 		c:= b.Cursor()
-		min := []byte(timeStartStr)
-		max := []byte(timeEndStr)
+		min := []byte(timeStartStr[8:])
+		max := []byte(timeEndStr[8:])
 		ectime:=0
 		for k, val := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, val = c.Next() {
 			l := new(g.PingLog)
@@ -90,11 +92,13 @@ func CheckAlertStatus(v g.Target) string{
 			if err!=nil{
 				continue
 			}
-			seelog.Debug(v.Name+"|"+strings.Split(l.Avgdelay,".")[0]+"|"+strconv.Itoa(v.Thdavgdelay)+"|"+strings.Split(l.Losspk,".")[0]+"|"+strconv.Itoa(v.Thdloss))
-			avgdelay, _ := strconv.Atoi(strings.Split(l.Avgdelay,".")[0])
-			losspk, _ := strconv.Atoi(strings.Split(l.Losspk,".")[0])
-			if avgdelay > v.Thdavgdelay || losspk >= v.Thdloss{
-				ectime = ectime +1
+			if l.Logtime > timeStartStr && l.Logtime < timeEndStr {
+				seelog.Debug(v.Name + "|" + strings.Split(l.Avgdelay, ".")[0] + "|" + strconv.Itoa(v.Thdavgdelay) + "|" + strings.Split(l.Losspk, ".")[0] + "|" + strconv.Itoa(v.Thdloss))
+				avgdelay, _ := strconv.Atoi(strings.Split(l.Avgdelay, ".")[0])
+				losspk, _ := strconv.Atoi(strings.Split(l.Losspk, ".")[0])
+				if avgdelay > v.Thdavgdelay || losspk >= v.Thdloss {
+					ectime = ectime + 1
+				}
 			}
 		}
 		if ectime<v.Thdoccnum{

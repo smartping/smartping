@@ -24,7 +24,7 @@ func main() {
 		os.Exit(0)
 	}
 	g.ParseConfig(Version)
-
+	go funcs.ClearArchive()
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
 		var wg sync.WaitGroup
@@ -40,9 +40,8 @@ func main() {
 			go funcs.StartCloudMonitor(1)
 		}
 	}, "ping")
-	c.AddFunc("*/300 * * * * *", func() {
-		go funcs.ClearBucket()
-		go funcs.ClearPingLog()
+	c.AddFunc("0 0 * * * *", func() {
+		go funcs.ClearArchive()
 	}, "mtc")
 	c.Start()
 	http.StartHttp()

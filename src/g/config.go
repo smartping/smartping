@@ -3,6 +3,7 @@ package g
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/boltdb/bolt"
 	"github.com/cihub/seelog"
 	"io/ioutil"
 	"log"
@@ -11,16 +12,16 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"github.com/boltdb/bolt"
+	"sync"
 )
 
 var (
 	Root           string
-	Db             *bolt.DB
 	Cfg            Config
 	AlertStatus    map[string]bool
 	AuthUserIpMap  map[string]bool
 	AuthAgentIpMap map[string]bool
+	DbMap          DbMapSt
 )
 
 func IsExist(fp string) bool {
@@ -44,7 +45,7 @@ func ReadConfig(filename string) Config {
 }
 
 func GetRoot() string {
-	return "D:\\gopath\\src\\github.com\\smartping\\smartping"
+	//return "D:\\gopath\\src\\github.com\\smartping\\smartping"
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal("Get Root Path Error:", err)
@@ -67,7 +68,6 @@ func ParseConfig(ver string) {
 		}
 		cfile = "config-base.json"
 	}
-
 	logger, err := seelog.LoggerFromConfigAsFile(Root + "/conf/" + "seelog.xml")
 	if err != nil {
 		log.Fatalln("[Fault]log config open fail .", err)
@@ -84,26 +84,43 @@ func ParseConfig(ver string) {
 		Cfg.Mode = "local"
 	}
 	Cfg.Ver = ver
-	Db, err = bolt.Open(Root + "/db/" + "database.db", 0600, nil)
-	if err != nil {
-		log.Fatalln("[Fault]db open fail .", err)
-	}
+	DbMap = DbMapSt{}
+	DbMap.Data = map[string]*bolt.DB{}
+	DbMap.Lock = new(sync.Mutex)
 	AlertStatus = map[string]bool{}
 	for k, target := range Cfg.Targets {
-		if target.Thdavgdelay == 0 {
-			Cfg.Targets[k].Thdavgdelay = Cfg.Thdavgdelay
+		if target.Addr != Cfg.Ip {
+
+			if target.Thdavgdelay == 0 {
+				Cfg.Targets[k].Thdavgdelay = Cfg.Thdavgdelay
+			}
+			if target.Thdchecksec == 0 {
+				Cfg.Targets[k].Thdchecksec = Cfg.Thdchecksec
+			}
+			if target.Thdloss == 0 {
+				Cfg.Targets[k].Thdloss = Cfg.Thdloss
+			}
+			if target.Thdoccnum == 0 {
+				Cfg.Targets[k].Thdoccnum = Cfg.Thdoccnum
+			}
 		}
-		if target.Thdchecksec == 0 {
-			Cfg.Targets[k].Thdchecksec = Cfg.Thdchecksec
-		}
-		if target.Thdloss == 0 {
-			Cfg.Targets[k].Thdloss = Cfg.Thdloss
-		}
-		if target.Thdoccnum == 0 {
-			Cfg.Targets[k].Thdoccnum = Cfg.Thdoccnum
-		}
+
 	}
 	saveAuth()
+}
+
+func GetDb(t string, db string) *bolt.DB {
+	dbname:=t+"_"+db
+	boltdb,err:=DbMap.Get(dbname)
+	if err!=nil{
+		boltdb, err := bolt.Open(Root+"/db/"+t+"/"+db+".db", 0600, nil)
+		if err != nil {
+			seelog.Error("[Error] "+Root+"/db/"+t+"/"+db+".db open fail .", err)
+		}
+		DbMap.Set(dbname,boltdb)
+		return boltdb
+	}
+	return boltdb
 }
 
 func SaveCloudConfig(url string, flag bool) (Config, error) {

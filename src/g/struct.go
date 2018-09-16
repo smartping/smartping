@@ -1,5 +1,11 @@
 package g
 
+import (
+	"sync"
+	"github.com/boltdb/bolt"
+	"fmt"
+)
+
 //Main Config
 type Config struct {
 	Ver       string
@@ -65,4 +71,24 @@ type AlertLog struct {
 	Fromname string
 	Toname string
 	Tracert string
+}
+
+type DbMapSt struct {
+	Data map[string]*bolt.DB
+	Lock *sync.Mutex
+}
+
+func (d DbMapSt) Get(k string) (*bolt.DB,error){
+	d.Lock.Lock()
+	defer d.Lock.Unlock()
+	if _,ok := d.Data[k]; ok {
+		return d.Data[k],nil
+	}
+	return nil,fmt.Errorf("NotFound")
+}
+
+func (d DbMapSt) Set(k string,v *bolt.DB) {
+	d.Lock.Lock()
+	d.Data[k]=v
+	d.Lock.Unlock()
 }

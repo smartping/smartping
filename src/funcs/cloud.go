@@ -25,6 +25,6 @@ func StartCloudMonitor(cnt int) {
 		}
 		g.Cfg.Cstatus = true
 		seelog.Info("[func:StartCloudMonitor] ", "StartCloudMonitor finish ")
-		time.Sleep(1 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }

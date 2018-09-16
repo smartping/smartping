@@ -9,7 +9,10 @@ bin/*
 *-journal
 *.db-journal
 *.iml
-db/database.db
+db/ping/*.db
+db/ping/*.lock
+db/alert/*.db
+db/alert/*.lock
 conf/config.json
 !bin/nssm.exe*
 logs/*

@@ -16,6 +16,7 @@ import (
 	//"strings"
 	"github.com/smartping/smartping/src/funcs"
 	//"context"
+	"strings"
 )
 
 func configApiRoutes() {
@@ -114,24 +115,27 @@ func configApiRoutes() {
 			losspk = append(losspk, "0")
 			timeStart = timeStart + 60
 		}
-		g.Db.View(func(tx *bolt.Tx) error {
-			b := tx.Bucket([]byte("pinglog-"+tableip))
+		db:=g.GetDb("ping",tableip)
+		db.View(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte("pinglog"))
 			if b==nil{
 				return nil
 			}
 			c:= b.Cursor()
-			min := []byte(timeStartStr)
-			max := []byte(timeEndStr)
+			min := []byte(timeStartStr[8:])
+			max := []byte(timeEndStr[8:])
 			for k, v := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, v = c.Next() {
 				l := new(g.PingLog)
 				err := json.Unmarshal(v,&l)
 				if err!=nil{
 					continue
 				}
-				maxdelay[timwwnum[string(k)]] = l.Maxdelay
-				mindelay[timwwnum[string(k)]] = l.Mindelay
-				avgdelay[timwwnum[string(k)]] = l.Avgdelay
-				losspk[timwwnum[string(k)]] = l.Losspk
+				if l.Logtime >= timeStartStr && l.Logtime <= timeEndStr{
+					maxdelay[timwwnum[l.Logtime]] = l.Maxdelay
+					mindelay[timwwnum[l.Logtime]] = l.Mindelay
+					avgdelay[timwwnum[l.Logtime]] = l.Avgdelay
+					losspk[timwwnum[l.Logtime]] = l.Losspk
+				}
 			}
 			return nil
 		})
@@ -146,48 +150,6 @@ func configApiRoutes() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		RenderJson(w, preout)
-		/*
-		g.DLock.Lock()
-		querySql := "SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + ""
-		rows, err := g.Db.Query(querySql)
-		g.DLock.Unlock()
-		seelog.Debug("[func:/api/ping.json] Query ", querySql)
-		if err != nil {
-			seelog.Error("[func:/api/ping.json] Query ", err)
-		} else {
-			for rows.Next() {
-				l := new(g.LogInfo)
-				err := rows.Scan(&l.Logtime, &l.Maxdelay, &l.Mindelay, &l.Avgdelay, &l.Sendpk, &l.Revcpk, &l.Losspk, &l.Lastcheck)
-				if err != nil {
-					seelog.Error("[/api/ping.json] Rows ", err)
-					continue
-				}
-				for n, v := range lastcheck {
-					if v == l.Lastcheck {
-						maxdelay[n] = l.Maxdelay
-						mindelay[n] = l.Mindelay
-						avgdelay[n] = l.Avgdelay
-						losspk[n] = l.Losspk
-						sendpk[n] = l.Sendpk
-						revcpk[n] = l.Revcpk
-					}
-				}
-			}
-			rows.Close()
-		}
-
-
-		preout := map[string][]string{
-			"lastcheck": lastcheck,
-			"maxdelay":  maxdelay,
-			"mindelay":  mindelay,
-			"avgdelay":  avgdelay,
-			"sendpk":    sendpk,
-			"revcpk":    revcpk,
-			"losspk":    losspk,
-		}
-		RenderJson(w, preout)
-		*/
 	})
 
 	//topology data api
@@ -221,14 +183,15 @@ func configApiRoutes() {
 		r.ParseForm()
 		var dtb string
 		if len(r.Form["date"]) > 0 {
-			dtb = r.Form["date"][0]
+			dtb = strings.Replace(r.Form["date"][0],"alertlog-","",-1)
+
 		} else {
-			dateStartStr := time.Unix(time.Now().Unix(), 0).Format("20060102")
-			dtb = "alertlog-" + dateStartStr
+			dtb = time.Unix(time.Now().Unix(), 0).Format("20060102")
 		}
 		listpreout := []string{}
 		datapreout := []g.AlertLog{}
-		g.Db.View(func(tx *bolt.Tx) error {
+		db:=g.GetDb("alert",dtb)
+		db.View(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(dtb))
 			if b==nil{
 				return nil
@@ -474,7 +437,11 @@ func configApiRoutes() {
 		}
 		url := r.Form["g"][0]
 		config := g.PingStMini{}
-		timeout := time.Duration(3 * time.Second)
+		defaultto,err := strconv.Atoi(g.Cfg.Timeout)
+		if err!=nil{
+			defaultto = 3
+		}
+		timeout := time.Duration(time.Duration(defaultto) * time.Second)
 		client := http.Client{
 			Timeout: timeout,
 		}
@@ -613,7 +580,11 @@ func configApiRoutes() {
 			http.Error(w, o, 406)
 		}
 		url := r.Form["g"][0]
-		timeout := time.Duration(3 * time.Second)
+		defaultto,err := strconv.Atoi(g.Cfg.Timeout)
+		if err!=nil{
+			defaultto = 3
+		}
+		timeout := time.Duration(time.Duration(defaultto) * time.Second)
 		client := http.Client{
 			Timeout: timeout,
 		}

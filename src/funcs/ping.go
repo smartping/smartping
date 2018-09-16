@@ -60,13 +60,14 @@ func StoragePing(pingres g.PingSt, t g.Target) {
 	l.Avgdelay = strconv.FormatFloat(pingres.AvgDelay, 'f', 2, 64)
 	l.Losspk = strconv.Itoa(pingres.LossPk)
 	seelog.Info("[func:StartPing] ", "(", checktime, ")Starting runPingTest ", t.Name)
-	err := g.Db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte("pinglog-"+t.Addr))
+	db:=g.GetDb("ping",t.Addr)
+	err := db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("pinglog"))
 		if err != nil {
 			return fmt.Errorf("create bucket error : %s", err)
 		}
 		jdata,_ :=json.Marshal(l)
-		err = b.Put([]byte(checktime), []byte(string(jdata)))
+		err = b.Put([]byte(checktime[8:]), []byte(string(jdata)))
 		if err != nil {
 			return fmt.Errorf("put data error: %s", err)
 		}
