@@ -4,9 +4,12 @@ import (
 	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/nettools"
-	"strconv"
 	"sync"
 	"time"
+	"encoding/json"
+	"github.com/boltdb/bolt"
+	"fmt"
+	"strconv"
 )
 
 //ping main function
@@ -49,26 +52,28 @@ func StartPing(t g.Target, wg *sync.WaitGroup) {
 
 //storage ping data
 func StoragePing(pingres g.PingSt, t g.Target) {
-	logtime := time.Now().Format("02 15:04")
 	checktime := time.Now().Format("2006-01-02 15:04")
+	l :=g.PingLog{}
+	l.Logtime = checktime
+	l.Maxdelay = strconv.FormatFloat(pingres.MaxDelay, 'f', 2, 64)
+	l.Mindelay = strconv.FormatFloat(pingres.MinDelay, 'f', 2, 64)
+	l.Avgdelay = strconv.FormatFloat(pingres.AvgDelay, 'f', 2, 64)
+	l.Losspk = strconv.Itoa(pingres.LossPk)
 	seelog.Info("[func:StartPing] ", "(", checktime, ")Starting runPingTest ", t.Name)
-	sql := `CREATE TABLE IF NOT EXISTS [pinglog-` + t.Addr + `] (
-	    logtime   VARCHAR (8),
-	    maxdelay  VARCHAR (3),
-	    mindelay  VARCHAR (3),
-	    avgdelay  VARCHAR (3),
-	    sendpk    VARCHAR (2),
-	    revcpk    VARCHAR (2),
-	    losspk    VARCHAR (3),
-	    lastcheck VARCHAR (16),
-	    PRIMARY KEY (
-		logtime
-	    )
-	);
-	CREATE INDEX  IF NOT EXISTS  "lc" ON [pinglog-` + t.Addr + `] (
-	    lastcheck
-	);`
-	sql = sql + "REPLACE INTO [pinglog-" + t.Addr + "] (logtime, maxdelay, mindelay, avgdelay, sendpk, revcpk, losspk, lastcheck) values('" + logtime + "','" + strconv.FormatFloat(pingres.MaxDelay, 'f', 2, 64) + "','" + strconv.FormatFloat(pingres.MinDelay, 'f', 2, 64) + "','" + strconv.FormatFloat(pingres.AvgDelay, 'f', 2, 64) + "','" + strconv.Itoa(pingres.SendPk) + "','" + strconv.Itoa(pingres.RevcPk) + "','" + strconv.Itoa(pingres.LossPk) + "','" + checktime + "')"
-	SqlExec(sql)
+	err := g.Db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("pinglog-"+t.Addr))
+		if err != nil {
+			return fmt.Errorf("create bucket error : %s", err)
+		}
+		jdata,_ :=json.Marshal(l)
+		err = b.Put([]byte(checktime), []byte(string(jdata)))
+		if err != nil {
+			return fmt.Errorf("put data error: %s", err)
+		}
+		return nil
+	})
+	if err != nil {
+		seelog.Error("[func:StoragePing] Data Storage Error: ",err)
+	}
 	seelog.Info("[func:StartPing] ", "(", checktime, ") PingTest on ", t.Name, " finish!")
 }

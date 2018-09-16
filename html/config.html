@@ -490,7 +490,7 @@
             success: function( retdata ) {
                 if (retdata["status"]=="true"){
                     alert("Config saved success!")
-                    window.location.reload();
+                    window.location.href="/config.html";
                 }else{
                     alert("Config saved fail ("+retdata["info"]+")")
                 }

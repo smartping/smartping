@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/funcs"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/http"
@@ -26,9 +25,6 @@ func main() {
 	}
 	g.ParseConfig(Version)
 
-	for _, target := range g.Cfg.Targets {
-		go funcs.CreatePingTable(target)
-	}
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
 		var wg sync.WaitGroup
@@ -40,14 +36,13 @@ func main() {
 		}
 		wg.Wait()
 		go funcs.StartAlert()
-		seelog.Info(g.Cfg.Mode)
 		if g.Cfg.Mode == "cloud" {
 			go funcs.StartCloudMonitor(1)
 		}
 	}, "ping")
-	c.AddFunc("0 0 0 * * *", func() {
-		go funcs.ClearAlertTable()
-		go funcs.ClearPingTable()
+	c.AddFunc("*/300 * * * * *", func() {
+		go funcs.ClearBucket()
+		go funcs.ClearPingLog()
 	}, "mtc")
 	c.Start()
 	http.StartHttp()

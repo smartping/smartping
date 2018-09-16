@@ -2,25 +2,23 @@ package g
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"github.com/cihub/seelog"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
+	"github.com/boltdb/bolt"
 )
 
 var (
-	DLock          sync.Mutex
 	Root           string
-	Db             *sql.DB
+	Db             *bolt.DB
 	Cfg            Config
+	AlertStatus    map[string]bool
 	AuthUserIpMap  map[string]bool
 	AuthAgentIpMap map[string]bool
 )
@@ -30,7 +28,6 @@ func IsExist(fp string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-// Opening config file in JSON format
 func ReadConfig(filename string) Config {
 	config := Config{}
 	file, err := os.Open(filename)
@@ -47,7 +44,7 @@ func ReadConfig(filename string) Config {
 }
 
 func GetRoot() string {
-	//return "D:\\gopath\\src\\github.com\\smartping\\smartping"
+	return "D:\\gopath\\src\\github.com\\smartping\\smartping"
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal("Get Root Path Error:", err)
@@ -72,6 +69,9 @@ func ParseConfig(ver string) {
 	}
 
 	logger, err := seelog.LoggerFromConfigAsFile(Root + "/conf/" + "seelog.xml")
+	if err != nil {
+		log.Fatalln("[Fault]log config open fail .", err)
+	}
 	seelog.ReplaceLogger(logger)
 	Cfg = ReadConfig(Root + "/conf/" + cfile)
 	if Cfg.Name == "" {
@@ -84,28 +84,11 @@ func ParseConfig(ver string) {
 		Cfg.Mode = "local"
 	}
 	Cfg.Ver = ver
-	if !IsExist(Root + "/db/" + "database.db") {
-		if !IsExist(Root + "/db/" + "database-base.db") {
-			log.Fatalln("[Fault]db file:", Root+"/db/"+"database(-base).db", "both not existent.")
-		}
-		src, err := os.Open(Root + "/db/" + "database-base.db")
-		if err != nil {
-			log.Fatalln("[Fault]db-base file open error.")
-		}
-		defer src.Close()
-		dst, err := os.OpenFile(Root+"/db/"+"database.db", os.O_WRONLY|os.O_CREATE, 0644)
-		if err != nil {
-			log.Fatalln("[Fault]db-base file copy error.")
-		}
-		defer dst.Close()
-		io.Copy(dst, src)
-	}
-	dbpath := Root + "/db/database.db"
-	seelog.Info("Config loaded")
-	Db, err = sql.Open("sqlite3", dbpath)
+	Db, err = bolt.Open(Root + "/db/" + "database.db", 0600, nil)
 	if err != nil {
 		log.Fatalln("[Fault]db open fail .", err)
 	}
+	AlertStatus = map[string]bool{}
 	for k, target := range Cfg.Targets {
 		if target.Thdavgdelay == 0 {
 			Cfg.Targets[k].Thdavgdelay = Cfg.Thdavgdelay

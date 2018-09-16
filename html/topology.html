@@ -172,7 +172,7 @@
                                 if (topodata[td] == "true") {
                                     mcurveness = 0;
                                     mcolor = "green"
-                                }else if (topodata[td] == "unkonwn") {
+                                }else if (topodata[td] == "unknown") {
                                     mcurveness = 0.2;
                                     mcolor = "gray"
                                 } else {
@@ -212,14 +212,14 @@
                             draggable: "true",
                             itemStyle: {
                                 normal: {
-                                    color: "red"
+                                    color: "gray"
                                 }
                             }
                         });
                         myChart.setOption(option);
-                        if ($("#alert").length < 1) {
-                            $(".main").append('<audio id="alert" style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src="' + result["Alertsound"] + '" type="audio/mp3"  /></audio>');
-                        }
+                        //if ($("#alert").length < 1) {
+                         //   $(".main").append('<audio id="alert" style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src="' + result["Alertsound"] + '" type="audio/mp3"  /></audio>');
+                        //}
                     });
                 }else{
                     dataarea.push({

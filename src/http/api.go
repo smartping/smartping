@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/g"
 	"github.com/wcharczuk/go-chart"
 	"github.com/wcharczuk/go-chart/drawing"
@@ -12,6 +11,11 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"github.com/boltdb/bolt"
+	//"github.com/cihub/seelog"
+	//"strings"
+	"github.com/smartping/smartping/src/funcs"
+	//"context"
 )
 
 func configApiRoutes() {
@@ -23,8 +27,6 @@ func configApiRoutes() {
 			http.Error(w, o, 401)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
 		nconf := g.Config{}
 		if len(r.Form["cloudendpoint"]) > 0 {
@@ -45,6 +47,7 @@ func configApiRoutes() {
 		var out bytes.Buffer
 		json.Indent(&out, onconf, "", "\t")
 		o := out.String()
+		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintln(w, o)
 	})
 
@@ -55,15 +58,18 @@ func configApiRoutes() {
 			http.Error(w, o, 401)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
+		if len(r.Form["ip"]) == 0 {
+			o := "Missing Param !"
+			http.Error(w, o, 406)
+			return
+		}
 		var tableip string
-		var where string
 		var timeStart int64
 		var timeEnd int64
 		var timeStartStr string
 		var timeEndStr string
+		tableip = r.Form["ip"][0]
 		if len(r.Form["starttime"]) > 0 && len(r.Form["endtime"]) > 0 {
 			timeStartStr = r.Form["starttime"][0]
 			if timeStartStr != "" {
@@ -95,8 +101,11 @@ func configApiRoutes() {
 		var sendpk []string
 		var revcpk []string
 		var losspk []string
+		timwwnum := map[string]int{}
 		for i := 0; i < cnt+1; i++ {
-			lastcheck = append(lastcheck, time.Unix(timeStart, 0).Format("2006-01-02 15:04"))
+			ntime:=time.Unix(timeStart, 0).Format("2006-01-02 15:04")
+			timwwnum[ntime]=i
+			lastcheck = append(lastcheck, ntime)
 			maxdelay = append(maxdelay, "0")
 			mindelay = append(mindelay, "0")
 			avgdelay = append(avgdelay, "0")
@@ -105,11 +114,39 @@ func configApiRoutes() {
 			losspk = append(losspk, "0")
 			timeStart = timeStart + 60
 		}
-		if len(r.Form["ip"]) > 0 {
-			tableip = r.Form["ip"][0]
-		} else {
-			tableip = ""
+		g.Db.View(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte("pinglog-"+tableip))
+			if b==nil{
+				return nil
+			}
+			c:= b.Cursor()
+			min := []byte(timeStartStr)
+			max := []byte(timeEndStr)
+			for k, v := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, v = c.Next() {
+				l := new(g.PingLog)
+				err := json.Unmarshal(v,&l)
+				if err!=nil{
+					continue
+				}
+				maxdelay[timwwnum[string(k)]] = l.Maxdelay
+				mindelay[timwwnum[string(k)]] = l.Mindelay
+				avgdelay[timwwnum[string(k)]] = l.Avgdelay
+				losspk[timwwnum[string(k)]] = l.Losspk
+			}
+			return nil
+		})
+		preout := map[string][]string{
+			"lastcheck": lastcheck,
+			"maxdelay":  maxdelay,
+			"mindelay":  mindelay,
+			"avgdelay":  avgdelay,
+			"sendpk":    sendpk,
+			"revcpk":    revcpk,
+			"losspk":    losspk,
 		}
+		w.Header().Set("Content-Type", "application/json")
+		RenderJson(w, preout)
+		/*
 		g.DLock.Lock()
 		querySql := "SELECT logtime,maxdelay,mindelay,avgdelay,sendpk,revcpk,losspk,lastcheck FROM `pinglog-" + tableip + "` where 1=1 and lastcheck between '" + timeStartStr + "' and '" + timeEndStr + "' " + where + ""
 		rows, err := g.Db.Query(querySql)
@@ -139,6 +176,7 @@ func configApiRoutes() {
 			rows.Close()
 		}
 
+
 		preout := map[string][]string{
 			"lastcheck": lastcheck,
 			"maxdelay":  maxdelay,
@@ -149,6 +187,7 @@ func configApiRoutes() {
 			"losspk":    losspk,
 		}
 		RenderJson(w, preout)
+		*/
 	})
 
 	//topology data api
@@ -158,46 +197,20 @@ func configApiRoutes() {
 			http.Error(w, o, 401)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		preout := make(map[string]string)
-		var timeStart int64
-		var timeStartStr string
 		for _, v := range g.Cfg.Targets {
 			if v.Addr != g.Cfg.Ip {
-				timeStart = time.Now().Unix() - int64(v.Thdchecksec)
-				timeStartStr = time.Unix(timeStart, 0).Format("2006-01-02 15:04")
-				preout[v.Name] = "false"
-				g.DLock.Lock()
-				querySql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + timeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
-				rows, err := g.Db.Query(querySql)
-				g.DLock.Unlock()
-				seelog.Debug("[func:/api/topology.json] Query Topology", querySql)
-				if err != nil {
-					seelog.Error("[/api/topology.json] ", err)
-				} else {
-					for rows.Next() {
-						l := new(g.TopoLog)
-						err := rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
-						if err != nil {
-							seelog.Error("[/api/topology.json] ", err)
-							preout[v.Name] = "unknown"
-							continue
-						}
-						sec, _ := strconv.Atoi(l.Cnt)
-						if sec < v.Thdoccnum {
-							preout[v.Name] = "true"
-						}
-					}
-					rows.Close()
-				}
+				preout[v.Name] =  funcs.CheckAlertStatus(v)
 			}
 		}
+		w.Header().Set("Content-Type", "application/json")
 		RenderJson(w, preout)
+
 	})
 
 	//alert api
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
+
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
@@ -214,46 +227,22 @@ func configApiRoutes() {
 			dtb = "alertlog-" + dateStartStr
 		}
 		listpreout := []string{}
-		g.DLock.Lock()
-		querySql := "SELECT name FROM [sqlite_master] where type='table' and name like '%alertlog%'"
-		lrows, lerr := g.Db.Query(querySql)
-		g.DLock.Unlock()
-		seelog.Debug("[func:/api/alert.json] Query Table List", querySql)
-		if lerr != nil {
-			seelog.Error("[/api/alert.json] ", lerr)
-		} else {
-			for lrows.Next() {
-				var l string
-				err := lrows.Scan(&l)
-				if err != nil {
-					seelog.Error("[/api/alert.json]  Rows Table List", err)
-					continue
-				}
-				listpreout = append(listpreout, l)
+		datapreout := []g.AlertLog{}
+		g.Db.View(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte(dtb))
+			if b==nil{
+				return nil
 			}
-			lrows.Close()
-		}
-		datapreout := []g.Alterdata{}
-		g.DLock.Lock()
-		querySql = "SELECT * FROM [" + dtb + "] where 1=1"
-		rows, err := g.Db.Query(querySql)
-		g.DLock.Unlock()
-		seelog.Debug("[func:/api/alert.json] Query Detail Data", querySql)
-		if err != nil {
-			seelog.Error("[/api/alert.json] Query Detail Data", err)
-		} else {
-			for rows.Next() {
-				l := new(g.Alterdata)
-				err := rows.Scan(&l.Logtime, &l.Fromname, &l.Toname, &l.Tracert)
-				if err != nil {
-					seelog.Error("[/api/alert.json]  Rows Detail Data", err)
-					continue
+			b.ForEach(func(k, v []byte) error {
+				l := g.AlertLog{}
+				err:= json.Unmarshal(v,&l)
+				if err==nil{
+					datapreout = append(datapreout, l)
 				}
-				datapreout = append(datapreout, *l)
-			}
-			rows.Close()
-		}
-
+				return nil
+			})
+			return nil
+		})
 		lout, _ := json.Marshal(listpreout)
 		dout, _ := json.Marshal(datapreout)
 		fmt.Fprintln(w, "["+string(lout)+","+string(dout)+"]")

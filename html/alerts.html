@@ -159,8 +159,18 @@
 <script>
     var ajaxcnt  = 0;
     function getdata(d){
-        $(".alertlist").html("");
         $.getJSON("/api/config.json",function(result){
+            $(".datelist").html("");
+            var nowtime = Date.parse(new Date())/1000
+            var starttime = nowtime-result["Alerthistory"]*86400
+            for ( nowtime;nowtime>starttime;nowtime=nowtime-86400) {
+                var date = new Date(nowtime*1000);
+                var Y = date.getFullYear() + '';
+                var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '';
+                var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + '';
+                dstr = "alertlog-"+Y+M+D
+                $(".datelist").append("<tr><td><a onclick=getdata(\"" + dstr + "\")>" + dstr + "</a></td></tr>");
+            }
             $(".agentlist").html("")
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS") {
@@ -171,36 +181,38 @@
                     ajaxcnt = ajaxcnt +1 ;
                 }
             });
+            $(".alertlist").html("");
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS"){
+                    if (d==""){
+                        rurl = '/api/agentproxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json'
+                    }else{
+                        rurl = '/api/agentproxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json?date='+d
+                    }
                     $.ajax({
                         dataType: "json",
-                        url: '/api/agentproxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json?date='+d,
+                        url: rurl,
                         success: function( result) {
+                            ajaxcnt = ajaxcnt -1;
                             $(".alerticon-"+field.Name+"").remove();
-                            for(var del in result[0]){
-                                var ard=false
-                                $(".datelist").find("tr").each(function(){
-                                    if($(this).find("td").find("a").html()==result[0][del])
-                                    {
-                                        ard = true
-                                    }
-                                });
-                                if (ard == false) {
-                                    $(".datelist").append("<tr><td><a onclick=getdata(\""+result[0][del]+"\")>"+result[0][del]+"</a></td></tr>");
-                                }
-                            };
                             for(var dal in result[1]){
                                 $(".alertlist").append("<tr><td>"+result[1][dal]['Logtime']+"</td><td>"+result[1][dal]['Fromname']+"</td><td>"+result[1][dal]['Toname']+"</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>Tracert</a></td></tr>");
                             };
                             $(".alerticon-"+field.Name+"").removeClass("icon-spinner");
+                            if(ajaxcnt==0 && $(".alertlist").html()!=""){
+                                pageFinish();
+                            }
                         },
                         timeout: result["Timeout"]*1000
                     }).fail( function( xhr, status ) {
+                        ajaxcnt = ajaxcnt -1;
                         $(".alerticon-"+field.Name+"").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
                         $(".alerticon-"+field.Name+"").addClass("icon-warning-sign");
                         $(".alerticon-" + field.Name + "").attr("title",xhr.responseText);
                         $(".alerticon-" + field.Name + "").tooltip();
+                        if(ajaxcnt==0 && $(".alertlist").html()!=""){
+                            pageFinish();
+                        }
                     });
                 }
             });
@@ -217,63 +229,8 @@
         });
     }
     $(function(){
-      $.getJSON("/api/config.json",function(result){
-          setTimeout('Refresh()',result["Alertcycle"]*60*1000);
-          AgentMode(result["Mode"],result["Cstatus"])
-          $("#verion").html("Version: "+result["Ver"])
-          $.each(result["Targets"], function(i, field){
-              if(field.Type=="CS") {
-                  if(field.Addr==result["Ip"]){
-                      return true;
-                  }
-                  $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;<a >" + field.Name + "</a></td></tr>");
-                  ajaxcnt = ajaxcnt +1 ;
-              }
-          });
-          $.each(result["Targets"], function(i, field){
-              if(field.Type=="CS") {
-                  $.ajax({
-                      dataType: "json",
-                      url: '/api/agentproxy.json?g=http://' + field.Addr + ':' + result['Port'] + '/api/alert.json',
-                      success: function (result) {
-                          $(".alerticon-" + field.Name + "").remove();
-                          for (var del in result[0]) {
-                              var ard = false
-                              $(".datelist").find("tr").each(function () {
-                                  if ($(this).find("td").find("a").html() == result[0][del]) {
-                                      ard = true
-                                  }
-                              });
-                              if (ard == false) {
-                                  $(".datelist").append("<tr><td><a onclick=getdata(\"" + result[0][del] + "\")>" + result[0][del] + "</a></td></tr>");
-                              }
-                          };
-                          for (var dal in result[1]) {
-                              $(".alertlist").append("<tr><td>" + result[1][dal]['Logtime'] + "</td><td>" + result[1][dal]['Fromname'] + "</td><td>" + result[1][dal]['Toname'] + "</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>Tracert</a></td></tr>");
-                          }
-                          ;
-                          $(".alerticon-" + field.Name + "").removeClass("icon-spinner");
-                          ajaxcnt = ajaxcnt -1;
-                          if(ajaxcnt==0){
-                              pageFinish();
-                          }
-                      },
-                      timeout: result["Timeout"] * 1000
-                  }).fail(function (xhr, status) {
-                      $(".alerticon-" + field.Name + "").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
-                      $(".alerticon-" + field.Name + "").addClass("icon-warning-sign");
-                      $(".alerticon-" + field.Name + "").attr("title",xhr.responseText);
-                      $(".alerticon-" + field.Name + "").tooltip();
-                      ajaxcnt = ajaxcnt -1;
-                      if(ajaxcnt==0){
-                          pageFinish();
-                      }
-                  });
-              }
-          });
-      });
+        getdata("")
     });
-
 </script>
 </body>
 </html>

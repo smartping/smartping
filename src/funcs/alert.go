@@ -2,72 +2,105 @@ package funcs
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/nettools"
-	"strconv"
 	"time"
+	"github.com/boltdb/bolt"
+	"encoding/json"
+	"strings"
+	"strconv"
+	"fmt"
 )
 
 //alert main function
 func StartAlert() {
 	seelog.Info("[func:StartAlert] ", "starting run AlertCheck ")
-	timeStartStr := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
 	dateStartStr := time.Unix(time.Now().Unix(), 0).Format("20060102")
-	sql := `CREATE TABLE IF NOT EXISTS [alertlog-` + dateStartStr + `] (
-			logtime   VARCHAR (8),
-			fromname  VARCHAR (15),
-			toname    VARCHAR (15),
-			tracert	  TEXT
-	);`
-	flag := false
 	for _, v := range g.Cfg.Targets {
 		if v.Addr != g.Cfg.Ip {
-			checktimeStartStr := time.Unix((time.Now().Unix() - int64(v.Thdchecksec)), 0).Format("2006-01-02 15:04")
-			g.DLock.Lock()
-			querysql := "SELECT ifnull(max(avgdelay),0) maxavgdelay, ifnull(max(losspk),0) maxlosspk ,count(1) Cnt FROM  `pinglog-" + v.Addr + "` where lastcheck > '" + checktimeStartStr + "' and (cast(avgdelay as double) > " + strconv.Itoa(v.Thdavgdelay) + " or cast(losspk as double) > " + strconv.Itoa(v.Thdloss) + ") "
-			rows, err := g.Db.Query(querysql)
-			g.DLock.Unlock()
-			seelog.Debug("[func:StartAlert] ", querysql)
-			if err != nil {
-				seelog.Error("[func:StartAlert] Query Error ", err)
-				continue
+			s := CheckAlertStatus(v)
+			if s=="true"{
+				g.AlertStatus[v.Addr]=true
 			}
-			for rows.Next() {
-				l := new(g.TopoLog)
-				err := rows.Scan(&l.Maxavgdelay, &l.Maxlosspk, &l.Cnt)
-				if err != nil {
-					seelog.Error("[func:StartAlert] Rows Error ", err)
-					continue
-				}
-				sec, _ := strconv.Atoi(l.Cnt)
-				if sec >= v.Thdoccnum {
-					tracrtString := ""
-					hops, err := nettools.RunTrace(v.Addr, time.Second, 64, 6)
-					if nil != err {
-						seelog.Error("[func:StartAlert] Traceroute error ", err)
-						tracrtString = err.Error()
-					} else {
-						tracrt := bytes.NewBufferString("")
-						for i, hop := range hops {
-							if hop.Addr == nil {
-								fmt.Fprintf(tracrt, "* * *\n")
-							} else {
-								fmt.Fprintf(tracrt, "%d (%s) %v %v %v\n", i+1, hop.Addr, hop.MaxRTT, hop.AvgRTT, hop.MinRTT)
-							}
+			_, haskey := g.AlertStatus[v.Addr];
+			if ( !haskey && s=="false" ) || ( s=="false" && g.AlertStatus[v.Addr] ) {
+				seelog.Debug("[func:StartAlert] ",v.Addr+" Alert!")
+				g.AlertStatus[v.Addr]=false
+				l := g.AlertLog{}
+				l.Logtime = time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
+				l.Toname = v.Name
+				l.Fromname = g.Cfg.Name
+				tracrtString := ""
+				hops, err := nettools.RunTrace(v.Addr, time.Second, 64, 6)
+				if nil != err {
+					seelog.Error("[func:StartAlert] Traceroute error ", err)
+					tracrtString = err.Error()
+				} else {
+					tracrt := bytes.NewBufferString("")
+					for i, hop := range hops {
+						if hop.Addr == nil {
+							fmt.Fprintf(tracrt, "* * *\n")
+						} else {
+							fmt.Fprintf(tracrt, "%d (%s) %v %v %v\n", i+1, hop.Addr, hop.MaxRTT, hop.AvgRTT, hop.MinRTT)
 						}
-						tracrtString = tracrt.String()
 					}
-					sql = sql + "insert into [alertlog-" + dateStartStr + "] (logtime,fromname,toname,tracert) values('" + timeStartStr + "','" + g.Cfg.Name + "','" + v.Name + "','" + tracrtString + "');"
-					flag = true
+					tracrtString = tracrt.String()
+				}
+				l.Tracert = tracrtString
+				err = g.Db.Update(func(tx *bolt.Tx) error {
+					b, err := tx.CreateBucketIfNotExists([]byte("alertlog-" + dateStartStr))
+					if err != nil {
+						return fmt.Errorf("create bucket error : %s", err)
+					}
+					jdata,_ :=json.Marshal(l)
+					err = b.Put([]byte(l.Logtime+v.Name), []byte(string(jdata)))
+					if err != nil {
+						return fmt.Errorf("put data error: %s", err)
+					}
+					return nil
+				})
+				if err != nil {
+					seelog.Error("[func:StartAlert] Data Storage Error: ",err)
 				}
 			}
-			rows.Close()
+
 		}
 	}
-	if flag {
-		SqlExec(sql)
-	}
 	seelog.Info("[func:StartAlert] ", "AlertCheck finish ")
+}
+
+func CheckAlertStatus(v g.Target) string{
+	timeStartStr := time.Unix((time.Now().Unix() - int64(v.Thdchecksec)), 0).Format("2006-01-02 15:04")
+	timeEndStr := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
+	result := "false"
+	g.Db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("pinglog-"+v.Addr))
+		if b==nil{
+			result = "unknown"
+			return nil
+		}
+		c:= b.Cursor()
+		min := []byte(timeStartStr)
+		max := []byte(timeEndStr)
+		ectime:=0
+		for k, val := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, val = c.Next() {
+			l := new(g.PingLog)
+			err := json.Unmarshal(val,&l)
+			if err!=nil{
+				continue
+			}
+			seelog.Debug(v.Name+"|"+strings.Split(l.Avgdelay,".")[0]+"|"+strconv.Itoa(v.Thdavgdelay)+"|"+strings.Split(l.Losspk,".")[0]+"|"+strconv.Itoa(v.Thdloss))
+			avgdelay, _ := strconv.Atoi(strings.Split(l.Avgdelay,".")[0])
+			losspk, _ := strconv.Atoi(strings.Split(l.Losspk,".")[0])
+			if avgdelay > v.Thdavgdelay || losspk >= v.Thdloss{
+				ectime = ectime +1
+			}
+		}
+		if ectime<v.Thdoccnum{
+			result =  "true"
+		}
+		return nil
+	})
+	return result
 }
