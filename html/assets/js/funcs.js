@@ -6,7 +6,7 @@ function AgentMode(mode,status){
         $(".localmode").remove();
         $(".cloudmode").show();
         if (status==true){
-            //$(".cicon").addClass("icon-success");
+            $(".cicon").removeClass("icon-danger");
             $(".cloudmodeonline").show();
             $(".cloudmodeoffline").remove();
         }else{

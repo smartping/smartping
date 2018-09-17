@@ -174,7 +174,7 @@
             $(".agentlist").html("")
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS") {
-
+                    ajaxcnt = ajaxcnt+1
                     if(field.Addr==result["Ip"]){
                         return true;
                     }
@@ -200,7 +200,7 @@
                                 $(".alertlist").append("<tr><td>"+result[1][dal]['Logtime']+"</td><td>"+result[1][dal]['Fromname']+"</td><td>"+result[1][dal]['Toname']+"</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>Tracert</a></td></tr>");
                             };
                             $(".alerticon-"+field.Name+"").removeClass("icon-spinner");
-                            console.log(ajaxcnt)
+                            //console.log(ajaxcnt)
                             if(ajaxcnt==0 && $(".alertlist").html()!=""){
                                 pageFinish();
                             }
