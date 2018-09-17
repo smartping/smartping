@@ -19,17 +19,17 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
-            <a class="brand" href="index.html">SmartPing Dashbord</a>
+            <span class="brand cloudmode" style="margin-right: -15px;"><i class="cicon icon-cloud"></i></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
             <div class="nav-collapse">
-                <ul class="nav pull-right">
-                    <li class="dropdown">
-                        <a target="_blank" href="http://smartping.cn/" >
-                            <i class="icon-cloud"></i>
-                            Know About The SmartPing.CN ?
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <ul class="nav pull-right">
+                <li class="dropdown">
+                    <a target="_blank" href="http://smartping.cn/" >
+                        <i class="icon-comment"></i>
+                        Know About SmartPing.CN ?
+                    </a>
+                </li>
+            </ul>
+        </div>
             <!--/.nav-collapse -->
         </div>
         <!-- /container -->
@@ -326,7 +326,7 @@
             <div class="control-group">
               <label class="control-label" for="Alertsound">Alert Sound</label>
               <div class="controls">
-                <input type="text"  style="width:97%" id="Alertsound" value="" >
+                <input type="text"  style="width:97%" id="Alertsound" value=""  readonly>
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
@@ -575,6 +575,7 @@
         }
         if(tp!="?cloud" && tp!="?local") {
           $.getJSON("/api/config.json",function(result){
+              $("#agentname").html(" ("+result["Name"]+")")
               updateForm(result);
           });
         }

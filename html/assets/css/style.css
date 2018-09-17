@@ -7,7 +7,13 @@ Bootstrap Admin Template by EGrappler.com
 /*------------------------------------------------------------------
 [1. Global]
 */
+.icon-success {
+	color:green;
+}
 
+.icon-danger {
+	color:#b94a48;
+}
 body {
 	background: #f9f6f1;
 	font: 13px/1.7em 'Open Sans';

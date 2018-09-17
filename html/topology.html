@@ -19,7 +19,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord</a>
+      <span class="brand cloudmode" style="margin-right: -15px;"><i class="cicon icon-cloud"></i></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
     </div>
     <!-- /container -->
   </div>
@@ -111,7 +111,7 @@
                     if(field.Addr==result["Ip"]){
                         return true;
                     }
-                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'  data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;<a>" + field.Name + "</a></td></tr>");
+                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'  data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;" + field.Name + "</td></tr>");
                 }
             });
             setTimeout('Refresh()',result["Alertcycle"]*60*1000);

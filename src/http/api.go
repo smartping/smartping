@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 	"github.com/boltdb/bolt"
-	"github.com/cihub/seelog"
+	//"github.com/cihub/seelog"
 	//"strings"
 	"github.com/smartping/smartping/src/funcs"
 	//"context"
@@ -578,7 +578,7 @@ func configApiRoutes() {
 			http.Error(w, o, 406)
 		}
 		url := strings.Replace(strings.Replace(r.Form["g"][0],"%26","&",-1)," ","%20",-1)
-		seelog.Debug("[/api/agentproxy.json] GET ",url)
+		//seelog.Debug("[/api/agentproxy.json] GET ",url)
 		defaultto,err := strconv.Atoi(g.Cfg.Timeout)
 		if err!=nil{
 			defaultto = 3

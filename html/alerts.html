@@ -20,7 +20,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashbord</a>
+      <span class="brand cloudmode" style="margin-right: -15px;"><i class="cicon icon-cloud"></i></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
       <!--/.nav-collapse -->
     </div>
     <!-- /container -->
@@ -174,11 +174,12 @@
             $(".agentlist").html("")
             $.each(result["Targets"], function(i, field){
                 if(field.Type=="CS") {
-                    ajaxcnt = ajaxcnt +1 ;
+
                     if(field.Addr==result["Ip"]){
                         return true;
                     }
-                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;<a >" + field.Name + "</a></td></tr>");
+                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;" + field.Name + "</td></tr>");
+
                 }
             });
             $(".alertlist").html("");
@@ -199,7 +200,7 @@
                                 $(".alertlist").append("<tr><td>"+result[1][dal]['Logtime']+"</td><td>"+result[1][dal]['Fromname']+"</td><td>"+result[1][dal]['Toname']+"</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>Tracert</a></td></tr>");
                             };
                             $(".alerticon-"+field.Name+"").removeClass("icon-spinner");
-                            //console.log(ajaxcnt)
+                            console.log(ajaxcnt)
                             if(ajaxcnt==0 && $(".alertlist").html()!=""){
                                 pageFinish();
                             }
