@@ -125,6 +125,7 @@ func SaveCloudConfig(url string, flag bool) (Config, error) {
 		return config, err
 	}
 	if flag == true {
+		Cfg.Chinamap = config.Chinamap
 		Cfg.Targets = config.Targets
 		Cfg.Mode = "cloud"
 		Cfg.Timeout = config.Timeout
