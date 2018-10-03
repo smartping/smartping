@@ -147,7 +147,7 @@
               $(thisTr.children('td')[7]).html("");
               $(thisTr.children('td')[8]).html("");
               $(thisTr.children('td')[9]).html("<i class='icon-spinner icon-spin animated erricon'  data-toggle='tooltip' title='' data-placement='bottom'></i>")
-              var p = $.getJSON("http://"+Addr+"/api/tools.json?t="+target,function(result){
+              var p = $.getJSON("/api/agentproxy.json?g=http://"+Addr+"/api/tools.json?t="+target,function(result){
                   if(result.status=="true"){
                       $(thisTr.children('td')[2]).html(result.ip);
                       $(thisTr.children('td')[3]).html(result.ping.SendPk);

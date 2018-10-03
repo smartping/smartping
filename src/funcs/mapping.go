@@ -41,7 +41,6 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 	statMap := []g.PingSt{}
 	for _, ip := range ips {
 		seelog.Debug("[func:StartChinaMapPing]", ip)
-		stat := g.PingSt{}
 		ipaddr, err := net.ResolveIPAddr("ip", ip)
 		if err == nil {
 			for i := 0; i < 3; i++ {
@@ -70,17 +69,18 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 				} else {
 					stat.AvgDelay = 0.0
 				}
+				statMap = append(statMap, stat)
 			}
 		} else {
 			stat := g.PingSt{}
-			stat.AvgDelay = 0.00
-			stat.MinDelay = 0.00
-			stat.MaxDelay = 0.00
+			stat.AvgDelay = 2000.00
+			stat.MinDelay = 2000.00
+			stat.MaxDelay = 2000.00
 			stat.SendPk = 0
 			stat.RevcPk = 0
 			stat.LossPk = 100
+			statMap = append(statMap, stat)
 		}
-		statMap = append(statMap, stat)
 	}
 	fStatDetail := g.PingSt{}
 	fT := 0
