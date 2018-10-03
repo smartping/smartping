@@ -573,10 +573,12 @@
         var tp = window.location.search;
         $.getJSON("/api/config.json",function(result){
             $("#agentname").html(" ("+result["Name"]+")")
+            updateForm(result);
             if(result["Mode"]=="cloud" && tp!="?local"){
+                $(".localmode").remove();
+                $(".cloudmode").show();
                 cloudReadonly();
             }
-            updateForm(result);
             var endpoint = "http://"+result["Ip"]+":"+result["Port"];
             if(tp=="?cloud"){
                 $(".localmode").remove();
