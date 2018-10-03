@@ -2,15 +2,15 @@ package funcs
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
+	"github.com/boltdb/bolt"
 	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/nettools"
-	"time"
-	"github.com/boltdb/bolt"
-	"encoding/json"
-	"strings"
 	"strconv"
-	"fmt"
+	"strings"
+	"time"
 )
 
 //alert main function
@@ -20,13 +20,13 @@ func StartAlert() {
 	for _, v := range g.Cfg.Targets {
 		if v.Addr != g.Cfg.Ip {
 			s := CheckAlertStatus(v)
-			if s=="true"{
-				g.AlertStatus[v.Addr]=true
+			if s == "true" {
+				g.AlertStatus[v.Addr] = true
 			}
-			_, haskey := g.AlertStatus[v.Addr];
-			if ( !haskey && s=="false" ) || ( s=="false" && g.AlertStatus[v.Addr] ) {
-				seelog.Debug("[func:StartAlert] ",v.Addr+" Alert!")
-				g.AlertStatus[v.Addr]=false
+			_, haskey := g.AlertStatus[v.Addr]
+			if (!haskey && s == "false") || (s == "false" && g.AlertStatus[v.Addr]) {
+				seelog.Debug("[func:StartAlert] ", v.Addr+" Alert!")
+				g.AlertStatus[v.Addr] = false
 				l := g.AlertLog{}
 				l.Logtime = time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
 				l.Toname = v.Name
@@ -48,13 +48,13 @@ func StartAlert() {
 					tracrtString = tracrt.String()
 				}
 				l.Tracert = tracrtString
-				db:=g.GetDb("alert",dateStartStr)
+				db := g.GetDb("alert", dateStartStr)
 				err = db.Update(func(tx *bolt.Tx) error {
 					b, err := tx.CreateBucketIfNotExists([]byte("alertlog"))
 					if err != nil {
 						return fmt.Errorf("create bucket error : %s", err)
 					}
-					jdata,_ :=json.Marshal(l)
+					jdata, _ := json.Marshal(l)
 					err = b.Put([]byte(l.Logtime+v.Name), []byte(string(jdata)))
 					if err != nil {
 						return fmt.Errorf("put data error: %s", err)
@@ -62,7 +62,7 @@ func StartAlert() {
 					return nil
 				})
 				if err != nil {
-					seelog.Error("[func:StartAlert] Data Storage Error: ",err)
+					seelog.Error("[func:StartAlert] Data Storage Error: ", err)
 				}
 			}
 
@@ -71,25 +71,25 @@ func StartAlert() {
 	seelog.Info("[func:StartAlert] ", "AlertCheck finish ")
 }
 
-func CheckAlertStatus(v g.Target) string{
+func CheckAlertStatus(v g.Target) string {
 	timeStartStr := time.Unix((time.Now().Unix() - int64(v.Thdchecksec)), 0).Format("2006-01-02 15:04")
 	timeEndStr := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
 	result := "false"
-	db:=g.GetDb("ping",v.Addr)
+	db := g.GetDb("ping", v.Addr)
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("pinglog"))
-		if b==nil{
+		if b == nil {
 			result = "unknown"
 			return nil
 		}
-		c:= b.Cursor()
+		c := b.Cursor()
 		min := []byte(timeStartStr[8:])
 		max := []byte(timeEndStr[8:])
-		ectime:=0
+		ectime := 0
 		for k, val := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, val = c.Next() {
 			l := new(g.PingLog)
-			err := json.Unmarshal(val,&l)
-			if err!=nil{
+			err := json.Unmarshal(val, &l)
+			if err != nil {
 				continue
 			}
 			if l.Logtime > timeStartStr && l.Logtime < timeEndStr {
@@ -101,8 +101,8 @@ func CheckAlertStatus(v g.Target) string{
 				}
 			}
 		}
-		if ectime<v.Thdoccnum{
-			result =  "true"
+		if ectime < v.Thdoccnum {
+			result = "true"
 		}
 		return nil
 	})

@@ -20,7 +20,7 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <span class="brand cloudmode" style="margin-right: -15px;"><i class="cicon icon-cloud"></i></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+      <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
       <!--/.nav-collapse -->
     </div>
     <!-- /container -->
@@ -32,12 +32,13 @@
   <div class="subnavbar-inner">
     <div class="container">
       <ul class="mainnav">
-        <li><a href="index.html"><i class="icon-mail-forward"></i><span>Forward Ping</span> </a> </li>
-        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>Reverse Ping</span> </a> </li>
-        <li ><a href="topology.html"><i class="icon-bar-chart"></i><span>Topology</span> </a> </li>
-        <li class="active"><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
-        <!--<li><a href="tools.html"><i class="icon-wrench"></i><span>Test Tools</span> </a> </li>-->
-        <li><a href="config.html"><i class="icon-cog"></i><span>Config</span> </a> </li>
+        <li><a href="index.html"><i class="icon-mail-forward"></i><span>正向Ping</span> </a> </li>
+        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
+        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
+        <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
+        <li  class="active"><a href="alerts.html"><i class="icon-warning-sign"></i><span>报警日志</span> </a> </li>
+        <li><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
+        <li><a href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
       </ul>
     </div>
     <!-- /container --> 
@@ -53,14 +54,14 @@
         <div class="span2"  >
           <div class="widget widget-table action-table">
             <div class="widget-header"> <i class="icon-th-list"></i>
-              <h3>Archives</h3>
+              <h3>报警存档</h3>
             </div>
             <!-- /widget-header -->
             <div class="widget-content">
               <table class="table table-striped table-bordered">
                 <thead>
                 <tr>
-                  <th> Data </th>
+                  <th> 日期 </th>
                 </tr>
                 </thead>
                 <tbody class="datelist"></tbody>
@@ -74,17 +75,17 @@
         <div class="span8">
           <div class="widget widget-table action-table">
             <div class="widget-header"> <i class="icon-th-list"></i>
-              <h3>Alert History</h3>
+              <h3>报警历史</h3>
             </div>
             <!-- /widget-header -->
             <div class="widget-content">
               <table class="table table-striped table-bordered" id="mytable">
                 <thead>
                 <tr>
-                  <th> Logtime </th>
-                  <th> From </th>
-                  <th> To </th>
-                  <th> NetTool </th>
+                  <th> 报警日期 </th>
+                  <th> 源节点 </th>
+                  <th> 目标节点 </th>
+                  <th> 工具 </th>
                 </tr>
                 </thead>
                 <tbody class="alertlist"></tbody>
@@ -97,16 +98,11 @@
         <div class="span2">
           <div class="widget widget-table action-table">
             <div class="widget-header"> <i class="icon-th-list"></i>
-              <h3>Agent List</h3>
+              <h3>节点列表</h3>
             </div>
             <!-- /widget-header -->
             <div class="widget-content">
               <table class="table table-striped table-bordered">
-                <thead>
-                <tr>
-                  <th> Agent </th>
-                </tr>
-                </thead>
                 <tbody class="agentlist">
 
                 </tbody>
@@ -160,9 +156,11 @@
     var ajaxcnt  = 0;
     function getdata(d){
         $.getJSON("/api/config.json",function(result){
+            $("#agentname").html(" ("+result["Name"]+")")
+            AgentMode(result["Mode"],result["Status"])
             $(".datelist").html("");
             var nowtime = Date.parse(new Date())/1000
-            var starttime = nowtime-result["Alerthistory"]*86400
+            var starttime = nowtime-result["Archive"]*86400
             for ( nowtime;nowtime>starttime;nowtime=nowtime-86400) {
                 var date = new Date(nowtime*1000);
                 var Y = date.getFullYear() + '';
@@ -173,18 +171,18 @@
             }
             $(".agentlist").html("")
             $.each(result["Targets"], function(i, field){
-                if(field.Type=="CS") {
+                if(field.Agent==true) {
                     ajaxcnt = ajaxcnt+1
-                    if(field.Addr==result["Ip"]){
-                        return true;
-                    }
+                    //if(field.Addr==result["Ip"]){
+                    //    return true;
+                    //}
                     $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;" + field.Name + "</td></tr>");
 
                 }
             });
             $(".alertlist").html("");
             $.each(result["Targets"], function(i, field){
-                if(field.Type=="CS"){
+                if(field.Agent==true){
                     if (d==""){
                         rurl = '/api/agentproxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json'
                     }else{

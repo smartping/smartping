@@ -9,18 +9,18 @@ import (
 func StartCloudMonitor(cnt int) {
 	if cnt < 3 {
 		seelog.Info("[func:StartCloudMonitor] ", "starting run StartCloudMonitor ")
-		_, err := g.SaveCloudConfig(g.Cfg.Cendpoint, true)
+		_, err := g.SaveCloudConfig(g.Cfg.Endpoint, true)
 		if err != nil {
 			seelog.Error("[func:StartCloudMonitor] Cloud Monitor Error", err)
-			g.Cfg.Cstatus = false
+			g.Cfg.Status = false
 			StartCloudMonitor(cnt + 1)
 			return
 		}
-		g.Cfg.Cstatus = true
+		g.Cfg.Status = true
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			seelog.Error("[func:StartCloudMonitor] Save Cloud Config Error", err)
-			g.Cfg.Cstatus = false
+			g.Cfg.Status = false
 			StartCloudMonitor(cnt + 1)
 			return
 		}

@@ -13,6 +13,10 @@ db/ping/*.db
 db/ping/*.lock
 db/alert/*.db
 db/alert/*.lock
+db/mapping/*.db
+db/mapping/*.lock
+html/config/*
+html/doc/*
 conf/config.json
 !bin/nssm.exe*
 logs/*

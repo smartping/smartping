@@ -11,8 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 	"sync"
+	"time"
 )
 
 var (
@@ -22,6 +22,7 @@ var (
 	AuthUserIpMap  map[string]bool
 	AuthAgentIpMap map[string]bool
 	DbMap          DbMapSt
+	ToolLimit      map[string]int
 )
 
 func IsExist(fp string) bool {
@@ -88,36 +89,19 @@ func ParseConfig(ver string) {
 	DbMap.Data = map[string]*bolt.DB{}
 	DbMap.Lock = new(sync.Mutex)
 	AlertStatus = map[string]bool{}
-	for k, target := range Cfg.Targets {
-		if target.Addr != Cfg.Ip {
-
-			if target.Thdavgdelay == 0 {
-				Cfg.Targets[k].Thdavgdelay = Cfg.Thdavgdelay
-			}
-			if target.Thdchecksec == 0 {
-				Cfg.Targets[k].Thdchecksec = Cfg.Thdchecksec
-			}
-			if target.Thdloss == 0 {
-				Cfg.Targets[k].Thdloss = Cfg.Thdloss
-			}
-			if target.Thdoccnum == 0 {
-				Cfg.Targets[k].Thdoccnum = Cfg.Thdoccnum
-			}
-		}
-
-	}
+	ToolLimit = map[string]int{}
 	saveAuth()
 }
 
 func GetDb(t string, db string) *bolt.DB {
-	dbname:=t+"_"+db
-	boltdb,err:=DbMap.Get(dbname)
-	if err!=nil{
+	dbname := t + "_" + db
+	boltdb, err := DbMap.Get(dbname)
+	if err != nil {
 		boltdb, err := bolt.Open(Root+"/db/"+t+"/"+db+".db", 0600, nil)
 		if err != nil {
 			seelog.Error("[Error] "+Root+"/db/"+t+"/"+db+".db open fail .", err)
 		}
-		DbMap.Set(dbname,boltdb)
+		DbMap.Set(dbname, boltdb)
 		return boltdb
 	}
 	return boltdb
@@ -144,18 +128,17 @@ func SaveCloudConfig(url string, flag bool) (Config, error) {
 		Cfg.Targets = config.Targets
 		Cfg.Mode = "cloud"
 		Cfg.Timeout = config.Timeout
-		Cfg.Alertcycle = config.Alertcycle
-		Cfg.Alerthistory = config.Alerthistory
-		Cfg.Alertcycle = config.Alertcycle
+		Cfg.Refresh = config.Refresh
+		Cfg.Archive = config.Archive
 		Cfg.Tsymbolsize = config.Tsymbolsize
 		Cfg.Tline = config.Tline
-		Cfg.Alertsound = config.Alertsound
-		Cfg.Cendpoint = url
+		Cfg.Tsound = config.Tsound
+		Cfg.Endpoint = url
 		Cfg.Authiplist = config.Authiplist
 		saveAuth()
 	} else {
 		config.Mode = "cloud"
-		config.Cendpoint = url
+		config.Endpoint = url
 		config.Ip = Cfg.Ip
 		config.Name = Cfg.Name
 		config.Ver = Cfg.Ver

@@ -19,7 +19,7 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
-            <span class="brand cloudmode" style="margin-right: -15px;"><i class="cicon icon-cloud"></i></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+          <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
             <div class="nav-collapse">
             <ul class="nav pull-right">
                 <li class="dropdown">
@@ -41,12 +41,13 @@
   <div class="subnavbar-inner">
     <div class="container">
       <ul class="mainnav">
-        <li><a href="index.html"><i class="icon-mail-forward"></i><span>Forward Ping</span> </a> </li>
-        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>Reverse Ping</span> </a> </li>
-        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Topology</span> </a> </li>
-        <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
-        <!--<li ><a href="tools.html"><i class="icon-wrench"></i><span>Test Tools</span> </a> </li>-->
-        <li  class="active"><a href="config.html"><i class="icon-cog"></i><span>Config</span> </a> </li>
+          <li><a href="index.html"><i class="icon-mail-forward"></i><span>正向Ping</span> </a> </li>
+          <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
+          <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
+          <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
+          <li ><a href="alerts.html"><i class="icon-warning-sign"></i><span>报警日志</span> </a> </li>
+          <li ><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
+          <li class="active"><a href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
       </ul>
     </div>
     <!-- /container --> 
@@ -54,133 +55,135 @@
   <!-- /subnavbar-inner --> 
 </div>
 <!-- /subnavbar -->
-<div class="main localmode" style="margin-top:-20px;">
+<div class="main" style="margin-top:-20px;">
   <div class="main-inner">
     <div class="container" id="main">
-
       <div class="row">
-          <div class="span4">
+          <div class="span3">
 
             <div class="widget-header">
               <i class="icon-user"></i>
-              <h3>Save Configuration </h3>
+              <h3>保存配置 </h3>
                <span style="float: right;margin-right: 25px;"><a  target="_blank" href="/api/config.json"><i class="icon-file"></i></a></span>
             </div> <!-- /widget-header -->
 
-            <div class="widget-content">
+            <div class="widget-content cloudmode">
+              <div class="control-group">
+                <label class="control-label">云配置地址</label>
+                <div class="controls">
+                  <div class="input-append">
+                    <input  style="width:73%" class="m-wrap" id="Endpoint" value="http://" type="text">
+                    <button style="margin-top: -10px;" class="btn"  onclick="checkCloud()">检测</button>
+                  </div>
+                </div>	<!-- /controls -->
+              </div> <!-- /control-group -->
+              <div class="control-group">
+                <label class="control-label">密码</label>
+                <div class="controls">
+                  <input class="cpassword" type="password" style="width:97%"  id="pass" value="">
+                </div> <!-- /controls -->
+              </div> <!-- /control-group -->
+              <button style="width:97%"  type="submit" class="btn btn-primary" onclick="savecloudconf()">Save</button>
+              <div style="text-align: center;margin-top: 10px;"><a  href="?local"><i class="icon-home"></i> 切换到本地模式 </a></div>
+            </div>
+
+            <div class="widget-content localmode">
               <div style="text-align: center">
                 <span>
-                  <b style="top:-5px;">Password:</b>
-                  <input class="span2 password" type="password" id="pass">
+                  <b>密码:</b>
+                  <input style="width:120px;" class="password" type="password" id="pass">
                   <button style="margin: -10px 0 0 0;" type="submit" class="btn btn-primary" onclick="saveconf()">Save</button>
                 </span>
-                <div style="text-align: center"><a href="?cloud"><i class="icon-cloud"></i> Change To Cloud Mode</a></div>
+                <div style="text-align: center"><a href="?cloud"><i class="icon-cloud"></i> 切换到云模式 </a></div>
               </div>
             </div>
+
             <br/>
             <div class="widget-header">
               <i class="icon-user"></i>
-              <h3>Base Configuration</h3>
+              <h3>基础配置</h3>
             </div> <!-- /widget-header -->
 
             <div class="widget-content">
 
-            <h4>Base</h4><br>
+            <h4>基础</h4><br>
             <div class="control-group"  style="float: left;width: 45%;">
-              <label class="control-label" for="Name" >Agent Name</label>
+              <label class="control-label" for="Name" >节点名称</label>
               <div class="controls">
                 <input type="text" style="width:100%" id="Name" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
             <div class="control-group" style="float: left;width: 45%;margin-left: 20px;">
-              <label class="control-label" for="Ip">Agent Ip</label>
+              <label class="control-label" for="Ip">节点IP</label>
               <div class="controls">
                 <input type="text"  style="width:100%" id="Ip" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
               <div class="control-group"  style="float: left;width: 45%;">
-                <label class="control-label" for="Name" >Timeout(s)</label>
+                <label class="control-label" for="Name" >超时时间(秒)</label>
                 <div class="controls">
                   <input type="text" style="width:100%" id="Timeout" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
               <div class="control-group"  style="float: left;width: 45%;margin-left: 20px;">
-                <label class="control-label" for="Alertcycle">Refresh(min)</label>
+                <label class="control-label" for="Refresh">刷新频率(分钟)</label>
                 <div class="controls">
-                  <input type="text"   style="width:100%" id="Alertcycle" value="">
+                  <input type="text"   style="width:100%" id="Refresh" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
-            <hr style="clear:both;">
-
-            <h4>Alert</h4><br>
-
-            <div class="control-group"  style="width: 45%;float: left">
-              <label class="control-label" for="Thdchecksec">Check Period(s)&nbsp;&nbsp;&nbsp;</label>
-              <div class="controls">
-                <input type="text" style="width:100%"   id="Thdchecksec" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group" style="width: 45%;float: left;margin-left: 20px;">
-              <label class="control-label" for="Thdloss">Loss Percent(%)&nbsp;&nbsp;</label>
-              <div class="controls">
-                <input type="text" style="width:100%"   id="Thdloss" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="width: 45%;float: left">
-              <label class="control-label" for="Thdavgdelay">Average Delay(ms)</label>
-              <div class="controls">
-                <input type="text" style="width:100%"   id="Thdavgdelay" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-              <div class="control-group"  style="width: 45%;float: left;margin-left: 20px;">
-                <label class="control-label" for="Thdoccnum">Occur Times&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                <div class="controls">
-                  <input type="text" style="width:100%"   id="Thdoccnum" value="">
-                </div> <!-- /controls -->
-              </div> <!-- /control-group -->
 
               <div class="control-group"  style="width: 45%;float: left">
-                <label class="control-label" for="Alerthistory">Archive Days&nbsp;&nbsp;</label>
+                <label class="control-label ttip" for="Archive" data-toggle='tooltip' title='此配置仅针对全国延迟与报警日志数据生效,Ping数据默认保存30天不可修改!'  data-placement='bottom'>数据存档(天)</label>
                 <div class="controls">
-                  <input type="text" style="width:100%"   id="Alerthistory" value="">
+                  <input type="text" style="width:100%"   id="Archive" value="">
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
             <hr style="clear:both;">
-            <h4>Topology</h4><br>
+            <h4>Ping拓扑</h4><br>
 
             <div class="control-group">
-              <label class="control-label" for="Alertsound">Alert Sound</label>
+              <label class="control-label" for="Tsound">报警声音</label>
               <div class="controls">
-                <input type="text"  style="width:97%" id="Alertsound" value="">
+                <input type="text"  style="width:97%" id="Tsound" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
             <div class="control-group"  style="width: 45%;float: left">
-              <label class="control-label" for="Tline">Line Thickness</label>
+              <label class="control-label" for="Tline">连线粗细</label>
               <div class="controls">
                 <input type="text"  style="width:100%"  id="Tline" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
             <div class="control-group"  style="width: 45%;float: left;margin-left: 20px;">
-              <label class="control-label" for="Tsymbolsize">Symbol Size</label>
+              <label class="control-label" for="Tsymbolsize">形状大小</label>
               <div class="controls">
                 <input type="text" style="width:100%"   id="Tsymbolsize" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
+
+              <hr style="clear:both;">
+
+              <h4>检测工具</h4><br>
+
+
+              <div class="control-group"  style="float: left;width: 45%;">
+                <label class="control-label" for="Toollimit">限定频率(秒)</label>
+                <div class="controls">
+                  <input type="text"   style="width:100%" id="Toollimit" value="">
+                </div> <!-- /controls -->
+              </div> <!-- /control-group -->
+
             <hr style="clear:both;">
-            <h4>Authorization</h4><br>
+            <h4>授权管理</h4><br>
             <div class="control-group"  style="width: 96%;">
-                <label class="control-label" for="Authiplist">Auth Ip List</label>
+                <label class="control-label" for="Authiplist">用户IP列表(逗号隔开)</label>
                 <div class="controls">
                     <input type="text" style="width:100%"  id="Authiplist" value="" >
                 </div> <!-- /controls -->
@@ -189,35 +192,30 @@
 
           </div>
           </div>
-          <div class="span8">
+          <div class="span9">
               <!-- /widget -->
               <div class="widget widget-table action-table">
                 <div class="widget-header"> <i class="icon-th-list"></i>
-                  <h3>SmartPing NetWork</h3>
+                  <h3>Ping节点测试网络</h3>
                 </div>
                 <!-- /widget-header -->
                 <div class="widget-content">
                   <table class="table table-striped table-bordered">
                     <thead>
                     <tr>
-                      <th> Name </th>
-                      <th> Ip </th>
-                      <th> Type </th>
-                      <th> <a title="Check Period">Alert CP(s)</a> </th>
-                      <th> <a title="Loss Percent">Alert LP(%)</a>  </th>
-                      <th> <a title="Average Delay">Alert AD(ms)</a>  </th>
-                      <th> <a title="Occur Times">Alert OT(t)</a>  </th>
+                      <th style="width:20px;" class="ttip" data-toggle='tooltip' title='是否为SmartPing节点?'  data-placement='bottom'> SP </th>
+                      <th> 节点名称 </th>
+                      <th> 节点IP </th>
+                      <th style="width:30px;"> 反向 </th>
+                      <th style="width:30px;" > 拓扑 </th>
+                      <th style="width:430px"> 报警规则 </th>
                       <th>  </th>
                     </tr>
                     </thead>
-                    <tbody class="agentlist">
-                    <tr>
-
-                    </tr>
-                    </tbody>
+                    <tbody class="agentlist"><tr></tr></tbody>
                     <tfoot>
                     <tr>
-                      <td colspan="8" style="text-align: center"><input style='margin:4px 3px 0 0;' type='button' onclick='addTr();' class='btn btn-small' value='Add Agent'></td>
+                      <td colspan="8" style="text-align: center"><input style='margin:4px 3px 0 0;' type='button' onclick='addTr();' class='btn btn-small' value='添加节点'></td>
                     </tr>
                     </tfoot>
                   </table>
@@ -225,6 +223,35 @@
                 </div>
                 <!-- /widget-content -->
               </div>
+              <!-- /widget -->
+              <div class="widget widget-table action-table">
+              <div class="widget-header"> <i class="icon-th-list"></i>
+                <h3>全国延迟测试网络</h3>
+                <span style="float: right;margin-top: 13px;margin-right: 5px;" class="label">每个IP列表最多20个IP以逗号分隔</span>
+              </div>
+              <!-- /widget-header -->
+              <div class="widget-content">
+                <table class="table table-striped table-bordered">
+                  <thead>
+                  <tr>
+                    <th  style="width:70px;"> 省份 </th>
+                    <th> 电信Ip列表</th>
+                    <th> 联通Ip列表</th>
+                    <th> 移动Ip列表</th>
+                    <th  style="width:15px;">  </th>
+                  </tr>
+                  </thead>
+                  <tbody class="mappinglist"><tr></tr></tbody>
+                  <tfoot>
+                  <tr>
+                    <td colspan="8" style="text-align: center"><input style='margin:4px 3px 0 0;' type='button' onclick='addMapingTr();' class='btn btn-small' value='添加节点'></td>
+                  </tr>
+                  </tfoot>
+                </table>
+                <!--<input type="hidden" value="0" class="mappingagentnum" />-->
+              </div>
+              <!-- /widget-content -->
+            </div>
               <!-- /widget -->
             </div>
       </div>
@@ -235,167 +262,6 @@
   <!-- /main-inner --> 
 </div>
 <!-- /main -->
-
-<div class="main cloudmode" style="margin-top:-20px;">
-  <div class="main-inner">
-    <div class="container" >
-
-      <div class="row">
-        <div class="span4">
-
-          <div class="widget-header">
-            <i class="icon-user"></i>
-            <h3>Save Configuration</h3>
-
-          </div> <!-- /widget-header -->
-
-          <div class="widget-content">
-
-            <div class="control-group">
-              <label class="control-label">Cloud Endpoint</label>
-
-              <div class="controls">
-                <div class="input-append">
-                  <input  style="width:76%" class="m-wrap" id="Cendpoint" value="http://" type="text">
-                  <button style="margin-top: -10px;" class="btn"  onclick="checkCloud()">Check!</button>
-                </div>
-              </div>	<!-- /controls -->
-            </div> <!-- /control-group -->
-
-
-            <div class="control-group">
-              <label class="control-label">Password</label>
-              <div class="controls">
-                <input class="password" type="password" style="width:97%"  id="pass" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-            <button style="width:97%"  type="submit" class="btn btn-primary" onclick="savecloudconf()">Save</button>
-            <div style="text-align: center;margin-top: 10px;"><a  href="?local"><i class="icon-home"></i> Change To Local Mode</a></div>
-          </div>
-          <br/>
-          <div class="widget-header">
-            <i class="icon-user"></i>
-            <h3>Base Configuration</h3>
-          </div> <!-- /widget-header -->
-
-          <div class="widget-content">
-
-            <h4>Base</h4><br>
-
-            <div class="control-group"  style="float: left;width: 45%;">
-              <label class="control-label" for="Name" >Agent Name</label>
-              <div class="controls">
-                <input type="text" style="width:100%" id="Name" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group" style="float: left;width: 45%;margin-left: 20px;">
-              <label class="control-label" for="Ip">Agent Ip</label>
-              <div class="controls">
-                <input type="text"  style="width:100%" id="Ip" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="float: left;width: 45%;">
-              <label class="control-label" for="Name" >Timeout(s)</label>
-              <div class="controls">
-                <input type="text" style="width:100%" id="Timeout" value=""  readonly>
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="float: left;width: 45%;margin-left: 20px;">
-              <label class="control-label" for="Alertcycle">Refresh(min)</label>
-              <div class="controls">
-                <input type="text"   style="width:100%" id="Alertcycle" value="" readonly>
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <hr style="clear:both;">
-
-            <h4>Alert</h4><br>
-            <div class="control-group"  style="float: left;width: 45%;">
-              <label class="control-label" for="Alerthistory">Archive Days&nbsp;&nbsp;</label>
-              <div class="controls">
-                <input type="text" style="width:100%" id="Alerthistory" value="" readonly>
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <hr style="clear:both;">
-            <h4>Topology</h4><br>
-
-            <div class="control-group">
-              <label class="control-label" for="Alertsound">Alert Sound</label>
-              <div class="controls">
-                <input type="text"  style="width:97%" id="Alertsound" value=""  readonly>
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="width: 45%;float: left">
-              <label class="control-label" for="Tline">Line Thickness</label>
-              <div class="controls">
-                <input type="text"  style="width:100%"  id="Tline" value="" readonly>
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="width: 45%;float: left;margin-left: 20px;">
-              <label class="control-label" for="Tsymbolsize">Symbol Size</label>
-              <div class="controls">
-                <input type="text" style="width:100%"   id="Tsymbolsize" value="" readonly>
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <hr style="clear:both;">
-            <h4>Authorization</h4><br>
-            <div class="control-group"  style="width: 96%;">
-              <label class="control-label" for="Authiplist">Auth Ip List</label>
-              <div class="controls">
-                <input type="text" style="width:100%"   id="Authiplist" value="" readonly>
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-            <br/>
-
-          </div>
-        </div>
-        <div class="span8">
-          <!-- /widget -->
-          <div class="widget widget-table action-table">
-            <div class="widget-header"> <i class="icon-th-list"></i>
-              <h3>SmartPing(Cloud)  NetWork</h3>
-            </div>
-            <!-- /widget-header -->
-            <div class="widget-content">
-              <table class="table table-striped table-bordered">
-                <thead>
-                <tr>
-                  <th> Name </th>
-                  <th> Ip </th>
-                  <th> <a title="Check Period">Alert CP(s)</a> </th>
-                  <th> <a title="Loss Percent">Alert LP(%)</a>  </th>
-                  <th> <a title="Average Delay">Alert AD(ms)</a>  </th>
-                  <th> <a title="Occur Times">Alert OT(t)</a>  </th>
-                </tr>
-                </thead>
-                <tbody class="agentlist">
-                <tr>
-
-                </tr>
-                </tbody>
-
-              </table>
-              <input type="hidden" value="0" class="agentnum" />
-            </div>
-            <!-- /widget-content -->
-          </div>
-          <!-- /widget -->
-        </div>
-      </div>
-      <hr>
-    </div>
-    <!-- /container -->
-  </div>
-  <!-- /main-inner -->
-</div>
-
 
 <div class="footer">
   <div class="footer-inner">
@@ -421,10 +287,18 @@
     function saveconf(){
         targets = []
         $("input[name^='tsnum']").each(function(i, t) {
+            console.log($(this).val())
             eval($(this).val());
         });
         $("[name^='targets']").each(function(i, el) {
-            if (el.name.indexOf("Thdchecksec")>0 || el.name.indexOf("Thdoccnum")>0 || el.name.indexOf("Thdloss")>0 || el.name.indexOf("Thdavgdelay")>0){
+            if (el.name.indexOf("Thdchecksec")>0 || el.name.indexOf("Thdoccnum")>0 || el.name.indexOf("Thdloss")>0 || el.name.indexOf("Thdavgdelay")>0 ||el.name.indexOf("Topo")>0 || el.name.indexOf("Revs")>0 ||el.name.indexOf("Agent")>0){
+                if (el.name.indexOf("Topo")>0 || el.name.indexOf("Revs")>0 || el.name.indexOf("Agent")>0){
+                    if ($(this).is(":checked")){
+                        $(this).val(true)
+                    }else{
+                        $(this).val(false)
+                    }
+                }
                 eval(el.name+"="+$(this).val()+"");
             }else{
                 eval(el.name+"=\""+$(this).val()+"\"");
@@ -436,22 +310,48 @@
                 ntargets.push(value)
             }
         });
+        //console.log(ntargets)
+        //return;
+        nmapping={}
+        nmapping["cucc"]={}
+        nmapping["ctcc"]={}
+        nmapping["cmcc"]={}
+        //mapi = $(".mappingagentnum").val()
+        //console.log(mapi)
+
+        $("[name^='mapping']").each(function(i, el) {
+            prov=$(this).find('.prov').attr('value');
+            cucc=$(this).find('.cucc').attr('value');
+            ctcc=$(this).find('.ctcc').attr('value');
+            cmcc=$(this).find('.cmcc').attr('value');
+            //console.log(this)
+            //console.log($(this).find('.prov').attr('value'))
+            //console.log(i)
+            if(cucc!="") {
+                nmapping["cucc"][prov] = cucc.split(",")
+            }
+            if(ctcc!="") {
+                nmapping["ctcc"][prov] = ctcc.split(",")
+            }
+            if(cmcc!="") {
+                nmapping["cmcc"][prov] = cmcc.split(",")
+            }
+        });
         config = {}
         config["Name"] = $("#Name").val();
         config["Ip"] = $("#Ip").val();
-        config["Ping"] = $("#Ping").val();
-        config["Thdchecksec"] =  parseInt($("#Thdchecksec").val());
-        config["Thdoccnum"] = parseInt($("#Thdoccnum").val());
-        config["Thdloss"] = parseInt($("#Thdloss").val());
-        config["Thdavgdelay"] = parseInt($("#Thdavgdelay").val());
-        config["Alertsound"] = $("#Alertsound").val();
+        config["Tsound"] = $("#Tsound").val();
         config["Tline"] = $("#Tline").val();
         config["Tsymbolsize"] = $("#Tsymbolsize").val();
         config["Timeout"] = $("#Timeout").val();
-        config["Alertcycle"] = parseInt($("#Alertcycle").val());
-        config["Alerthistory"] = parseInt($("#Alerthistory").val());
+        config["Refresh"] = parseInt($("#Refresh").val());
+        config["Archive"] = parseInt($("#Archive").val());
         config["Authiplist"] = $("#Authiplist").val();
+        config["Toollimit"] = parseInt($("#Toollimit").val());
         config["Targets"] = ntargets;
+        config["Chinamap"] = nmapping;
+        console.log(config);
+        //return
         data = {}
         data['config'] = JSON.stringify(config)
         data['password'] = $(".password").val()
@@ -463,7 +363,7 @@
             success: function( retdata ) {
                 if (retdata["status"]=="true"){
                     alert("Config saved success!")
-                    window.location.reload();
+                    //window.location.reload();
                 }else{
                     alert("Config saved fail ("+retdata["info"]+")")
                 }
@@ -477,11 +377,11 @@
         config = {}
         config["Name"] = $("#Name").val();
         config["Ip"] = $("#Ip").val();
-        config["Cendpoint"] = $("#Cendpoint").val();
-        config["Alertsound"] = $("#Alertsound").val();
+        config["Endpoint"] = $("#Endpoint").val();
+        //config["Tsound"] = $("#Tsound").val();
         data = {}
         data['config'] = JSON.stringify(config)
-        data['password'] = $(".password").val()
+        data['password'] = $(".cpassword").val()
         $.ajax({
             dataType: "json",
             type: 'POST',
@@ -507,78 +407,189 @@
     }
     function addTr(){
         i = $(".agentnum").val()
-        $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input  name='targets["+i+"][\"Name\"]' value='' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]' style='width:90%' value=''></td><td><select name='targets["+i+"][\"Type\"]'  style='width:47px;'><option value='C'>C</option><option value='CS'>CS</option></select></td><td><input  name='targets["+i+"][\"Thdchecksec\"]'  style='width:90%' value='"+$("#Thdchecksec").val()+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+$("#Thdloss").val()+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]'  style='width:90%' value='"+$("#Thdavgdelay").val()+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+$("#Thdoccnum").val()+"'> </td><td> <i onclick='deleteTr(this);' class='icon-large icon-trash'></i> </td></tr>");
+        s= "<tr class='form-horizontal'>                                                                                                 "+
+            " <td style='text-align:center'><input name='targets[" + i + "][\"Agent\"]' type='checkbox' ></td>                           "+
+            " <td>                                                                                                                       "+
+            "    <input name='tsnum[" + i + "]' value='targets[" + i + "]={}' type='hidden'>                                             "+
+            "    <input name='targets[" + i + "][\"Name\"]' value='' style='width:90%'></td>                                             "+
+            "  <td style='margin-left:0px;'>                                                                                             "+
+            "    <input name='targets[" + i + "][\"Addr\"]' style='width:90%' value=''></td>                                             "+
+            "  <td style='text-align:center'><input name='targets[" + i + "][\"Revs\"]' type='checkbox'  ></td>                          "+
+            "  <td style='text-align:center'><input name='targets[" + i + "][\"Topo\"]' type='checkbox' checked></td>                    "+
+            "  <td>                                                                                                                      "+
+            "   <div class='controls' style='margin-left:0px;'>                                                                          "+
+            "     <div class='input-prepend input-append'>                                                                               "+
+            "       <input name='targets[" + i + "][\"Thdchecksec\"]' type='text' style='width:20px' value='900'>                        "+
+            "       <span class='add-on'>秒</span>                                                                                       "+
+            "     </div>                                                                                                                 "+
+            "    内出现                                                                                                                  "+
+            "    <div class='input-prepend input-append'>                                                                                "+
+            "       <input name='targets[" + i + "][\"Thdoccnum\"]' type='text' style='width:20px' value='3'>                            "+
+            "       <span class='add-on'>次</span>                                                                                       "+
+            "    </div>                                                                                                                  "+
+            "    内延迟大于                                                                                                              "+
+            "    <div class='input-prepend input-append'>                                                                                "+
+            "       <input type='text' name='targets[" + i + "][\"Thdavgdelay\"]'  value='200' style='width:20px'>                       "+
+            "       <span class='add-on'>ms</span>                                                                                       "+
+            "    </div>                                                                                                                  "+
+            "    或丢包率大于                                                                                                            "+
+            "    <div class='input-prepend input-append'>                                                                                "+
+            "       <input type='text' name='targets[" + i + "][\"Thdloss\"]'  value='40' style='width:20px'>                            "+
+            "       <span class='add-on'>%</span>                                                                                        "+
+            "    </div>                                                                                                                  "+
+            "  </td>                                                                                                                     "+
+            "  <td><i onclick='deleteTr(this);' class='icon-large icon-trash'></i></td>                                                  "+
+            "</tr>                                                                                                                       "
+        $(".agentlist").append(s)
         $(".agentnum").val(parseInt(i)+1);
     }
+    function addMapingTr(){
+        //i = $(".mappingagentnum").val()
+        s="<tr name='mapping[]'>" +
+            "<td><select class='prov' style='width:70px;'><option value='北京'>北京</option><option value='浙江'>浙江</option><option value='天津'>天津</option><option value='安徽'>安徽</option><option value='上海'>上海</option><option value='福建'>福建</option><option value='重庆'>重庆</option><option value='江西'>江西</option><option value='山东'>山东</option><option value='河南'>河南</option><option value='湖北'>湖北</option><option value='湖南'>湖南</option><option value='广东'>广东</option><option value='海南'>海南</option><option value='山西'>山西</option><option value='青海'>青海</option><option value='江苏'>江苏</option><option value='辽宁'>辽宁</option><option value='吉林'>吉林</option><option value='台湾'>台湾</option><option value='河北'>河北</option><option value='贵州'>贵州</option><option value='四川'>四川</option><option value='云南'>云南</option><option value='陕西'>陕西</option><option value='甘肃'>甘肃</option><option value='黑龙江'>黑龙江</option><option value='香港'>香港</option><option value='澳门'>澳门</option><option value='广西'>广西</option><option value='宁夏'>宁夏</option><option value='新疆'>新疆</option><option value='内蒙古'>内蒙古</option><option value='西藏'>西藏</option></select></td>" +
+            "<td><input class='ctcc' type='text' style='width: 97%'></td>" +
+            "<td><input class='cucc' type='text' style='width: 97%'></td>" +
+            "<td><input class='cmcc' type='text' style='width: 97%'></td>" +
+            "<td><i onclick='deletedMapingTr(this);' class='icon-large icon-trash'></i></td>"+
+          "</tr>"
+        $(".mappinglist").append(s)
+        //$(".mappingagentnum").val(parseInt(i)+1);
+    }
+    function deletedMapingTr(nowTr){
+        //i = $(".mappingagentnum").val()
+        $(nowTr).parent().parent().remove();
+        //$(".mappingagentnum").val(i-1);
+    }
     function checkCloud(){
-        endpoint = $("#Cendpoint").val();
+        endpoint = $("#Endpoint").val();
         $.getJSON("/api/config.json?cloudendpoint="+endpoint,function(result){
             if (result["status"]=="false"){
                 alert("Check Cloud Endpoint Error: "+result["info"]);
             }else{
                 $(".agentlist").html("")
+                $(".mappinglist").html("")
                 updateForm(result);
+                cloudReadonly();
             }
         })
     }
     function updateForm(result){
-        AgentMode(result["Mode"],result["Cstatus"])
-        if(result["Ping"]=="sysping"){
-            $("#Ping").find("option[name='sysping']").attr("selected",true);
-        }
-        if(result["Ping"]=="goping"){
-            $("#Ping option[name='goping']").attr("selected",true);
-        }
-        //console.log(result["Ping"])
         $("#verion").html("Version: "+result["Ver"])
         $("#Name").val(result["Name"]);
         $("#Ip").val(result["Ip"]);
-        $("#Thdchecksec").val(result["Thdchecksec"]);
-        $("#Thdoccnum").val(result["Thdoccnum"]);
-        $("#Thdloss").val(result["Thdloss"]);
-        $("#Thdavgdelay").val(result["Thdavgdelay"]);
-        $("#Alertsound").val(result["Alertsound"]);
+        $("#Tsound").val(result["Tsound"]);
         $("#Tline").val(result["Tline"]);
         $("#Tsymbolsize").val(result["Tsymbolsize"]);
         $("#Timeout").val(result["Timeout"]);
-        $("#Alertcycle").val(result["Alertcycle"]);
-        $("#Alerthistory").val(result["Alerthistory"]);
-        $("#Cendpoint").val(result["Cendpoint"]);
+        $("#Refresh").val(result["Refresh"]);
+        $("#Archive").val(result["Archive"]);
+        $("#Endpoint").val(result["Endpoint"]);
         $("#Authiplist").val(result["Authiplist"]);
+        $("#Toollimit").val(result["Toollimit"]);
         $.each(result["Targets"], function(i, field){
-            if (result["Mode"] == "local") {
-                Ctype = ""
-                CStype = ""
-                if (field.Type == "C") {
-                    Ctype = "selected"
-                } else {
-                    CStype = "selected"
+                agent_checked = revs_checked = topo_checked = ""
+                if (field.Agent == true) {
+                    agent_checked = "checked"
                 }
-                $(".agentlist").append("<tr><td><input name='tsnum[" + i + "]' value='targets[" + i + "]={}' type='hidden'><input name='targets[" + i + "][\"Name\"]' value='" + field.Name + "' style='width:90%'></td><td><input  name='targets[" + i + "][\"Addr\"]'  style='width:90%' value='" + field.Addr + "'></td><td><select name='targets[" + i + "][\"Type\"]'  style='width:47px;'><option value='C' " + Ctype + ">C</option><option value='CS'" + CStype + ">CS</option></select></td><td><input   name='targets[" + i + "][\"Thdchecksec\"]' style='width:90%' value='" + field.Thdchecksec + "'> </td><td><input  name='targets[" + i + "][\"Thdloss\"]' style='width:90%' value='" + field.Thdloss + "'> </td><td><input  name='targets[" + i + "][\"Thdavgdelay\"]' style='width:90%' value='" + field.Thdavgdelay + "'> </td><td><input  name='targets[" + i + "][\"Thdoccnum\"]' style='width:90%' value='" + field.Thdoccnum + "'> </td><td><i onclick='deleteTr(this);' class='icon-large icon-trash'></i></td></tr>");
+                if (field.Revs == true) {
+                    revs_checked = "checked"
+                }
+                if (field.Topo == true) {
+                    topo_checked = "checked"
+                }
+                s= "<tr class='form-horizontal'>                                                                                                 "+
+                    "  <td style='text-align:center'><input id='"+i+"_Agent' name='targets[" + i + "][\"Agent\"]' type='checkbox' "+agent_checked+"></td>         "+
+                    " <td>                                                                                                                       "+
+                    "    <input name='tsnum[" + i + "]' value='targets[" + i + "]={}' type='hidden'>                                             "+
+                    "    <input name='targets[" + i + "][\"Name\"]' value='" + field.Name + "' style='width:90%'></td>                           "+
+                    "  <td style='margin-left:0px;'>                                                                                             "+
+                    "    <input name='targets[" + i + "][\"Addr\"]' style='width:90%' value='" + field.Addr + "'></td>                           "+
+                    "  <td style='text-align:center'><input  id='"+i+"_Revs' name='targets[" + i + "][\"Revs\"]' type='checkbox' "+revs_checked+"></td>   "+
+                    "  <td style='text-align:center'><input  id='Topo' name='targets[" + i + "][\"Topo\"]' type='checkbox' "+topo_checked+"></td>          "+
+                    "  <td>                                                                                                                      "+
+                    "   <div class='controls' style='margin-left:0px;'>                                                                          "+
+                    "     <div class='input-prepend input-append'>                                                                               "+
+                    "       <input name='targets[" + i + "][\"Thdchecksec\"]' type='text' style='width:20px' value='" + field.Thdchecksec + "'>  "+
+                    "       <span class='add-on'>秒</span>                                                                                       "+
+                    "     </div>                                                                                                                 "+
+                    "    内出现                                                                                                                  "+
+                    "    <div class='input-prepend input-append'>                                                                                "+
+                    "       <input name='targets[" + i + "][\"Thdoccnum\"]' type='text' style='width:20px' value='" + field.Thdoccnum + "'>  "    +
+                    "       <span class='add-on'>次</span>                                                                                       "+
+                    "    </div>                                                                                                                  "+
+                    "    内延迟大于                                                                                                              "+
+                    "    <div class='input-prepend input-append'>                                                                                "+
+                    "       <input type='text' name='targets[" + i + "][\"Thdavgdelay\"]'  value='" + field.Thdavgdelay + "' style='width:20px'> "+
+                    "       <span class='add-on'>ms</span>                                                                                       "+
+                    "    </div>                                                                                                                  "+
+                    "    或丢包率大于                                                                                                            "+
+                    "    <div class='input-prepend input-append'>                                                                                "+
+                    "       <input type='text' name='targets[" + i + "][\"Thdloss\"]'  value='" + field.Thdloss + "' style='width:20px'>         "+
+                    "       <span class='add-on'>%</span>                                                                                        "+
+                    "    </div>                                                                                                                  "+
+                    "  </td>                                                                                                                     "+
+                    "  <td><i onclick='deleteTr(this);' class='icon-large icon-trash'></i></td>                                                  "+
+                    "</tr>                                                                                                                       "
+                $(".agentlist").append(s)
                 $(".agentnum").val(i + 1);
-            }
-            if (result["Mode"] == "cloud"){
-                $(".agentlist").append("<tr><td><input name='tsnum[" + i + "]' value='targets[" + i + "]={}' type='hidden'><input readonly name='targets[" + i + "][\"Name\"]' value='" + field.Name + "' style='width:90%'></td><td><input readonly  name='targets[" + i + "][\"Addr\"]'  style='width:90%' value='" + field.Addr + "'></td><td><input readonly  name='targets[" + i + "][\"Thdchecksec\"]' style='width:90%' value='" + field.Thdchecksec + "'> </td><td><input readonly name='targets[" + i + "][\"Thdloss\"]' style='width:90%' value='" + field.Thdloss + "'> </td><td><input readonly name='targets[" + i + "][\"Thdavgdelay\"]' style='width:90%' value='" + field.Thdavgdelay + "'> </td><td><input readonly name='targets[" + i + "][\"Thdoccnum\"]' style='width:90%' value='" + field.Thdoccnum + "'> </td></tr>");
-                $(".agentnum").val(i + 1);
-            }
         });
+        mapping={}
+        $.each(result["Chinamap"], function(telcom, telcomVal){
+            $.each(telcomVal, function(prov, provVal){
+                //console.log(provVal)
+                if(!mapping.hasOwnProperty(prov)){
+                    mapping[prov]={}
+                    mapping[prov]["cmcc"]=mapping[prov]["cucc"]=mapping[prov]["ctcc"]="";
+                }
+                mapping[prov][telcom]=provVal.toString();
+            });
+        });
+        $.each(mapping, function(prov, mapVal){
+            s="<tr name='mapping[]'>" +
+                "<td><select class='prov' id='mapping_"+prov+"' style='width:70px;'><option value='北京'>北京</option><option value='浙江'>浙江</option><option value='天津'>天津</option><option value='安徽'>安徽</option><option value='上海'>上海</option><option value='福建'>福建</option><option value='重庆'>重庆</option><option value='江西'>江西</option><option value='山东'>山东</option><option value='河南'>河南</option><option value='湖北'>湖北</option><option value='湖南'>湖南</option><option value='广东'>广东</option><option value='海南'>海南</option><option value='山西'>山西</option><option value='青海'>青海</option><option value='江苏'>江苏</option><option value='辽宁'>辽宁</option><option value='吉林'>吉林</option><option value='台湾'>台湾</option><option value='河北'>河北</option><option value='贵州'>贵州</option><option value='四川'>四川</option><option value='云南'>云南</option><option value='陕西'>陕西</option><option value='甘肃'>甘肃</option><option value='黑龙江'>黑龙江</option><option value='香港'>香港</option><option value='澳门'>澳门</option><option value='广西'>广西</option><option value='宁夏'>宁夏</option><option value='新疆'>新疆</option><option value='内蒙古'>内蒙古</option><option value='西藏'>西藏</option></select></td>" +
+                "<td><input class='ctcc' type='text' style='width: 97%' value='"+mapVal["ctcc"]+"'></td>" +
+                "<td><input class='cucc' type='text' style='width: 97%' value='"+mapVal["cucc"]+"'></td>" +
+                "<td><input class='cmcc' type='text' style='width: 97%' value='"+mapVal["cmcc"]+"'></td>" +
+                "<td><i onclick='deletedMapingTr(this);' class='icon-large icon-trash'></i></td>"+
+                "</tr>"
+            $(".mappinglist").append(s)
+            $("#mapping_"+prov).find("option[value='"+prov+"']").attr("selected",true);
+        });
+    }
+    function cloudReadonly(){
+        $("select").each(function(){
+            $(this).attr("disabled","disabled");
+        });
+        $("input").each(function(){
+            console.log($(this).val())
+            var id = $(this).attr("id");
+            if (id != "Name" && id != "Ip" && id != "Endpoint" && id !="pass" ){
+                $(this).attr("disabled","disabled");
+            }
+        })
+        $(".icon-trash").remove()
     }
     $(function(){
         var tp = window.location.search;
-        if(tp=="?cloud"){
-            $(".localmode").remove();
-            $(".cloudmode").show();
-        }
-        if(tp=="?local"){
-            $(".localmode").show();
-            $(".cloudmode").remove();
-        }
-        if(tp!="?cloud" && tp!="?local") {
-          $.getJSON("/api/config.json",function(result){
-              $("#agentname").html(" ("+result["Name"]+")")
-              updateForm(result);
-          });
-        }
+        $.getJSON("/api/config.json",function(result){
+            $("#agentname").html(" ("+result["Name"]+")")
+            if(result["Mode"]=="cloud" && tp!="?local"){
+                cloudReadonly();
+            }
+            updateForm(result);
+            var endpoint = "http://"+result["Ip"]+":"+result["Port"];
+            if(tp=="?cloud"){
+                $(".localmode").remove();
+                $(".cloudmode").show();
+                $("#Endpoint").val(endpoint+"/api/config.json");
+                cloudReadonly();
+            }
+            if(tp=="?local"){
+                $(".localmode").show();
+                $(".cloudmode").remove();
+            }
+        });
+        $(".ttip").tooltip();
     });
 </script>
 

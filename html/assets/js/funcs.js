@@ -3,18 +3,10 @@ function Refresh(){
 }
 function AgentMode(mode,status){
     if(mode=="cloud"){
-        $(".localmode").remove();
-        $(".cloudmode").show();
         if (status==true){
-            $(".cicon").removeClass("icon-danger");
-            $(".cloudmodeonline").show();
-            $(".cloudmodeoffline").remove();
+            $("#cloudbrand").append("<i class='icon icon-cloud'></i>&nbsp;");
         }else{
-            $(".cicon").addClass("icon-danger")
-            $(".cloudmodeonline").remove();
-            $(".cloudmodeoffline").show();
+            $("#cloudbrand").append("<i class='icon icon-cloud icon-danger'></i>&nbsp;");
         }
-    }else{
-        $(".cloudmode").remove();
     }
 }

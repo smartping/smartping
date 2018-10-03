@@ -4,19 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/boltdb/bolt"
+	"github.com/cihub/seelog"
+	"github.com/smartping/smartping/src/funcs"
 	"github.com/smartping/smartping/src/g"
+	"github.com/smartping/smartping/src/nettools"
 	"github.com/wcharczuk/go-chart"
 	"github.com/wcharczuk/go-chart/drawing"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strconv"
-	"time"
-	"github.com/boltdb/bolt"
-	//"github.com/cihub/seelog"
-	//"strings"
-	"github.com/smartping/smartping/src/funcs"
-	//"context"
 	"strings"
+	"time"
 )
 
 func configApiRoutes() {
@@ -104,8 +104,8 @@ func configApiRoutes() {
 		var losspk []string
 		timwwnum := map[string]int{}
 		for i := 0; i < cnt+1; i++ {
-			ntime:=time.Unix(timeStart, 0).Format("2006-01-02 15:04")
-			timwwnum[ntime]=i
+			ntime := time.Unix(timeStart, 0).Format("2006-01-02 15:04")
+			timwwnum[ntime] = i
 			lastcheck = append(lastcheck, ntime)
 			maxdelay = append(maxdelay, "0")
 			mindelay = append(mindelay, "0")
@@ -115,22 +115,22 @@ func configApiRoutes() {
 			losspk = append(losspk, "0")
 			timeStart = timeStart + 60
 		}
-		db:=g.GetDb("ping",tableip)
+		db := g.GetDb("ping", tableip)
 		db.View(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte("pinglog"))
-			if b==nil{
+			if b == nil {
 				return nil
 			}
-			c:= b.Cursor()
+			c := b.Cursor()
 			min := []byte(timeStartStr[8:])
 			max := []byte(timeEndStr[8:])
 			for k, v := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, v = c.Next() {
 				l := new(g.PingLog)
-				err := json.Unmarshal(v,&l)
-				if err!=nil{
+				err := json.Unmarshal(v, &l)
+				if err != nil {
 					continue
 				}
-				if l.Logtime >= timeStartStr && l.Logtime <= timeEndStr{
+				if l.Logtime >= timeStartStr && l.Logtime <= timeEndStr {
 					maxdelay[timwwnum[l.Logtime]] = l.Maxdelay
 					mindelay[timwwnum[l.Logtime]] = l.Mindelay
 					avgdelay[timwwnum[l.Logtime]] = l.Avgdelay
@@ -159,18 +159,16 @@ func configApiRoutes() {
 		}
 		preout := make(map[string]string)
 		for _, v := range g.Cfg.Targets {
-			if v.Addr != g.Cfg.Ip {
-				preout[v.Name] =  funcs.CheckAlertStatus(v)
+			if v.Addr != g.Cfg.Ip && v.Topo {
+				preout[v.Name] = funcs.CheckAlertStatus(v)
 			}
 		}
 		w.Header().Set("Content-Type", "application/json")
 		RenderJson(w, preout)
-
 	})
 
 	//alert api
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
-
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
@@ -181,23 +179,23 @@ func configApiRoutes() {
 		r.ParseForm()
 		var dtb string
 		if len(r.Form["date"]) > 0 {
-			dtb = strings.Replace(r.Form["date"][0],"alertlog-","",-1)
+			dtb = strings.Replace(r.Form["date"][0], "alertlog-", "", -1)
 
 		} else {
 			dtb = time.Unix(time.Now().Unix(), 0).Format("20060102")
 		}
 		listpreout := []string{}
 		datapreout := []g.AlertLog{}
-		db:=g.GetDb("alert",dtb)
+		db := g.GetDb("alert", dtb)
 		db.View(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte("alertlog"))
-			if b==nil{
+			if b == nil {
 				return nil
 			}
 			b.ForEach(func(k, v []byte) error {
 				l := g.AlertLog{}
-				err:= json.Unmarshal(v,&l)
-				if err==nil{
+				err := json.Unmarshal(v, &l)
+				if err == nil {
 					datapreout = append(datapreout, l)
 				}
 				return nil
@@ -207,6 +205,105 @@ func configApiRoutes() {
 		lout, _ := json.Marshal(listpreout)
 		dout, _ := json.Marshal(datapreout)
 		fmt.Fprintln(w, "["+string(lout)+","+string(dout)+"]")
+	})
+
+	//mapping
+	http.HandleFunc("/api/mapping.json", func(w http.ResponseWriter, r *http.Request) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
+			return
+		}
+		m, _ := time.ParseDuration("-1m")
+		dataKey := time.Now().Add(m).Format("2006-01-02 15:04")
+		r.ParseForm()
+		if len(r.Form["d"]) > 0 {
+			dataKey = r.Form["d"][0]
+		}
+		chinaMp := g.ChinaMp{}
+		chinaMp.Text = "No Data"
+		chinaMp.Subtext = dataKey
+		chinaMp.Avgdelay = map[string][]g.MapVal{}
+		chinaMp.Avgdelay["ctcc"] = []g.MapVal{}
+		chinaMp.Avgdelay["cucc"] = []g.MapVal{}
+		chinaMp.Avgdelay["cmcc"] = []g.MapVal{}
+		bucketName := time.Unix(time.Now().Unix(), 0).Format("20060102")
+		db := g.GetDb("mapping", bucketName)
+		db.View(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte("mapping"))
+			if b == nil {
+				return nil
+			}
+			v := b.Get([]byte(dataKey))
+			if v != nil {
+				json.Unmarshal(v, &chinaMp)
+			}
+			return nil
+		})
+		w.Header().Set("Content-Type", "application/json")
+		RenderJson(w, chinaMp)
+	})
+
+	//tools
+	http.HandleFunc("/api/tools.json", func(w http.ResponseWriter, r *http.Request) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
+			return
+		}
+		preout := g.ToolsRes{}
+		preout.Status = "false"
+		r.ParseForm()
+		if len(r.Form["t"]) == 0 {
+			preout.Error = "target empty!"
+			RenderJson(w, preout)
+			return
+		}
+		nowtime := int(time.Now().Unix())
+		if _, ok := g.ToolLimit[r.RemoteAddr]; ok {
+			if (nowtime - g.ToolLimit[r.RemoteAddr]) <= g.Cfg.Toollimit {
+				preout.Error = "Time Limit Exceeded!"
+				RenderJson(w, preout)
+				return
+			}
+		}
+		g.ToolLimit[r.RemoteAddr] = nowtime
+		target := strings.Replace(strings.Replace(r.Form["t"][0], "https://", "", -1), "http://", "", -1)
+		preout.Ping = g.PingSt{}
+		preout.Ping.MinDelay = -1
+		lossPK := 0
+		ipaddr, err := net.ResolveIPAddr("ip", target)
+		if err != nil {
+			preout.Error = "Unable to resolve destination host"
+			RenderJson(w, preout)
+			return
+		}
+		preout.Ip = ipaddr.String()
+		for i := 0; i < 5; i++ {
+			delay, err := nettools.RunPing(ipaddr, 3*time.Second, 64, i)
+			if err == nil {
+				preout.Ping.AvgDelay = preout.Ping.AvgDelay + delay
+				if preout.Ping.MaxDelay < delay {
+					preout.Ping.MaxDelay = delay
+				}
+				if preout.Ping.MinDelay == -1 || preout.Ping.MinDelay > delay {
+					preout.Ping.MinDelay = delay
+				}
+				preout.Ping.RevcPk = preout.Ping.RevcPk + 1
+			} else {
+				lossPK = lossPK + 1
+			}
+			preout.Ping.SendPk = preout.Ping.SendPk + 1
+			preout.Ping.LossPk = int((float64(lossPK) / float64(preout.Ping.SendPk)) * 100)
+		}
+		if preout.Ping.RevcPk > 0 {
+			preout.Ping.AvgDelay = preout.Ping.AvgDelay / float64(preout.Ping.RevcPk)
+		} else {
+			preout.Ping.AvgDelay = 0.0
+		}
+		preout.Status = "true"
+		w.Header().Set("Content-Type", "application/json")
+		RenderJson(w, preout)
 	})
 
 	//save config
@@ -258,28 +355,7 @@ func configApiRoutes() {
 			RenderJson(w, preout)
 			return
 		}
-		//Alert
-		if nconfig.Thdchecksec < 0 {
-			preout["info"] = "Check Period illegal!(>0)"
-			RenderJson(w, preout)
-			return
-		}
-		if nconfig.Thdloss < 0 || nconfig.Thdloss > 100 {
-			preout["info"] = "Loss Percent illegal!(<=0 and <=100)"
-			RenderJson(w, preout)
-			return
-		}
-		if nconfig.Thdavgdelay <= 0 {
-			preout["info"] = "Average Delay illegal!(>0)"
-			RenderJson(w, preout)
-			return
-		}
-		if nconfig.Thdoccnum < 0 {
-			preout["info"] = "Occur Times illegal!(>=0)"
-			RenderJson(w, preout)
-			return
-		}
-		if nconfig.Alerthistory <= 0 {
+		if nconfig.Archive <= 0 {
 			preout["info"] = "Archive Days !(>0)"
 			RenderJson(w, preout)
 			return
@@ -295,7 +371,7 @@ func configApiRoutes() {
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Alertcycle <= 0 {
+		if nconfig.Refresh <= 0 {
 			preout["info"] = "Refresh illegal!(>0)"
 			RenderJson(w, preout)
 			return
@@ -309,11 +385,6 @@ func configApiRoutes() {
 			}
 			if !ValidIP4(v.Addr) {
 				preout["info"] = "SmartPing Network Info illegal!(illegal Addr Agent) "
-				RenderJson(w, preout)
-				return
-			}
-			if v.Type != "CS" && v.Type != "C" {
-				preout["info"] = "SmartPing Network Info illegal!(illegal Type Agent) "
 				RenderJson(w, preout)
 				return
 			}
@@ -338,9 +409,22 @@ func configApiRoutes() {
 				return
 			}
 		}
-		//nconfig.Db = g.Cfg.Db
+
+		//Map
+		for _, telcomVal := range nconfig.Chinamap {
+			for _, provVal := range telcomVal {
+				for _, ip := range provVal {
+					if ip != "" && !ValidIP4(ip) {
+						preout["info"] = "Mapping Ip illegal!"
+						RenderJson(w, preout)
+						return
+					}
+				}
+			}
+		}
+		seelog.Debug(nconfig)
+		//return
 		nconfig.Ver = g.Cfg.Ver
-		//nconfig.Port = g.Cfg.Port
 		nconfig.Mode = "local"
 		nconfig.Password = g.Cfg.Password
 		nconfig.Port = g.Cfg.Port
@@ -388,7 +472,7 @@ func configApiRoutes() {
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Cendpoint == "" {
+		if nconfig.Endpoint == "" {
 			preout["info"] = "Cloud Endpoint illegal!"
 			RenderJson(w, preout)
 			return
@@ -398,18 +482,18 @@ func configApiRoutes() {
 			RenderJson(w, preout)
 			return
 		}
-		_, err = g.SaveCloudConfig(nconfig.Cendpoint, true)
+		_, err = g.SaveCloudConfig(nconfig.Endpoint, true)
 		if err != nil {
 			preout["info"] = err.Error()
 			RenderJson(w, preout)
 			return
 		}
 		g.Cfg.Name = nconfig.Name
-		g.Cfg.Cendpoint = nconfig.Cendpoint
-		g.Cfg.Alertsound = nconfig.Alertsound
+		g.Cfg.Endpoint = nconfig.Endpoint
+		//g.Cfg.Tsound = nconfig.Tsound
 		g.Cfg.Ip = nconfig.Ip
 		g.Cfg.Password = g.Cfg.Password
-		g.Cfg.Cstatus = true
+		g.Cfg.Status = true
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			preout["info"] = saveerr.Error()
@@ -435,8 +519,8 @@ func configApiRoutes() {
 		}
 		url := r.Form["g"][0]
 		config := g.PingStMini{}
-		defaultto,err := strconv.Atoi(g.Cfg.Timeout)
-		if err!=nil{
+		defaultto, err := strconv.Atoi(g.Cfg.Timeout)
+		if err != nil {
 			defaultto = 3
 		}
 		timeout := time.Duration(time.Duration(defaultto) * time.Second)
@@ -577,10 +661,10 @@ func configApiRoutes() {
 			o := "Param Error!"
 			http.Error(w, o, 406)
 		}
-		url := strings.Replace(strings.Replace(r.Form["g"][0],"%26","&",-1)," ","%20",-1)
+		url := strings.Replace(strings.Replace(r.Form["g"][0], "%26", "&", -1), " ", "%20", -1)
 		//seelog.Debug("[/api/agentproxy.json] GET ",url)
-		defaultto,err := strconv.Atoi(g.Cfg.Timeout)
-		if err!=nil{
+		defaultto, err := strconv.Atoi(g.Cfg.Timeout)
+		if err != nil {
 			defaultto = 3
 		}
 		timeout := time.Duration(time.Duration(defaultto) * time.Second)
