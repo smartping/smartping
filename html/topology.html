@@ -165,7 +165,7 @@
                 if(field.Topo=true) {
                     $.ajax({
                         dataType: "json",
-                        url: '/api/agentproxy.json?g=http://' + field.Addr + ':' + result['Port'] + '/api/topology.json',
+                        url: '/api/proxy.json?g=http://' + field.Addr + ':' + result['Port'] + '/api/topology.json',
                         //data: topodata,
                         success: function (topodata) {
                             $(".alerticon-" + field.Name + "").remove();

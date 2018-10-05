@@ -128,13 +128,13 @@
     }
     function getLineChart(url){
       if(url!=""){
-          url="/api/agentproxy.json?g="+url
+          url="/api/proxy.json?g="+url
       }
       $.getJSON(url+"/api/config.json",function(result){
           $("#main").html("");
           $(".agentlist").html("");
           $("#agentname").html(" ("+result["Name"]+")")
-          AgentMode(result["Mode"],result["Status"])
+          AgentMode(result["Mode"],result["Cstatus"])
           $("#verion").html("Version: "+result["Ver"])
           $.each(result["Targets"], function(i, field){
               if(field.Agent == true) {
@@ -145,7 +145,7 @@
               if(field.Addr==result["Ip"]){
                   return true;
               }
-              $("#main").append("<div class='img showcharts' style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;;background-size:100% 100%;' imgsrc='/api/graph.png?g=http://"+result["Ip"]+":"+result["Port"]+"/api/ping.json?ip="+field.Addr+"' apiurl='/api/agentproxy.json?g=http://"+result["Ip"]+":"+result["Port"]+"/api/ping.json?ip="+field.Addr+"' ><b style='font-color:#333333'>"+result["Name"]+"->"+field.Name+"</b></div>");
+              $("#main").append("<div class='img showcharts' style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;;background-size:100% 100%;' imgsrc='/api/graph.png?g=http://"+result["Ip"]+":"+result["Port"]+"/api/ping.json?ip="+field.Addr+"' apiurl='/api/proxy.json?g=http://"+result["Ip"]+":"+result["Port"]+"/api/ping.json?ip="+field.Addr+"' ><b style='font-color:#333333'>"+result["Name"]+"->"+field.Name+"</b></div>");
           });
           layzeImg();
       }).fail(function (xhr, status) {

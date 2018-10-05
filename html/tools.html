@@ -147,7 +147,7 @@
               $(thisTr.children('td')[7]).html("");
               $(thisTr.children('td')[8]).html("");
               $(thisTr.children('td')[9]).html("<i class='icon-spinner icon-spin animated erricon'  data-toggle='tooltip' title='' data-placement='bottom'></i>")
-              var p = $.getJSON("/api/agentproxy.json?g=http://"+Addr+"/api/tools.json?t="+target,function(result){
+              var p = $.getJSON("/api/proxy.json?t=10&g=http://"+Addr+"/api/tools.json?t="+target,function(result){
                   if(result.status=="true"){
                       $(thisTr.children('td')[2]).html(result.ip);
                       $(thisTr.children('td')[3]).html(result.ping.SendPk);
@@ -157,15 +157,15 @@
                       $(thisTr.children('td')[7]).html(result.ping.MinDelay.toFixed(2)+"ms");
                       $(thisTr.children('td')[8]).html(result.ping.AvgDelay.toFixed(2)+"ms");
                       $(thisTr.children('td')[9]).html("")
+                      //thisTr.addClass("danger")
                   }else{
-                      $(thisTr.children('td')[9]).html("<i class='icon-warning-sign animated erricon'  data-toggle='tooltip' title='"+result.error+"' data-placement='bottom'></i>")
+                      $(thisTr.children('td')[9]).html("<i class='icon-time animated erricon'  data-toggle='tooltip' title='"+result.error+"' data-placement='bottom'></i>")
                       $(".erricon").tooltip();
                   }
               }).fail(function (xhr, status) {
-                  $(thisTr.children('td')[9]).html("<i class='icon-warning-sign animated erricon' data-toggle='tooltip' title='"+xhr.statusText+"' data-placement='bottom'></i>")
+                  $(thisTr.children('td')[9]).html("<i class='icon-warning-sign animated erricon' data-toggle='tooltip' title='"+xhr.statusText+":"+xhr.responseText+"' data-placement='bottom'></i>")
                   $(".erricon").tooltip();
               });
-              //setTimeout(function(){ p.abort(); }, 5000);
           }else{
               $(this).remove()
           }

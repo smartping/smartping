@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -110,8 +111,6 @@ func configApiRoutes() {
 			maxdelay = append(maxdelay, "0")
 			mindelay = append(mindelay, "0")
 			avgdelay = append(avgdelay, "0")
-			//sendpk = append(sendpk, "0")
-			//revcpk = append(revcpk, "0")
 			losspk = append(losspk, "0")
 			timeStart = timeStart + 60
 		}
@@ -279,27 +278,48 @@ func configApiRoutes() {
 			return
 		}
 		preout.Ip = ipaddr.String()
+		var channel chan float64 = make(chan float64, 5)
+		var wg sync.WaitGroup
 		for i := 0; i < 5; i++ {
-			delay, err := nettools.RunPing(ipaddr, 3*time.Second, 64, i)
-			if err == nil {
-				preout.Ping.AvgDelay = preout.Ping.AvgDelay + delay
-				if preout.Ping.MaxDelay < delay {
-					preout.Ping.MaxDelay = delay
+			wg.Add(1)
+			go func() {
+				delay, err := nettools.RunPing(ipaddr, 3*time.Second, 64, i)
+				if err != nil {
+					channel <- -1.00
+				} else {
+					channel <- delay
 				}
-				if preout.Ping.MinDelay == -1 || preout.Ping.MinDelay > delay {
-					preout.Ping.MinDelay = delay
+				wg.Done()
+			}()
+			seelog.Debug(i)
+			time.Sleep(time.Duration(100 * time.Millisecond))
+		}
+		wg.Wait()
+		for i := 0; i < 5; i++ {
+			select {
+			case delay := <-channel:
+				if delay != -1.00 {
+					preout.Ping.AvgDelay = preout.Ping.AvgDelay + delay
+					if preout.Ping.MaxDelay < delay {
+						preout.Ping.MaxDelay = delay
+					}
+					if preout.Ping.MinDelay == -1 || preout.Ping.MinDelay > delay {
+						preout.Ping.MinDelay = delay
+					}
+					preout.Ping.RevcPk = preout.Ping.RevcPk + 1
+				} else {
+					lossPK = lossPK + 1
 				}
-				preout.Ping.RevcPk = preout.Ping.RevcPk + 1
-			} else {
-				lossPK = lossPK + 1
+				preout.Ping.SendPk = preout.Ping.SendPk + 1
+				preout.Ping.LossPk = int((float64(lossPK) / float64(preout.Ping.SendPk)) * 100)
 			}
-			preout.Ping.SendPk = preout.Ping.SendPk + 1
-			preout.Ping.LossPk = int((float64(lossPK) / float64(preout.Ping.SendPk)) * 100)
 		}
 		if preout.Ping.RevcPk > 0 {
 			preout.Ping.AvgDelay = preout.Ping.AvgDelay / float64(preout.Ping.RevcPk)
 		} else {
-			preout.Ping.AvgDelay = 0.0
+			preout.Ping.AvgDelay = 3000
+			preout.Ping.MinDelay = 3000
+			preout.Ping.MaxDelay = 3000
 		}
 		preout.Status = "true"
 		w.Header().Set("Content-Type", "application/json")
@@ -648,24 +668,30 @@ func configApiRoutes() {
 	})
 
 	//remote apip roxy
-	http.HandleFunc("/api/agentproxy.json", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/proxy.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		//w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
 		if len(r.Form["g"]) == 0 {
-			o := "Param Error!"
+			o := "Url Param Error!"
 			http.Error(w, o, 406)
+			return
+		}
+		to := g.Cfg.Timeout
+		if len(r.Form["t"]) > 0 {
+			to = r.Form["t"][0]
 		}
 		url := strings.Replace(strings.Replace(r.Form["g"][0], "%26", "&", -1), " ", "%20", -1)
-		//seelog.Debug("[/api/agentproxy.json] GET ",url)
-		defaultto, err := strconv.Atoi(g.Cfg.Timeout)
+		defaultto, err := strconv.Atoi(to)
 		if err != nil {
-			defaultto = 3
+			o := "Timeout Param Error!"
+			http.Error(w, o, 406)
+			return
+			//defaultto = 3
 		}
 		timeout := time.Duration(time.Duration(defaultto) * time.Second)
 		client := http.Client{
@@ -693,7 +719,6 @@ func configApiRoutes() {
 		json.Indent(&out, body, "", "\t")
 		o := out.String()
 		fmt.Fprintln(w, o)
-		//RenderJson(w, body)
 	})
 
 }

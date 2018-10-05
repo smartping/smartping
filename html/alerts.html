@@ -184,9 +184,9 @@
             $.each(result["Targets"], function(i, field){
                 if(field.Agent==true){
                     if (d==""){
-                        rurl = '/api/agentproxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json'
+                        rurl = '/api/proxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json'
                     }else{
-                        rurl = '/api/agentproxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json?date='+d
+                        rurl = '/api/proxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json?date='+d
                     }
                     $.ajax({
                         dataType: "json",

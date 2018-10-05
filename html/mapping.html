@@ -105,7 +105,7 @@
         d=$("#pkdata").val()
         var url = $("#agent").val();
         if(url!=""){
-            url="/api/agentproxy.json?g="+url
+            url="/api/proxy.json?g="+url
         }
         $.getJSON(url+"/api/mapping.json?d="+d,function(result){
             option = {
@@ -204,7 +204,7 @@
         $(".alerticon-" + n).addClass("icon-spinner").addClass("icon-spin").addClass("animated");
         if(url!=""){
             $("#agent").val(url);
-            url="/api/agentproxy.json?g="+url
+            url="/api/proxy.json?g="+url
         }
         $.getJSON(url+"/api/mapping.json",function(result){
             option = {
@@ -228,9 +228,9 @@
                     y: 'bottom',
                     text:['高','低'],
                     splitList: [
-                        {start: 200, color: 'red'},
-                        {start: 150, end: 200},
-                        {start: 100, end: 150},
+                        {start: 1000, color: 'red'},
+                        {start: 300, end: 1000},
+                        {start: 100, end: 300},
                         {start: 50, end: 100, color: 'DarkGreen'},
                         {start: 0, end: 50,color: 'Green'}
                     ],
