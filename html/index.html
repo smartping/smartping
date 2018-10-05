@@ -134,7 +134,7 @@
           $("#main").html("");
           $(".agentlist").html("");
           $("#agentname").html(" ("+result["Name"]+")")
-          AgentMode(result["Mode"],result["Cstatus"])
+          AgentMode(result["Mode"],result["Status"])
           $("#verion").html("Version: "+result["Ver"])
           $.each(result["Targets"], function(i, field){
               if(field.Agent == true) {
