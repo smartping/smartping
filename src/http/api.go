@@ -20,6 +20,7 @@ func configApiRoutes() {
 		nconf := g.Config{}
 		nconf = g.Cfg
 		nconf.Password = ""
+		nconf.Db = ""
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
 		json.Indent(&out, onconf, "", "\t")
