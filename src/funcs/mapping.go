@@ -24,7 +24,6 @@ func Mapping() {
 	var wg sync.WaitGroup
 	MapStatus = map[string][]g.MapVal{}
 	seelog.Debug("[func:Mapping]", g.Cfg.Chinamap)
-	g.CLock.Lock()
 	for tel, provDetail := range g.Cfg.Chinamap {
 		for prov, _ := range provDetail {
 			seelog.Debug("[func:Mapping]", g.Cfg.Chinamap[tel][prov])
@@ -32,7 +31,6 @@ func Mapping() {
 			wg.Add(1)
 		}
 	}
-	g.CLock.Unlock()
 	wg.Wait()
 	MapPingStorage()
 }

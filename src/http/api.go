@@ -30,9 +30,7 @@ func configApiRoutes() {
 		}
 		r.ParseForm()
 		nconf := g.Config{}
-		g.CLock.Lock()
 		nconf = g.Cfg
-		g.CLock.Unlock()
 		nconf.Password = ""
 		if ! AuthAgentIp(r.RemoteAddr){
 			nconf.Alert["SendEmailPassword"]="samepasswordasbefore"
@@ -495,14 +493,10 @@ func configApiRoutes() {
 		nconfig.Port = g.Cfg.Port
 		nconfig.Password = g.Cfg.Password
 		if nconfig.Alert["SendEmailPassword"]=="samepasswordasbefore" {
-			g.CLock.Lock()
 			nconfig.Alert["SendEmailPassword"] = g.Cfg.Alert["SendEmailPassword"]
-			g.CLock.Unlock()
 		}
-		g.CLock.Lock()
 		g.Cfg = nconfig
 		g.SelfCfg = g.Cfg.Network[g.Cfg.Addr]
-		g.CLock.Unlock()
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			preout["info"] = saveerr.Error()
@@ -569,9 +563,7 @@ func configApiRoutes() {
 		}
 		url := r.Form["g"][0]
 		config := g.PingStMini{}
-		g.CLock.Lock()
 		timeout := time.Duration(time.Duration(g.Cfg.Base["Timeout"]) * time.Second)
-		g.CLock.Unlock()
 		client := http.Client{
 			Timeout: timeout,
 		}
@@ -709,9 +701,7 @@ func configApiRoutes() {
 			http.Error(w, o, 406)
 			return
 		}
-		g.CLock.Lock()
 		to := strconv.Itoa(g.Cfg.Base["Timeout"])
-		g.CLock.Unlock()
 		if len(r.Form["t"]) > 0 {
 			to = r.Form["t"][0]
 		}

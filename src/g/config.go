@@ -19,7 +19,7 @@ import (
 var (
 	Root           string
 	Cfg            Config
-	CLock	       sync.Mutex
+	//CLock	       sync.Mutex
 	SelfCfg        NetworkMember
 	AlertStatus    map[string]bool
 	AuthUserIpMap  map[string]bool
@@ -135,6 +135,7 @@ func SaveCloudConfig(url string) (Config, error) {
 	Ver:=Cfg.Ver
 	Password:=Cfg.Password
 	Port:=Cfg.Port
+	Endpoint:=Cfg.Mode["Endpoint"]
 	Cfg = config
 	Cfg.Name = Name
 	Cfg.Addr = Addr
@@ -142,6 +143,9 @@ func SaveCloudConfig(url string) (Config, error) {
 	Cfg.Port = Port
 	Cfg.Password = Password
 	Cfg.Mode["LastSuccTime"]=time.Now().Format("2006-01-02 15:04:05")
+	Cfg.Mode["Status"] = "true"
+	Cfg.Mode["Endpoint"] = Endpoint
+	Cfg.Mode["Type"] = "cloud"
 	saveAuth()
 	return config, nil
 }

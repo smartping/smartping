@@ -47,11 +47,9 @@ func StartAlert() {
 				}
 				l.Tracert = mtrString
 				go AlertStorage(l)
-				g.CLock.Lock()
 				if g.Cfg.Alert["SendEmailAccount"] != "" && g.Cfg.Alert["SendEmailPassword"] != "" && g.Cfg.Alert["EmailHost"]!="" && g.Cfg.Alert["RevcEmailList"]!=""{
 					go AlertSendMail(l)
 				}
-				g.CLock.Unlock()
 			}
 
 		}
@@ -119,12 +117,10 @@ func AlertSendMail(t g.AlertLog){
 	fmt.Fprintf(mtrstr,"</table>")
 	title :="【"+t.Fromname+"->"+t.Targetname+"】网络异常报警（"+t.Logtime+"）- SmartPing"
 	content := "报警时间："+t.Logtime+" <br> 来路："+t.Fromname+"("+t.Fromip+") <br>  目的："+t.Targetname+"("+t.Targetip+") <br> "
-	g.CLock.Lock()
 	SendEmailAccount:=g.Cfg.Alert["SendEmailAccount"]
 	SendEmailPassword:=g.Cfg.Alert["SendEmailPassword"]
 	EmailHost:=g.Cfg.Alert["EmailHost"]
 	RevcEmailList:=g.Cfg.Alert["RevcEmailList"]
-	g.CLock.Unlock()
 	err = SendMail(SendEmailAccount,SendEmailPassword,EmailHost,RevcEmailList,title,content+mtrstr.String())
 	if err != nil {
 		seelog.Error("[func:AlertSendMail] SendMail Error ",err)

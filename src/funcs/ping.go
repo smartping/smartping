@@ -13,12 +13,10 @@ import (
 
 func Ping() {
 	var wg sync.WaitGroup
-	g.CLock.Lock()
 	for _, target := range g.SelfCfg.Ping {
 		wg.Add(1)
 		go PingTask(g.Cfg.Network[target], &wg)
 	}
-	g.CLock.Unlock()
 	wg.Wait()
 	go StartAlert()
 }
