@@ -277,7 +277,7 @@
                       <tr>
                         <th> 节点名称 </th>
                         <th> 节点IP </th>
-                        <th> 正向Ping </th>
+                        <th style="text-align: center"> 正向Ping <input type='checkbox' class="allchecked"></th>
                       </tr>
                       </thead>
                       <tbody class="pingModalist"></tbody>
@@ -305,7 +305,7 @@
                       <tr>
                         <th> 节点名称 </th>
                         <th> 节点IP </th>
-                        <th style="width:60px;"> 正向拓扑 </th>
+                        <th style="width:70px;"> 正向拓扑 <input type='checkbox' class="allchecked" style="margin-top: 2px"  v="topoCheck" /></th>
                         <th style="width:450px;"> 报警规则 </th>
                       </tr>
                       </thead>
@@ -775,12 +775,14 @@
             itopocfg["Thdavgdelay"] = 0
             itopocfg["Thdloss"] = 0
             checked=""
+            disabled="disabled"
             if(config["Network"].hasOwnProperty(mAddr)){
                 nodeConfig=config["Network"][mAddr]
                 $.each(nodeConfig["Topology"], function(i, cf){
                     if(cf["Addr"]==Addr){
                         itopocfg = cf
                         checked="checked"
+                        disabled=""
                         return false
                     }
                 });
@@ -788,26 +790,26 @@
             $(".topoModallist").append("<tr>" +
                 "<td class='topoModalListName'>"+agentconfig["Name"]+"</td>" +
                 "<td class='topoModalListAddr'>"+agentconfig["Addr"]+"</td>" +
-                "<td  style='text-align:center'><input  class='topoModalListChecked' type='checkbox' "+checked+" ></td>" +
+                "<td  style='text-align:center'><input class='topoModalListChecked' type='checkbox' "+checked+" onclick='enabledTopo(this)' ></td>" +
                 "<td class='form-horizontal'>" +
                 "<div class='controls' style='margin-left:0px;'>" +
                 "<div class='input-prepend input-append'>" +
-                "<input class='topoModalListThdchecksec' type='text' style='width:25px' value='"+itopocfg["Thdchecksec"]+"'>" +
+                "<input class='topoModalListThdchecksec' type='text' style='width:25px' value='"+itopocfg["Thdchecksec"]+"' "+disabled+" >" +
                 "<span class='add-on'>秒</span>" +
                 "</div>" +
                 "内出现" +
                 "<div class='input-prepend input-append'>" +
-                "<input class='topoModalListThdoccnum' type='text' style='width:20px' value='"+itopocfg["Thdoccnum"]+"'>" +
+                "<input class='topoModalListThdoccnum' type='text' style='width:20px' value='"+itopocfg["Thdoccnum"]+"' "+disabled+" >" +
                 "<span class='add-on'>次</span>" +
                 "</div>" +
                 "内延迟大于" +
                 "<div class='input-prepend input-append'>" +
-                "<input class='topoModalListThdavgdelay' type='text' value='"+itopocfg["Thdavgdelay"]+"' style='width:25px'>" +
+                "<input class='topoModalListThdavgdelay' type='text' value='"+itopocfg["Thdavgdelay"]+"' style='width:25px' "+disabled+" >" +
                 "<span class='add-on'>ms</span>" +
                 "</div>" +
                 "或丢包率大于" +
                 "<div class='input-prepend input-append'>" +
-                "<input class='topoModalListThdloss' type='text'  value='"+itopocfg["Thdloss"]+"' style='width:20px'>" +
+                "<input class='topoModalListThdloss' type='text'  value='"+itopocfg["Thdloss"]+"' style='width:20px' "+disabled+" >" +
                 "<span class='add-on'>%</span>" +
                 "</div>" +
                 "</div>" +
@@ -816,6 +818,27 @@
         })
         $("#topocfgAddr").val(mAddr)
         $('#topoModal').modal()
+    }
+    function enabledTopo(obj){
+        if($(obj).is(":checked")){
+            $(obj).closest("tr").find(".topoModalListThdchecksec").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdchecksec").val("900")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").val("3")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").val("200")
+            $(obj).closest("tr").find(".topoModalListThdloss").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdloss").val("30")
+        }else{
+            $(obj).closest("tr").find(".topoModalListThdchecksec").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdchecksec").val("0")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").val("0")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").val("0")
+            $(obj).closest("tr").find(".topoModalListThdloss").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdloss").val("0")
+        }
     }
     /*/Ping节点测试网络 - 检测工具配置
     function toolcfg(obj,Save){
@@ -1161,6 +1184,19 @@
                 }
             })
             refreshChinaMap();
+        });
+        $(".allchecked").click(function(){
+            var xz = $(this).prop("checked");
+            var topoCheck=false
+            if($(this).attr("v")=="topoCheck"){
+                topoCheck=true
+            }
+            $(this).parents().children("tbody").children("tr").each(function(i,obj) {
+                $(obj).find('input').attr("checked",xz);
+                if(topoCheck){
+                    enabledTopo($(obj).find('input'))
+                }
+            });
         });
     });
 </script>
