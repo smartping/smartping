@@ -567,6 +567,7 @@
             $(".selfAgentName").html(editAgentName)
             $(".selfAgentAddr").html(editAgentAddr)
             addAgent(editAgentName,editAgentAddr)
+            config["Network"][editAgentAddr]["Smartping"]=true
             sessionStorage.setItem("config",JSON.stringify(config))
             $('#editSelfagentModal').modal("hide");
             return
