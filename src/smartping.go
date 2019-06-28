@@ -13,7 +13,7 @@ import (
 )
 
 // Init config
-var Version = "0.7.0"
+var Version = "0.8.0"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -29,8 +29,8 @@ func main() {
 	c.AddFunc("*/60 * * * * *", func() {
 		go funcs.Ping()
 		go funcs.Mapping()
-		if g.Cfg.Mode == "cloud" {
-			go funcs.StartCloudMonitor(1)
+		if g.Cfg.Mode["Type"] == "cloud" {
+			go funcs.StartCloudMonitor()
 		}
 	}, "ping")
 	c.AddFunc("0 0 * * * *", func() {

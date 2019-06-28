@@ -34,9 +34,8 @@
         <li  class="active"><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
         <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
         <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
-        <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>报警日志</span> </a> </li>
         <li ><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
-        <li><a href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
+        <li><a  id="cfgUrl"  href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
       </ul>
     </div>
     <!-- /container -->
@@ -86,7 +85,7 @@
   <div class="footer-inner">
     <div class="container">
       <div class="row">
-        <div class="span12"> &copy; 2017 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
+        <div class="span12"> &copy; 2017 - 2020 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
         <!-- /span12 -->
       </div>
       <!-- /row -->
@@ -135,21 +134,27 @@
             $("#main").html("");
             $(".agentlist").html("");
             $("#agentname").html(" ("+result["Name"]+")")
-            AgentMode(result["Mode"],result["Status"])
+            AgentMode(result["Mode"])
             //int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
             $("#verion").html("Version: " + result["Ver"])
-            $.each(result["Targets"], function (i, field) {
-                if (field.Agent == true) {
-                    $(".agentlist").append("<tr><td><i class='alerticon-" + field.Name + "'></i>&nbsp;<a onclick=changeAgent('"+field.Name+"','http://" + field.Addr + ":" + result["Port"] + "')>" + field.Name + "</a></td></tr>");
+            $.each(result["Network"], function(i, network){
+                if(network["Smartping"]) {
+                    $(".agentlist").append("<tr><td><i class='alerticon-" + network["Name"] + "'></i>&nbsp;" +
+                        "<a onclick=changeAgent('" + network["Name"] + "','http://" + network["Addr"] + ":" + result["Port"] + "')>" + network["Name"] + "</a></td></tr>");
                 }
             });
-            $.each(result["Targets"], function (i, field) {
-                if (field.Revs == true) {
-                    if (field.Addr == result["Ip"]) {
-                        return true;
-                    }
-                    $("#main").append("<div style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;background-size:100% 100%;' class='img showcharts' imgsrc='/api/graph.png?g=http://"+field.Addr+":"+result["Port"]+"/api/ping.json?ip="+result["Ip"]+"' apiurl='/api/proxy.json?g=http://" + field.Addr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Ip'] + "' ><b style='font-color:#333333'>"+field.Name+"->"+result["Name"]+"</b></div>");
+            $.each(result["Network"], function(rAddr, network){
+                if (rAddr==result["Addr"]){
+                    return true
                 }
+                $.each(network["Ping"], function(i, ping){
+                    if(ping==result["Addr"]){
+                        $("#main").append("<div style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;background-size:100% 100%;' " +
+                            "class='img showcharts' imgsrc='/api/graph.png?g=http://"+rAddr+":"+result["Port"]+"/api/ping.json?ip="+result["Addr"]+"' " +
+                            "apiurl='/api/proxy.json?g=http://" + rAddr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Addr'] + "' " +
+                            "><b style='font-color:#333333'>"+network["Name"]+"->"+result["Name"]+"</b></div>");
+                    }
+                })
             });
             layzeImg()
             $("#main").on("click", ".showcharts", function () {

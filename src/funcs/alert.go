@@ -1,69 +1,57 @@
 package funcs
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"github.com/boltdb/bolt"
 	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/nettools"
 	"strconv"
-	"strings"
 	"time"
+	_ "github.com/gy-games-libs/go-sqlite3"
+	"encoding/json"
+	"net/smtp"
+	"strings"
+	"fmt"
+	"bytes"
 )
 
-//alert main function
 func StartAlert() {
 	seelog.Info("[func:StartAlert] ", "starting run AlertCheck ")
-	dateStartStr := time.Unix(time.Now().Unix(), 0).Format("20060102")
-	for _, v := range g.Cfg.Targets {
-		if v.Addr != g.Cfg.Ip {
-			s := CheckAlertStatus(v)
-			if s == "true" {
-				g.AlertStatus[v.Addr] = true
+	for _, v := range g.SelfCfg.Topology {
+		if v["Addr"] != g.SelfCfg.Addr {
+			sFlag := CheckAlertStatus(v)
+			if sFlag  {
+				g.AlertStatus[v["Addr"]] = true
 			}
-			_, haskey := g.AlertStatus[v.Addr]
-			if (!haskey && s == "false") || (s == "false" && g.AlertStatus[v.Addr]) {
-				seelog.Debug("[func:StartAlert] ", v.Addr+" Alert!")
-				g.AlertStatus[v.Addr] = false
+			_, haskey := g.AlertStatus[v["Addr"]]
+			if (!haskey && ! sFlag) || ( !sFlag && g.AlertStatus[v["Addr"]]) {
+				seelog.Debug("[func:StartAlert] ", v["Addr"]+" Alert!")
+				g.AlertStatus[v["Addr"]] = false
 				l := g.AlertLog{}
+				l.Fromname = g.SelfCfg.Name
+				l.Fromip = g.SelfCfg.Addr
 				l.Logtime = time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
-				l.Toname = v.Name
-				l.Fromname = g.Cfg.Name
-				tracrtString := ""
-				hops, err := nettools.RunTrace(v.Addr, time.Second, 64, 6)
+				l.Targetname = v["Name"]
+				l.Targetip = v["Addr"]
+				mtrString :=""
+				hops, err := nettools.RunMtr(v["Addr"], time.Second, 64, 6)
 				if nil != err {
 					seelog.Error("[func:StartAlert] Traceroute error ", err)
-					tracrtString = err.Error()
+					mtrString = err.Error()
 				} else {
-					tracrt := bytes.NewBufferString("")
-					for i, hop := range hops {
-						if hop.Addr == nil {
-							fmt.Fprintf(tracrt, "* * *\n")
-						} else {
-							fmt.Fprintf(tracrt, "%d (%s) %v %v %v\n", i+1, hop.Addr, hop.MaxRTT, hop.AvgRTT, hop.MinRTT)
-						}
+					jHops,err:=json.Marshal(hops)
+					if err!=nil{
+						mtrString = err.Error()
+					}else{
+						mtrString = string(jHops)
 					}
-					tracrtString = tracrt.String()
 				}
-				l.Tracert = tracrtString
-				db := g.GetDb("alert", dateStartStr)
-				err = db.Update(func(tx *bolt.Tx) error {
-					b, err := tx.CreateBucketIfNotExists([]byte("alertlog"))
-					if err != nil {
-						return fmt.Errorf("create bucket error : %s", err)
-					}
-					jdata, _ := json.Marshal(l)
-					err = b.Put([]byte(l.Logtime+v.Name), []byte(string(jdata)))
-					if err != nil {
-						return fmt.Errorf("put data error: %s", err)
-					}
-					return nil
-				})
-				if err != nil {
-					seelog.Error("[func:StartAlert] Data Storage Error: ", err)
+				l.Tracert = mtrString
+				go AlertStorage(l)
+				g.CLock.Lock()
+				if g.Cfg.Alert["SendEmailAccount"] != "" && g.Cfg.Alert["SendEmailPassword"] != "" && g.Cfg.Alert["EmailHost"]!="" && g.Cfg.Alert["RevcEmailList"]!=""{
+					go AlertSendMail(l)
 				}
+				g.CLock.Unlock()
 			}
 
 		}
@@ -71,40 +59,89 @@ func StartAlert() {
 	seelog.Info("[func:StartAlert] ", "AlertCheck finish ")
 }
 
-func CheckAlertStatus(v g.Target) string {
-	timeStartStr := time.Unix((time.Now().Unix() - int64(v.Thdchecksec)), 0).Format("2006-01-02 15:04")
-	timeEndStr := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04")
-	result := "false"
-	db := g.GetDb("ping", v.Addr)
-	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("pinglog"))
-		if b == nil {
-			result = "unknown"
-			return nil
+func CheckAlertStatus(v map[string]string) bool {
+	type Cnt struct {
+		Cnt int
+	}
+	Thdchecksec,_:=strconv.Atoi(v["Thdchecksec"])
+	timeStartStr := time.Unix((time.Now().Unix() - int64(Thdchecksec)), 0).Format("2006-01-02 15:04")
+	querysql := "SELECT count(1) cnt FROM  `pinglog` where logtime > '" + timeStartStr + "' and target = '"+ v["Addr"] +"' and (cast(avgdelay as double) > " + v["Thdavgdelay"] + " or cast(losspk as double) > " + v["Thdloss"] + ") "
+	rows, err := g.Db.Query(querysql)
+	defer rows.Close()
+	seelog.Debug("[func:StartAlert] ", querysql)
+	if err != nil {
+		seelog.Error("[func:StartAlert] Query Error ", err)
+		return false
+	}
+	for rows.Next() {
+		l := new(Cnt)
+		err := rows.Scan(&l.Cnt,)
+		if err != nil {
+			seelog.Error("[func:StartAlert]", err)
+			return false
 		}
-		c := b.Cursor()
-		min := []byte(timeStartStr[8:])
-		max := []byte(timeEndStr[8:])
-		ectime := 0
-		for k, val := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, val = c.Next() {
-			l := new(g.PingLog)
-			err := json.Unmarshal(val, &l)
-			if err != nil {
-				continue
-			}
-			if l.Logtime > timeStartStr && l.Logtime < timeEndStr {
-				seelog.Debug(v.Name + "|" + strings.Split(l.Avgdelay, ".")[0] + "|" + strconv.Itoa(v.Thdavgdelay) + "|" + strings.Split(l.Losspk, ".")[0] + "|" + strconv.Itoa(v.Thdloss))
-				avgdelay, _ := strconv.Atoi(strings.Split(l.Avgdelay, ".")[0])
-				losspk, _ := strconv.Atoi(strings.Split(l.Losspk, ".")[0])
-				if avgdelay > v.Thdavgdelay || losspk >= v.Thdloss {
-					ectime = ectime + 1
-				}
-			}
+		Thdoccnum,_:=strconv.Atoi(v["Thdoccnum"])
+		if l.Cnt <= Thdoccnum{
+			return true
+		}else{
+			return false
 		}
-		if ectime < v.Thdoccnum {
-			result = "true"
-		}
-		return nil
-	})
-	return result
+	}
+	return false
+}
+
+func AlertStorage(t g.AlertLog) {
+	seelog.Info("[func:AlertStorage] ", "(", t.Logtime, ")Starting AlertStorage ", t.Targetname)
+	sql := "INSERT INTO [alertlog] (logtime, targetip, targetname, tracert) values('" + t.Logtime + "','"+t.Targetip+"','" + t.Targetname + "','" + t.Tracert + "')"
+	g.DLock.Lock()
+	g.Db.Exec(sql)
+	_,err :=g.Db.Exec(sql)
+	if err!=nil{
+		seelog.Error("[func:StartPing] Sql Error ",err)
+	}
+	g.DLock.Unlock()
+	seelog.Info("[func:AlertStorage] ", "(", t.Logtime, ") AlertStorage on ", t.Targetname, " finish!")
+}
+
+func AlertSendMail(t g.AlertLog){
+	hops :=[]nettools.Mtr{}
+	err := json.Unmarshal([]byte(t.Tracert),&hops)
+	if err!=nil{
+		seelog.Error("[func:AlertSendMail] json Error ",err)
+		return
+	}
+	mtrstr := bytes.NewBufferString("")
+	fmt.Fprintf(mtrstr,"<table>")
+	fmt.Fprintf(mtrstr, "<tr><td>Host</td><td>Loss</td><td>Snt</td><td>Last</td><td>Avg</td><td>Best</td><td>Wrst</td><td>StDev</td></tr>")
+	for i, hop := range hops {
+		fmt.Fprintf(mtrstr, "<tr><td>%d %s</td><td>%.2f</td><td>%d</td><td>%v</td><td>%v</td><td>%v</td><td>%v</td><td>%.2f</td></tr>", i+1, hop.Host,((float64(hop.Loss)/float64(hop.Send))*100), hop.Send, hop.Last, hop.Avg, hop.Best, hop.Wrst, hop.StDev)
+	}
+	fmt.Fprintf(mtrstr,"</table>")
+	title :="【"+t.Fromname+"->"+t.Targetname+"】网络异常报警（"+t.Logtime+"）- SmartPing"
+	content := "报警时间："+t.Logtime+" <br> 来路："+t.Fromname+"("+t.Fromip+") <br>  目的："+t.Targetname+"("+t.Targetip+") <br> "
+	g.CLock.Lock()
+	SendEmailAccount:=g.Cfg.Alert["SendEmailAccount"]
+	SendEmailPassword:=g.Cfg.Alert["SendEmailPassword"]
+	EmailHost:=g.Cfg.Alert["EmailHost"]
+	RevcEmailList:=g.Cfg.Alert["RevcEmailList"]
+	g.CLock.Unlock()
+	err = SendMail(SendEmailAccount,SendEmailPassword,EmailHost,RevcEmailList,title,content+mtrstr.String())
+	if err != nil {
+		seelog.Error("[func:AlertSendMail] SendMail Error ",err)
+	}
+}
+
+func SendMail(user, pwd, host, to, subject, body string) (error) {
+	if len(strings.Split(host, ":"))==1{
+		host = host+":25"
+	}
+	auth := smtp.PlainAuth("", user, pwd, strings.Split(host, ":")[0])
+	content_type := "Content-Type: text/html" + "; charset=UTF-8"
+	msg := []byte("To: " + to + "\r\nFrom: " + user + "\r\nSubject: " + subject + "\r\n" + content_type + "\r\n\r\n" + body)
+	send_to := strings.Split(to, ";")
+	err := smtp.SendMail(host, auth, user, send_to, msg)
+	if err != nil {
+		return err
+	}
+	return nil
 }

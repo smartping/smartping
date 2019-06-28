@@ -3,7 +3,6 @@ package g
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/boltdb/bolt"
 	"github.com/cihub/seelog"
 	"io/ioutil"
 	"log"
@@ -13,16 +12,21 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"io"
+	"database/sql"
 )
 
 var (
 	Root           string
 	Cfg            Config
+	CLock	       sync.Mutex
+	SelfCfg        NetworkMember
 	AlertStatus    map[string]bool
 	AuthUserIpMap  map[string]bool
 	AuthAgentIpMap map[string]bool
-	DbMap          DbMapSt
 	ToolLimit      map[string]int
+	Db    		*sql.DB
+	DLock 		sync.Mutex
 )
 
 func IsExist(fp string) bool {
@@ -78,36 +82,38 @@ func ParseConfig(ver string) {
 	if Cfg.Name == "" {
 		Cfg.Name, _ = os.Hostname()
 	}
-	if Cfg.Ip == "" {
-		Cfg.Ip = "127.0.0.1"
-	}
-	if Cfg.Mode == "" {
-		Cfg.Mode = "local"
+	if Cfg.Addr == "" {
+		Cfg.Addr = "127.0.0.1"
 	}
 	Cfg.Ver = ver
-	DbMap = DbMapSt{}
-	DbMap.Data = map[string]*bolt.DB{}
-	DbMap.Lock = new(sync.Mutex)
+	if !IsExist(Root + "/db/" + "database.db") {
+		if !IsExist(Root + "/db/" + "database-base.db") {
+			log.Fatalln("[Fault]db file:", Root+"/db/"+"database(-base).db", "both not existent.")
+		}
+		src, err := os.Open(Root + "/db/" + "database-base.db")
+		if err != nil {
+			log.Fatalln("[Fault]db-base file open error.")
+		}
+		defer src.Close()
+		dst, err := os.OpenFile(Root+"/db/"+"database.db", os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			log.Fatalln("[Fault]db-base file copy error.")
+		}
+		defer dst.Close()
+		io.Copy(dst, src)
+	}
+	seelog.Info("Config loaded")
+	Db, err = sql.Open("sqlite3", Root + "/db/database.db")
+	if err != nil {
+		log.Fatalln("[Fault]db open fail .", err)
+	}
+	SelfCfg = Cfg.Network[Cfg.Addr]
 	AlertStatus = map[string]bool{}
 	ToolLimit = map[string]int{}
 	saveAuth()
 }
 
-func GetDb(t string, db string) *bolt.DB {
-	dbname := t + "_" + db
-	boltdb, err := DbMap.Get(dbname)
-	if err != nil {
-		boltdb, err := bolt.Open(Root+"/db/"+t+"/"+db+".db", 0600, nil)
-		if err != nil {
-			seelog.Error("[Error] "+Root+"/db/"+t+"/"+db+".db open fail .", err)
-		}
-		DbMap.Set(dbname, boltdb)
-		return boltdb
-	}
-	return boltdb
-}
-
-func SaveCloudConfig(url string, flag bool) (Config, error) {
+func SaveCloudConfig(url string) (Config, error) {
 	config := Config{}
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
@@ -124,26 +130,19 @@ func SaveCloudConfig(url string, flag bool) (Config, error) {
 		config.Name = string(body)
 		return config, err
 	}
-	if flag == true {
-		Cfg.Chinamap = config.Chinamap
-		Cfg.Targets = config.Targets
-		Cfg.Mode = "cloud"
-		Cfg.Timeout = config.Timeout
-		Cfg.Refresh = config.Refresh
-		Cfg.Archive = config.Archive
-		Cfg.Tsymbolsize = config.Tsymbolsize
-		Cfg.Tline = config.Tline
-		Cfg.Tsound = config.Tsound
-		Cfg.Endpoint = url
-		Cfg.Authiplist = config.Authiplist
-		saveAuth()
-	} else {
-		config.Mode = "cloud"
-		config.Endpoint = url
-		config.Ip = Cfg.Ip
-		config.Name = Cfg.Name
-		config.Ver = Cfg.Ver
-	}
+	Name:=Cfg.Name
+	Addr:=Cfg.Addr
+	Ver:=Cfg.Ver
+	Password:=Cfg.Password
+	Port:=Cfg.Port
+	Cfg = config
+	Cfg.Name = Name
+	Cfg.Addr = Addr
+	Cfg.Ver = Ver
+	Cfg.Port = Port
+	Cfg.Password = Password
+	Cfg.Mode["LastSuccTime"]=time.Now().Format("2006-01-02 15:04:05")
+	saveAuth()
 	return config, nil
 }
 
@@ -173,7 +172,7 @@ func saveAuth() {
 		for _, ip := range authiplist {
 			AuthUserIpMap[ip] = true
 		}
-		for _, k := range Cfg.Targets {
+		for _, k := range Cfg.Network {
 			AuthAgentIpMap[k.Addr] = true
 		}
 	}

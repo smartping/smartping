@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/boltdb/bolt"
 	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/funcs"
 	"github.com/smartping/smartping/src/g"
@@ -22,7 +21,7 @@ import (
 
 func configApiRoutes() {
 
-	//config api
+	//配置文件API
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -31,20 +30,13 @@ func configApiRoutes() {
 		}
 		r.ParseForm()
 		nconf := g.Config{}
-		if len(r.Form["cloudendpoint"]) > 0 {
-			cloudnconf, err := g.SaveCloudConfig(r.Form["cloudendpoint"][0], false)
-			if err != nil {
-				preout := make(map[string]string)
-				preout["status"] = "false"
-				preout["info"] = cloudnconf.Name + "(" + err.Error() + ")"
-				RenderJson(w, preout)
-				return
-			}
-			nconf = cloudnconf
-		} else {
-			nconf = g.Cfg
-		}
+		g.CLock.Lock()
+		nconf = g.Cfg
+		g.CLock.Unlock()
 		nconf.Password = ""
+		if ! AuthAgentIp(r.RemoteAddr){
+			nconf.Alert["SendEmailPassword"]="samepasswordasbefore"
+		}
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
 		json.Indent(&out, onconf, "", "\t")
@@ -53,7 +45,7 @@ func configApiRoutes() {
 		fmt.Fprintln(w, o)
 	})
 
-	//graph data api
+	//Ping数据API
 	http.HandleFunc("/api/ping.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -100,8 +92,6 @@ func configApiRoutes() {
 		var maxdelay []string
 		var mindelay []string
 		var avgdelay []string
-		//var sendpk []string
-		//var revcpk []string
 		var losspk []string
 		timwwnum := map[string]int{}
 		for i := 0; i < cnt+1; i++ {
@@ -114,30 +104,31 @@ func configApiRoutes() {
 			losspk = append(losspk, "0")
 			timeStart = timeStart + 60
 		}
-		db := g.GetDb("ping", tableip)
-		db.View(func(tx *bolt.Tx) error {
-			b := tx.Bucket([]byte("pinglog"))
-			if b == nil {
-				return nil
-			}
-			c := b.Cursor()
-			min := []byte(timeStartStr[8:])
-			max := []byte(timeEndStr[8:])
-			for k, v := c.Seek(min); k != nil && bytes.Compare(k, max) <= 0; k, v = c.Next() {
+		querySql := "SELECT logtime,maxdelay,mindelay,avgdelay,losspk FROM `pinglog` where target='" + tableip + "' and logtime between '" + timeStartStr + "' and '" + timeEndStr + "' "
+		rows, err := g.Db.Query(querySql)
+		seelog.Debug("[func:/api/ping.json] Query ", querySql)
+		if err != nil {
+			seelog.Error("[func:/api/ping.json] Query ", err)
+		} else {
+			for rows.Next() {
 				l := new(g.PingLog)
-				err := json.Unmarshal(v, &l)
+				err := rows.Scan(&l.Logtime, &l.Maxdelay, &l.Mindelay, &l.Avgdelay, &l.Losspk)
 				if err != nil {
+					seelog.Error("[/api/ping.json] Rows", err)
 					continue
 				}
-				if l.Logtime >= timeStartStr && l.Logtime <= timeEndStr {
-					maxdelay[timwwnum[l.Logtime]] = l.Maxdelay
-					mindelay[timwwnum[l.Logtime]] = l.Mindelay
-					avgdelay[timwwnum[l.Logtime]] = l.Avgdelay
-					losspk[timwwnum[l.Logtime]] = l.Losspk
+				for n, v := range lastcheck {
+					if v == l.Logtime {
+						maxdelay[n] = l.Maxdelay
+						mindelay[n] = l.Mindelay
+						avgdelay[n] = l.Avgdelay
+						losspk[n] = l.Losspk
+						break
+					}
 				}
 			}
-			return nil
-		})
+			rows.Close()
+		}
 		preout := map[string][]string{
 			"lastcheck": lastcheck,
 			"maxdelay":  maxdelay,
@@ -149,7 +140,7 @@ func configApiRoutes() {
 		RenderJson(w, preout)
 	})
 
-	//topology data api
+	//Ping拓扑API
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -157,56 +148,78 @@ func configApiRoutes() {
 			return
 		}
 		preout := make(map[string]string)
-		for _, v := range g.Cfg.Targets {
-			if v.Addr != g.Cfg.Ip && v.Topo {
-				preout[v.Name] = funcs.CheckAlertStatus(v)
+		for _, v := range g.SelfCfg.Topology {
+			if funcs.CheckAlertStatus(v) {
+				preout[v["Addr"]] = "true"
+			} else {
+				preout[v["Addr"]] = "false"
 			}
 		}
 		w.Header().Set("Content-Type", "application/json")
 		RenderJson(w, preout)
 	})
 
-	//alert api
+	//报警API
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
 		}
+		type DateList struct {
+			Ldate string
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		r.ParseForm()
-		var dtb string
+		dtb := time.Unix(time.Now().Unix(), 0).Format("2006-01-02")
 		if len(r.Form["date"]) > 0 {
 			dtb = strings.Replace(r.Form["date"][0], "alertlog-", "", -1)
-
-		} else {
-			dtb = time.Unix(time.Now().Unix(), 0).Format("20060102")
 		}
 		listpreout := []string{}
 		datapreout := []g.AlertLog{}
-		db := g.GetDb("alert", dtb)
-		db.View(func(tx *bolt.Tx) error {
-			b := tx.Bucket([]byte("alertlog"))
-			if b == nil {
-				return nil
-			}
-			b.ForEach(func(k, v []byte) error {
-				l := g.AlertLog{}
-				err := json.Unmarshal(v, &l)
-				if err == nil {
-					datapreout = append(datapreout, l)
+		querySql := "select date(logtime) as ldate from alertlog group by date(logtime) order by logtime desc"
+		rows, err := g.Db.Query(querySql)
+		seelog.Debug("[func:/api/alert.json] Query ", querySql)
+		if err != nil {
+			seelog.Error("[func:/api/alert.json] Query ", err)
+		} else {
+			for rows.Next() {
+				l := new(DateList)
+				err := rows.Scan(&l.Ldate)
+				if err != nil {
+					seelog.Error("[/api/alert.json] Rows", err)
+					continue
 				}
-				return nil
-			})
-			return nil
-		})
+				listpreout = append(listpreout, l.Ldate)
+			}
+			rows.Close()
+		}
+		querySql = "select logtime,targetname,targetip,tracert from alertlog where logtime between '" + dtb + " 00:00:00' and '" + dtb + " 23:59:59'"
+		rows, err = g.Db.Query(querySql)
+		seelog.Debug("[func:/api/alert.json] Query ", querySql)
+		if err != nil {
+			seelog.Error("[func:/api/alert.json] Query ", err)
+		} else {
+			for rows.Next() {
+				l := new(g.AlertLog)
+				err := rows.Scan(&l.Logtime, &l.Targetname, &l.Targetip, &l.Tracert)
+				l.Fromname = g.Cfg.Name
+				l.Fromip = g.Cfg.Addr
+				if err != nil {
+					seelog.Error("[/api/alert.json] Rows", err)
+					continue
+				}
+				datapreout = append(datapreout, *l)
+			}
+			rows.Close()
+		}
 		lout, _ := json.Marshal(listpreout)
 		dout, _ := json.Marshal(datapreout)
 		fmt.Fprintln(w, "["+string(lout)+","+string(dout)+"]")
 	})
 
-	//mapping
+	//全国延迟API
 	http.HandleFunc("/api/mapping.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -219,31 +232,40 @@ func configApiRoutes() {
 		if len(r.Form["d"]) > 0 {
 			dataKey = r.Form["d"][0]
 		}
+		type Mapjson struct {
+			Mapjson string
+		}
 		chinaMp := g.ChinaMp{}
-		chinaMp.Text = "No Data"
+		chinaMp.Text = g.Cfg.Name
 		chinaMp.Subtext = dataKey
 		chinaMp.Avgdelay = map[string][]g.MapVal{}
 		chinaMp.Avgdelay["ctcc"] = []g.MapVal{}
 		chinaMp.Avgdelay["cucc"] = []g.MapVal{}
 		chinaMp.Avgdelay["cmcc"] = []g.MapVal{}
-		bucketName := time.Unix(time.Now().Unix(), 0).Format("20060102")
-		db := g.GetDb("mapping", bucketName)
-		db.View(func(tx *bolt.Tx) error {
-			b := tx.Bucket([]byte("mapping"))
-			if b == nil {
-				return nil
+		g.DLock.Lock()
+		querySql := "select mapjson from mappinglog where logtime = '" + dataKey + "'"
+		rows, err := g.Db.Query(querySql)
+		g.DLock.Unlock()
+		seelog.Debug("[func:/api/mapping.json] Query ", querySql)
+		if err != nil {
+			seelog.Error("[func:/api/mapping.json] Query ", err)
+		} else {
+			for rows.Next() {
+				l := new(Mapjson)
+				err := rows.Scan(&l.Mapjson)
+				if err != nil {
+					seelog.Error("[/api/mapping.json] Rows", err)
+					continue
+				}
+				json.Unmarshal([]byte(l.Mapjson), &chinaMp.Avgdelay)
 			}
-			v := b.Get([]byte(dataKey))
-			if v != nil {
-				json.Unmarshal(v, &chinaMp)
-			}
-			return nil
-		})
+			rows.Close()
+		}
 		w.Header().Set("Content-Type", "application/json")
 		RenderJson(w, chinaMp)
 	})
 
-	//tools
+	//检测工具API
 	http.HandleFunc("/api/tools.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -291,7 +313,6 @@ func configApiRoutes() {
 				}
 				wg.Done()
 			}()
-			seelog.Debug(i)
 			time.Sleep(time.Duration(100 * time.Millisecond))
 		}
 		wg.Wait()
@@ -326,7 +347,7 @@ func configApiRoutes() {
 		RenderJson(w, preout)
 	})
 
-	//save config
+	//保存配置文件
 	http.HandleFunc("/api/saveconfig.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -336,104 +357,132 @@ func configApiRoutes() {
 		preout := make(map[string]string)
 		r.ParseForm()
 		preout["status"] = "false"
-		if len(r.Form["password"]) == 0 {
-			preout["info"] = "password empty!"
-			RenderJson(w, preout)
-			return
-		}
-		if r.Form["password"][0] != g.Cfg.Password {
-			preout["info"] = "password error!"
+		if len(r.Form["password"]) == 0 || r.Form["password"][0] != g.Cfg.Password {
+			preout["info"] = "密码错误!"
 			RenderJson(w, preout)
 			return
 		}
 		if len(r.Form["config"]) == 0 {
-			preout["info"] = "param error!"
+			preout["info"] = "参数错误!"
 			RenderJson(w, preout)
 			return
 		}
-		//Base
 		nconfig := g.Config{}
-		nconfig.Targets = []g.Target{}
 		err := json.Unmarshal([]byte(r.Form["config"][0]), &nconfig)
 		if err != nil {
-			preout["info"] = "decode json error!" + err.Error()
+			preout["info"] = "配置文件解析错误!" + err.Error()
 			RenderJson(w, preout)
 			return
 		}
 		if nconfig.Name == "" {
-			preout["info"] = "Agent Name illegal!"
+			preout["info"] = "本机节点名称为空!"
 			RenderJson(w, preout)
 			return
 		}
-		if !ValidIP4(nconfig.Ip) {
-			preout["info"] = "Agent Ip illegal!"
+		if !ValidIP4(nconfig.Addr) {
+			preout["info"] = "非法本机节点IP!"
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Timeout <= "0" {
-			preout["info"] = "Timeout illegal!(>0)"
+		//Base
+		if _, ok := nconfig.Base["Timeout"]; !ok || nconfig.Base["Timeout"] <= 0 {
+			preout["info"] = "非法超时时间!(>0)"
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Archive <= 0 {
-			preout["info"] = "Archive Days !(>0)"
+		if _, ok := nconfig.Base["Archive"]; !ok || nconfig.Base["Archive"] <= 0 {
+			preout["info"] = "非法存档天数!(>0)"
+			RenderJson(w, preout)
+			return
+		}
+		if _, ok := nconfig.Base["Refresh"]; !ok || nconfig.Base["Refresh"] <= 0 {
+			preout["info"] = "非法刷新频率!(>0)"
 			RenderJson(w, preout)
 			return
 		}
 		//Topology
-		if nconfig.Tline <= "0" {
-			preout["info"] = "Line Thickness  illegal!(>0)"
+		if _, ok := nconfig.Topology["Tline"]; !ok || nconfig.Topology["Tline"] <= "0" {
+			preout["info"] = "非法拓扑连线粗细(>0)"
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Tsymbolsize < "0" {
-			preout["info"] = "Symbol Size illegal!(>0)"
+		if _, ok := nconfig.Topology["Tsymbolsize"]; !ok || nconfig.Topology["Tsymbolsize"] <= "0" {
+			preout["info"] = "非法拓扑形状大小!(>0)"
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Refresh <= 0 {
-			preout["info"] = "Refresh illegal!(>0)"
+		if nconfig.Toollimit < 0 {
+			preout["info"] = "非法检测工具限定频率!(>=0)"
 			RenderJson(w, preout)
 			return
 		}
-		//SmartPing NetWork
-		for _, v := range nconfig.Targets {
-			if v.Name == "" {
-				preout["info"] = "SmartPing Network Info illegal!(Empty Name Agent) "
+		//Network
+		for k, network := range nconfig.Network {
+			if !ValidIP4(network.Addr) || !ValidIP4(k) {
+				preout["info"] = "Ping节点测试网络信息错误!(非法节点IP地址 " + k + ")"
 				RenderJson(w, preout)
 				return
 			}
-			if !ValidIP4(v.Addr) {
-				preout["info"] = "SmartPing Network Info illegal!(illegal Addr Agent) "
+			if network.Name == "" {
+				preout["info"] = "Ping节点测试网络信息错误!( " + k + " 节点名称为空)"
 				RenderJson(w, preout)
 				return
 			}
-			if v.Thdchecksec <= 0 {
-				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT CP Agent) "
-				RenderJson(w, preout)
-				return
-			}
-			if v.Thdloss < 0 || v.Thdloss > 100 {
-				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT LP Agent) "
-				RenderJson(w, preout)
-				return
-			}
-			if v.Thdavgdelay <= 0 {
-				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT AD Agent) "
-				RenderJson(w, preout)
-				return
-			}
-			if v.Thdoccnum < 0 {
-				preout["info"] = "SmartPing Network Info illegal!(illegal ALERT OT Agent) "
-				RenderJson(w, preout)
-				return
+			for _, topology := range network.Topology {
+				if _, ok := topology["Thdchecksec"]; !ok {
+					preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，秒) "
+					RenderJson(w, preout)
+					return
+				} else {
+					Thdchecksec, err := strconv.Atoi(topology["Thdchecksec"])
+					if err != nil || Thdchecksec <= 0 {
+						preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，>0 秒  ) "
+						RenderJson(w, preout)
+						return
+					}
+				}
+				if _, ok := topology["Thdloss"]; !ok {
+					preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，%) "
+					RenderJson(w, preout)
+					return
+				} else {
+					Thdloss, err := strconv.Atoi(topology["Thdloss"])
+					if err != nil || (Thdloss < 0 || Thdloss > 100) {
+						preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，0 <= % <=100  ) "
+						RenderJson(w, preout)
+						return
+					}
+				}
+				if _, ok := topology["Thdavgdelay"]; !ok {
+					preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，ms) "
+					RenderJson(w, preout)
+					return
+				} else {
+					Thdavgdelay, err := strconv.Atoi(topology["Thdavgdelay"])
+					if err != nil || Thdavgdelay <= 0 {
+						preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，> 0 ms  ) "
+						RenderJson(w, preout)
+						return
+					}
+				}
+				if _, ok := topology["Thdoccnum"]; !ok {
+					preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，次) "
+					RenderJson(w, preout)
+					return
+				} else {
+					Thdoccnum, err := strconv.Atoi(topology["Thdoccnum"])
+					if err != nil || Thdoccnum <= 0 {
+						preout["info"] = "Ping节点测试网络信息错误!( " + k + "->" + topology["Addr"] + " 非法拓扑报警规则，> 0 次  ) "
+						RenderJson(w, preout)
+						return
+					}
+				}
 			}
 		}
-
-		//Map
-		for _, telcomVal := range nconfig.Chinamap {
-			for _, provVal := range telcomVal {
-				for _, ip := range provVal {
+		//ChinaMap
+		for _, provVal := range nconfig.Chinamap {
+			for _, telcomVal := range provVal {
+				for _, ip := range telcomVal {
 					if ip != "" && !ValidIP4(ip) {
 						preout["info"] = "Mapping Ip illegal!"
 						RenderJson(w, preout)
@@ -442,13 +491,18 @@ func configApiRoutes() {
 				}
 			}
 		}
-		seelog.Debug(nconfig)
-		//return
 		nconfig.Ver = g.Cfg.Ver
-		nconfig.Mode = "local"
-		nconfig.Password = g.Cfg.Password
 		nconfig.Port = g.Cfg.Port
+		nconfig.Password = g.Cfg.Password
+		if nconfig.Alert["SendEmailPassword"]=="samepasswordasbefore" {
+			g.CLock.Lock()
+			nconfig.Alert["SendEmailPassword"] = g.Cfg.Alert["SendEmailPassword"]
+			g.CLock.Unlock()
+		}
+		g.CLock.Lock()
 		g.Cfg = nconfig
+		g.SelfCfg = g.Cfg.Network[g.Cfg.Addr]
+		g.CLock.Unlock()
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			preout["info"] = saveerr.Error()
@@ -459,8 +513,8 @@ func configApiRoutes() {
 		RenderJson(w, preout)
 	})
 
-	//save cloud config
-	http.HandleFunc("/api/savecloudconfig.json", func(w http.ResponseWriter, r *http.Request) {
+	//发送测试邮件
+	http.HandleFunc("/api/sendmailtest.json", func(w http.ResponseWriter, r *http.Request){
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
@@ -469,54 +523,30 @@ func configApiRoutes() {
 		preout := make(map[string]string)
 		r.ParseForm()
 		preout["status"] = "false"
-		if len(r.Form["password"]) == 0 {
-			preout["info"] = "password empty!"
+		if len(r.Form["EmailHost"]) == 0 {
+			preout["info"] = "邮件服务器不能为空!"
 			RenderJson(w, preout)
 			return
 		}
-		if r.Form["password"][0] != g.Cfg.Password {
-			preout["info"] = "password error!"
+		if len(r.Form["SendEmailAccount"]) == 0 {
+			preout["info"] = "发件邮件不能为空!"
 			RenderJson(w, preout)
 			return
 		}
-		nconfig := g.Config{}
-		nconfig.Targets = []g.Target{}
-		err := json.Unmarshal([]byte(r.Form["config"][0]), &nconfig)
-		if err != nil {
-			preout["info"] = "Decode json error!" + err.Error()
+		if len(r.Form["SendEmailPassword"]) == 0 {
+			preout["info"] = "发件邮箱密码不能为空!"
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Name == "" {
-			preout["info"] = "Agent Name illegal!"
+		if len(r.Form["RevcEmailList"]) == 0 {
+			preout["info"] = "收件邮箱列表不能为空!"
 			RenderJson(w, preout)
 			return
 		}
-		if nconfig.Endpoint == "" {
-			preout["info"] = "Cloud Endpoint illegal!"
-			RenderJson(w, preout)
-			return
-		}
-		if !ValidIP4(nconfig.Ip) {
-			preout["info"] = "Agent Ip illegal!"
-			RenderJson(w, preout)
-			return
-		}
-		_, err = g.SaveCloudConfig(nconfig.Endpoint, true)
-		if err != nil {
+
+		err := funcs.SendMail(r.Form["SendEmailAccount"][0], r.Form["SendEmailPassword"][0], r.Form["EmailHost"][0], r.Form["RevcEmailList"][0], "报警测试邮件 - SmartPing","报警测试邮件")
+		if err!=nil{
 			preout["info"] = err.Error()
-			RenderJson(w, preout)
-			return
-		}
-		g.Cfg.Name = nconfig.Name
-		g.Cfg.Endpoint = nconfig.Endpoint
-		//g.Cfg.Tsound = nconfig.Tsound
-		g.Cfg.Ip = nconfig.Ip
-		g.Cfg.Password = g.Cfg.Password
-		g.Cfg.Status = true
-		saveerr := g.SaveConfig()
-		if saveerr != nil {
-			preout["info"] = saveerr.Error()
 			RenderJson(w, preout)
 			return
 		}
@@ -524,7 +554,7 @@ func configApiRoutes() {
 		RenderJson(w, preout)
 	})
 
-	//show graph
+	//Ping画图
 	http.HandleFunc("/api/graph.png", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -539,11 +569,9 @@ func configApiRoutes() {
 		}
 		url := r.Form["g"][0]
 		config := g.PingStMini{}
-		defaultto, err := strconv.Atoi(g.Cfg.Timeout)
-		if err != nil {
-			defaultto = 3
-		}
-		timeout := time.Duration(time.Duration(defaultto) * time.Second)
+		g.CLock.Lock()
+		timeout := time.Duration(time.Duration(g.Cfg.Base["Timeout"]) * time.Second)
+		g.CLock.Unlock()
 		client := http.Client{
 			Timeout: timeout,
 		}
@@ -667,7 +695,7 @@ func configApiRoutes() {
 
 	})
 
-	//remote apip roxy
+	//代理访问
 	http.HandleFunc("/api/proxy.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
@@ -681,7 +709,9 @@ func configApiRoutes() {
 			http.Error(w, o, 406)
 			return
 		}
-		to := g.Cfg.Timeout
+		g.CLock.Lock()
+		to := strconv.Itoa(g.Cfg.Base["Timeout"])
+		g.CLock.Unlock()
 		if len(r.Form["t"]) > 0 {
 			to = r.Form["t"][0]
 		}
@@ -691,7 +721,6 @@ func configApiRoutes() {
 			o := "Timeout Param Error!"
 			http.Error(w, o, 406)
 			return
-			//defaultto = 3
 		}
 		timeout := time.Duration(time.Duration(defaultto) * time.Second)
 		client := http.Client{

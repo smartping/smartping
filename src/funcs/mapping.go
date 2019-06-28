@@ -1,9 +1,8 @@
 package funcs
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
-	"github.com/boltdb/bolt"
 	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/nettools"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	_ "github.com/gy-games-libs/go-sqlite3"
+	"encoding/json"
 )
 
 var (
@@ -23,14 +24,15 @@ func Mapping() {
 	var wg sync.WaitGroup
 	MapStatus = map[string][]g.MapVal{}
 	seelog.Debug("[func:Mapping]", g.Cfg.Chinamap)
+	g.CLock.Lock()
 	for tel, provDetail := range g.Cfg.Chinamap {
-
 		for prov, _ := range provDetail {
 			seelog.Debug("[func:Mapping]", g.Cfg.Chinamap[tel][prov])
 			go MappingTask(tel, prov, g.Cfg.Chinamap[tel][prov], &wg)
 			wg.Add(1)
 		}
 	}
+	g.CLock.Unlock()
 	wg.Wait()
 	MapPingStorage()
 }
@@ -67,7 +69,7 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 				if stat.RevcPk > 0 {
 					stat.AvgDelay = stat.AvgDelay / float64(stat.RevcPk)
 				} else {
-					stat.AvgDelay = 0.0
+					stat.AvgDelay = 2000
 				}
 				statMap = append(statMap, stat)
 			}
@@ -101,42 +103,28 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 		effCnt = effCnt + 1
 	}
 	gMapVal := g.MapVal{}
-	gMapVal.Name = prov
+	gMapVal.Name = tel
 	value, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", fStatDetail.AvgDelay/float64(effCnt)), 64)
 	gMapVal.Value = value
 	MapLock.Lock()
-	MapStatus[tel] = append(MapStatus[tel], gMapVal)
+	MapStatus[prov] = append(MapStatus[prov], gMapVal)
 	MapLock.Unlock()
 	wg.Done()
 	seelog.Info("Finish MappingTask " + prov + "..")
 }
 
-//storage ping data
+
 func MapPingStorage() {
 	seelog.Info("Start MapPingStorage...")
-	chinaMap := g.ChinaMp{}
-	dataKey := time.Now().Format("2006-01-02 15:04")
-	bucketName := time.Unix(time.Now().Unix(), 0).Format("20060102")
-	chinaMap.Text = g.Cfg.Name
-	chinaMap.Subtext = dataKey
-	chinaMap.Avgdelay = MapStatus
-	//seelog.Info("[func:ChinaMapPing] ", "(", checktime, ")Starting runPingTest ", t.Name)
-	seelog.Debug("[func:ChinaMapPing] ", chinaMap)
-	db := g.GetDb("mapping", bucketName)
-	err := db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte("mapping"))
-		if err != nil {
-			return fmt.Errorf("create bucket error : %s", err)
-		}
-		jdata, _ := json.Marshal(chinaMap)
-		err = b.Put([]byte(dataKey), []byte(string(jdata)))
-		if err != nil {
-			return fmt.Errorf("put data error: %s", err)
-		}
-		return nil
-	})
-	if err != nil {
-		seelog.Error("[func:ChinaMapPing] Data Storage Error: ", err)
+	jdata, _ := json.Marshal(MapStatus)
+	sql := "INSERT INTO [mappinglog] (logtime, mapjson) values('" + time.Now().Format("2006-01-02 15:04") + "','" + string(jdata)+ "')"
+	g.DLock.Lock()
+	g.Db.Exec(sql)
+	_,err :=g.Db.Exec(sql)
+	if err!=nil{
+		seelog.Error("[func:StartPing] Sql Error ",err)
 	}
+	g.DLock.Unlock()
+	seelog.Debug("[func:MapPingStorage] ",sql)
 	seelog.Info("Finish MapPingStorage...")
 }

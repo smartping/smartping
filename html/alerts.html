@@ -34,11 +34,10 @@
       <ul class="mainnav">
         <li><a href="index.html"><i class="icon-mail-forward"></i><span>正向Ping</span> </a> </li>
         <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
-        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
-        <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
-        <li  class="active"><a href="alerts.html"><i class="icon-warning-sign"></i><span>报警日志</span> </a> </li>
+        <li class="active"><a   href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
+        <li><a href="mapping.html" ><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
         <li><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
-        <li><a href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
+        <li><a  id="cfgUrl"  href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
       </ul>
     </div>
     <!-- /container --> 
@@ -84,7 +83,9 @@
                 <tr>
                   <th> 报警日期 </th>
                   <th> 源节点 </th>
+                  <th> 源IP </th>
                   <th> 目标节点 </th>
+                  <th> 目标IP </th>
                   <th> 工具 </th>
                 </tr>
                 </thead>
@@ -96,6 +97,11 @@
         </div>
 
         <div class="span2">
+
+          <div style="text-align: center;margin-bottom: 15px;">
+            <button class="btn" style="width:100%;height:50px;margin-bottom: -5px;text-align: center" onclick="javascript:window.location.href='topology.html'"><i class="icon-circle-arrow-left "></i> 返回Ping拓扑</button>
+          </div>
+
           <div class="widget widget-table action-table">
             <div class="widget-header"> <i class="icon-th-list"></i>
               <h3>节点列表</h3>
@@ -122,20 +128,23 @@
 </div>
 <!-- /main -->
 
-<div id="alert" class="modal fade" tabindex="-1" style="width: 450px;height:500px;background-color: #0c0c0c;color: white">
-  <div class="modal-dialog">
-       <div class="modal-content" >
-         <pre style="background-color: #0c0c0c;color: white" class="tracertdata"></pre>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+<div id="alert" class="modal fade" tabindex="-1" style="width: 550px;height:500px;">
+  <!--<div class="modal-dialog">
+       <div class="modal-content"  >-->
+           <table class="table">
+             <thead><tr><td>Host</td><td>Loss%</td><td>Snt</td><td>Last</td><td>Avg</td><td>Best</td><td>Wrst</td><td>StDev</td></th></thead>
+             <tbody class="tracertdata"></tbody>
+           </table>
+  <!-- </div>
+  </div>/.modal-content -->
+  </div>.modal-dialog -->
 </div><!-- /.modal -->
 
 <div class="footer">
   <div class="footer-inner">
     <div class="container">
       <div class="row">
-        <div class="span12"> &copy; 2017 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
+        <div class="span12"> &copy; 2017 - 2020 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
         <!-- /span12 --> 
       </div>
       <!-- /row --> 
@@ -149,77 +158,94 @@
 ================================================== --> 
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="assets/js/jquery-1.7.2.min.js"></script>
+<script src="assets/js/jquery.base64.js"></script>
 <script src="assets/js/bootstrap.js"></script>
 <script src="assets/datatable/js/jquery.dataTables.min.js"></script>
 <script src="assets/js/funcs.js"></script>
 <script>
-    var ajaxcnt  = 0;
     function getdata(d){
+        var ajaxcnt = 0
         $.getJSON("/api/config.json",function(result){
             $("#agentname").html(" ("+result["Name"]+")")
-            AgentMode(result["Mode"],result["Status"])
+            AgentMode(result["Mode"])
             $(".datelist").html("");
-            var nowtime = Date.parse(new Date())/1000
-            var starttime = nowtime-result["Archive"]*86400
-            for ( nowtime;nowtime>starttime;nowtime=nowtime-86400) {
-                var date = new Date(nowtime*1000);
-                var Y = date.getFullYear() + '';
-                var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '';
-                var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + '';
-                dstr = "alertlog-"+Y+M+D
-                $(".datelist").append("<tr><td><a onclick=getdata(\"" + dstr + "\")>" + dstr + "</a></td></tr>");
-            }
-            $(".agentlist").html("")
-            $.each(result["Targets"], function(i, field){
-                if(field.Agent==true) {
-                    ajaxcnt = ajaxcnt+1
-                    //if(field.Addr==result["Ip"]){
-                    //    return true;
-                    //}
-                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;" + field.Name + "</td></tr>");
-
+            FromObj = new Object();
+            $.each(result["Network"], function(i, network) {
+                ArrObj = new Object()
+                ArrObj["Name"] = network["Name"]
+                ArrObj["Addr"] = network["Addr"]
+                ArrObj["Type"] = "To"
+                ArrObj["Color"] = "green"
+                if (network["Topology"].length > 0) {
+                    ArrObj["Color"] = "gray"
+                    ArrObj["Type"] = "From"
                 }
+                FromObj[network["Addr"]] = ArrObj
+            })
+            $(".agentlist").html("")
+            $.each(FromObj, function(i, network){
+                if(network["Type"]=="To"){
+                    return true
+                }
+                $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + network["Name"] + "' data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;" + network["Name"] + "</td></tr>");
             });
             $(".alertlist").html("");
-            $.each(result["Targets"], function(i, field){
-                if(field.Agent==true){
-                    if (d==""){
-                        rurl = '/api/proxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json'
-                    }else{
-                        rurl = '/api/proxy.json?g=http://' +field.Addr+':'+result['Port']+'/api/alert.json?date='+d
+            $.each(FromObj, function(i, network){
+                    if(network["Type"]=="To"){
+                        return true
                     }
+                    if (d==""){
+                        rurl = '/api/proxy.json?g=http://' +network["Addr"]+':'+result['Port']+'/api/alert.json'
+                    }else{
+                        rurl = '/api/proxy.json?g=http://' +network["Addr"]+':'+result['Port']+'/api/alert.json?date='+d
+                    }
+                    ajaxcnt = ajaxcnt+1
                     $.ajax({
                         dataType: "json",
                         url: rurl,
                         success: function( result) {
-                            ajaxcnt = ajaxcnt -1;
-                            $(".alerticon-"+field.Name+"").remove();
-                            for(var dal in result[1]){
-                                $(".alertlist").append("<tr><td>"+result[1][dal]['Logtime']+"</td><td>"+result[1][dal]['Fromname']+"</td><td>"+result[1][dal]['Toname']+"</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>Tracert</a></td></tr>");
+                            ajaxcnt = ajaxcnt - 1
+                            $(".alerticon-"+network["Name"]+"").remove();
+                            for (var del in result[0]) {
+                                var ard = false
+                                $(".datelist").find("tr").each(function () {
+                                    if ($(this).find("td").find("a").html() == result[0][del]) {
+                                        ard = true
+                                    }
+                                });
+                                if (ard == false) {
+                                    $(".datelist").append("<tr><td><a onclick=getdata(\"" + result[0][del] + "\")>" + result[0][del] + "</a></td></tr>");
+                                }
                             };
-                            $(".alerticon-"+field.Name+"").removeClass("icon-spinner");
-                            //console.log(ajaxcnt)
-                            if(ajaxcnt==0 && $(".alertlist").html()!=""){
-                                pageFinish();
+                            for(var dal in result[1]){
+                                $(".alertlist").append("<tr><td>"+result[1][dal]['Logtime']+"</td><td>"+result[1][dal]['Fromname']+"</td><td>"+result[1][dal]['Fromip']+"</td><td>"+result[1][dal]['Targetname']+"</td><td>"+result[1][dal]['Targetip']+"</td><td><a onclick=\"gettracertdata(this)\" value='"+result[1][dal]['Tracert']+"'>MTR</a></td></tr>");
+                            };
+                            if(ajaxcnt==0){
+                                pageFinish()
                             }
                         },
-                        timeout: result["Timeout"]*1000
+                        timeout: result["Base"]["Timeout"]*1000
                     }).fail( function( xhr, status ) {
                         ajaxcnt = ajaxcnt -1;
-                        $(".alerticon-"+field.Name+"").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
-                        $(".alerticon-"+field.Name+"").addClass("icon-warning-sign");
-                        $(".alerticon-" + field.Name + "").attr("title",xhr.responseText);
-                        $(".alerticon-" + field.Name + "").tooltip();
-                        if(ajaxcnt==0 && $(".alertlist").html()!=""){
-                            pageFinish();
+                        $(".alerticon-"+network["Name"]+"").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
+                        $(".alerticon-"+network["Name"]+"").addClass("icon-warning-sign");
+                        $(".alerticon-" + network["Name"] + "").attr("title",xhr.responseText);
+                        $(".alerticon-" + network["Name"] + "").tooltip();
+                        if(ajaxcnt==0){
+                            pageFinish()
                         }
                     });
-                }
             });
+
         });
     }
     function gettracertdata(d){
-        $(".tracertdata").html($(d).attr("value"))
+        content = $.parseJSON($(d).attr("value"))
+        $(".tracertdata").html("")
+        $.each(content,function(i,line){
+            $(".tracertdata").append("<tr><td>"+line["Host"]+"</td><td>"+((line["Loss"]/line["Send"])*100).toFixed(2)+"</td><td>"+line["Send"]+"</td><td>"+(line["Last"]/1000000).toFixed(2)+"</td><td>"+(line["Avg"]/1000000).toFixed(2)+"</td><td>"+(line["Best"]/1000000).toFixed(2)+"</td><td>"+(line["Wrst"]/1000000).toFixed(2)+"</td><td>"+line["StDev"].toFixed(2)+"</td></tr>")
+            console.log(line["Loss"])
+        })
         $("#alert").modal('show');
     }
     function pageFinish(){
@@ -230,6 +256,7 @@
     }
     $(function(){
         getdata("")
+
     });
 </script>
 </body>

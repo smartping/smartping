@@ -34,9 +34,8 @@
         <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
         <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
         <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
-        <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>报警日志</span> </a> </li>
         <li  class="active"><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
-        <li><a href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
+        <li><a  id="cfgUrl"  href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
       </ul>
     </div>
     <!-- /container --> 
@@ -80,22 +79,9 @@
 
             </tbody>
           </table>
-
         </div>
-        <!--
-        <div class="span2">
-          <div class="widget widget-table action-table">
-            <div class="widget-header"> <i class="icon-th-list"></i>
-              <h3>节点列表</h3>
-            </div>
-            <div class="widget-content">
-              <table class="table table-striped table-bordered">
-                <tbody class="agentlist">
 
-                </tbody>
-              </table>
-            </div>
-            <!-- /widget-content -->
+        <!-- /widget-content -->
           </div>
         </div>
       </div>
@@ -110,7 +96,7 @@
   <div class="footer-inner">
     <div class="container">
       <div class="row">
-        <div class="span12"> &copy; 2017 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
+        <div class="span12"> &copy; 2017 - 2020 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
         <!-- /span12 --> 
       </div>
       <!-- /row --> 
@@ -179,13 +165,13 @@
             });
         });
         $.getJSON("/api/config.json",function(result){
-            $("#target").val(result["Ip"]);
+            $("#target").val(result["Addr"]);
             $("#agentname").html(" ("+result["Name"]+")")
-            AgentMode(result["Mode"],result["Status"])
+            AgentMode(result["Mode"])
             $("#verion").html("Version: "+result["Ver"])
-            $.each(result["Targets"], function(i, field){
-                if(field.Agent==true) {
-                    $(".agentlist-tools").append("<tr><td><input type='checkbox' checked></td><td v='" + field.Addr + ":"+result["Port"]+"'>" + field.Name + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>");
+            $.each(result["Network"], function(i, network){
+                if(network["Smartping"]) {
+                    $(".agentlist-tools").append("<tr><td><input type='checkbox' checked></td><td v='" + network["Addr"] + ":" + result["Port"] + "'>" + network["Name"] + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>");
                 }
             });
         }).fail(function (xhr, status) {
