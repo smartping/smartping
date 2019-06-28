@@ -111,6 +111,7 @@
 <script src="assets/js/funcs.js"></script>
 <script>
     $(function(){
+        var ajaxCnt = 0
         $("#echarts").height($(window).height()-220);
         $.getJSON("/api/config.json",function(result){
             $("#agentname").html(" ("+result["Name"]+")")
@@ -186,6 +187,7 @@
                 if(network["Type"]=="To"){
                     return true
                 }
+                ajaxCnt = ajaxCnt + 1
                 $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + network["Name"] + "'  data-toggle='tooltip' title='' data-placement='bottom'></i>&nbsp;" + network["Name"] + "</td></tr>");
             });
 
@@ -197,6 +199,7 @@
                     dataType: "json",
                     url: '/api/proxy.json?g=http://' + FromObjInfo["Addr"] + ':' + result['Port'] + '/api/topology.json',
                     success: function (topodata) {
+                        ajaxCnt = ajaxCnt - 1
                         $(".alerticon-" + FromObjInfo["Name"] + "").remove();
                         $.each(topodata,function(ToAddr,Flag){
                             if(FromToObj.hasOwnProperty(FromObjInfo["Addr"]+"-"+ToAddr)){
@@ -214,31 +217,14 @@
                             }
                         })
                         FromObj[FromObjInfo["Addr"]]["Color"]="green"
-                        $.each(FromObj,function(i,Area){
-                            dataarea.push({
-                                name: Area["Name"],
-                                draggable: "true",
-                                itemStyle: {
-                                    normal: {
-                                        color: Area["Color"]
-                                    }
-                                }
-                            });
-                        })
-                        $.each(FromToObj,function(i,Line){
-                            //console.log("=== ",i,Line)
-                            dataline.push({
-                                source: Line["From"],
-                                target: Line["To"],
-                                lineStyle: {
-                                    normal: {curveness: Line["Curveness"], color: Line["Color"]}
-                                }
-                            })
-                        })
-                        myChart.setOption(option);
+                        //console.log(ajaxCnt)
+                        if(ajaxCnt==0){
+                            Dawr()
+                        }
                     },
                     timeout: result["Base"]["Timeout"] * 1000
                 }).fail(function (xhr, status) {
+                    ajaxCnt = ajaxCnt - 1
                     $(".alerticon-" + FromObjInfo["Name"] + "").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
                     $(".alerticon-" + FromObjInfo["Name"] + "").addClass("icon-warning-sign");
                     $(".alerticon-" + FromObjInfo["Name"] + "").attr("title",xhr.responseText);
@@ -247,13 +233,42 @@
                     if ($("#alert").length < 1) {
                        $(".main").append('<audio id="alert" style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src="' + result["Alertsound"] + '" type="audio/mp3"  /></audio>');
                     }
+                    if(ajaxCnt==0){
+                        Dawr()
+                    }
                 });
             })
+            function Dawr(){
+                //console.log(FromObj)
+                $.each(FromObj,function(i,Area){
+                    dataarea.push({
+                        name: Area["Name"],
+                        draggable: "true",
+                        itemStyle: {
+                            normal: {
+                                color: Area["Color"]
+                            }
+                        }
+                    });
+                })
+                $.each(FromToObj,function(i,Line){
+                    //console.log("=== ",i,Line)
+                    dataline.push({
+                        source: Line["From"],
+                        target: Line["To"],
+                        lineStyle: {
+                            normal: {curveness: Line["Curveness"], color: Line["Color"]}
+                        }
+                    })
+                })
+                myChart.setOption(option);
+            }
 
         }).fail(function (xhr, status) {
             alert(xhr.responseText);
             Refresh();
         });
+
     });
 </script>
 </body>

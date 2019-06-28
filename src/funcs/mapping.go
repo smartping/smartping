@@ -27,8 +27,10 @@ func Mapping() {
 	for tel, provDetail := range g.Cfg.Chinamap {
 		for prov, _ := range provDetail {
 			seelog.Debug("[func:Mapping]", g.Cfg.Chinamap[tel][prov])
-			go MappingTask(tel, prov, g.Cfg.Chinamap[tel][prov], &wg)
-			wg.Add(1)
+			if len( g.Cfg.Chinamap[tel][prov])>0 {
+				go MappingTask(tel, prov, g.Cfg.Chinamap[tel][prov], &wg)
+				wg.Add(1)
+			}
 		}
 	}
 	wg.Wait()
@@ -37,7 +39,7 @@ func Mapping() {
 
 //ping main function
 func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
-	seelog.Info("Start MappingTask " + prov + "..")
+	seelog.Info("Start MappingTask " + tel + " "+prov + "..")
 	statMap := []g.PingSt{}
 	for _, ip := range ips {
 		seelog.Debug("[func:StartChinaMapPing]", ip)
@@ -108,17 +110,22 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 	MapStatus[prov] = append(MapStatus[prov], gMapVal)
 	MapLock.Unlock()
 	wg.Done()
-	seelog.Info("Finish MappingTask " + prov + "..")
+	seelog.Info("Finish MappingTask " + tel + " "+prov+ "..")
 }
 
 
 func MapPingStorage() {
 	seelog.Info("Start MapPingStorage...")
-	jdata, _ := json.Marshal(MapStatus)
+	seelog.Info(MapStatus)
+	jdata, err := json.Marshal(MapStatus)
+	if err!=nil{
+		seelog.Error("[func:StartPing] Json Error ",err)
+	}
 	sql := "INSERT INTO [mappinglog] (logtime, mapjson) values('" + time.Now().Format("2006-01-02 15:04") + "','" + string(jdata)+ "')"
 	g.DLock.Lock()
 	g.Db.Exec(sql)
-	_,err :=g.Db.Exec(sql)
+	_,err =g.Db.Exec(sql)
+	//seelog.Info(sql)
 	if err!=nil{
 		seelog.Error("[func:StartPing] Sql Error ",err)
 	}

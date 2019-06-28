@@ -705,6 +705,7 @@
         if($(obj).attr("disabled") == "disabled"){
             return
         }
+        $(".allchecked").removeAttr("checked")
         config=$.parseJSON(sessionStorage.getItem("config"))
         if(Save==true){
             nAddr=$("#pingcfgAddr").val()
@@ -744,6 +745,7 @@
         if($(obj).attr("disabled") == "disabled"){
             return
         }
+        $(".allchecked").removeAttr("checked")
         config=$.parseJSON(sessionStorage.getItem("config"))
         if(Save==true){
             mnAddr=$("#topocfgAddr").val()
@@ -936,6 +938,9 @@
         $.each(config["Chinamap"], function(prov, detail){
             $(".provSelect option[value='"+prov+"']").remove();
         })
+        $(".add_chinamap_cucc").find("tr").remove()
+        $(".add_chinamap_ctcc").find("tr").remove()
+        $(".add_chinamap_cmcc").find("tr").remove()
         $('#addChinaMapModal').modal()
     }
     //全国延迟测试网络-删除节点
@@ -1000,7 +1005,7 @@
             ctcc=detail["ctcc"].length
             cucc=detail["cucc"].length
             text=prov+"(电信"+ctcc+",联通"+cucc+",移动"+cmcc+")"
-            $(".chinamaplist").append("<input type='button' value='"+text+"' onclick='editChinaMap(\""+prov+"\")' style='margin-right: 10px;'>")
+            $(".chinamaplist").append("<input type='button' value='"+text+"' onclick='editChinaMap(\""+prov+"\")' style='margin-right: 10px;width:177px;'>")
         })
         $(".chinamaplist").append("<input type='button' value=' + ' style='width: 50px;' onclick='addChinaMap(false)'> ")
     }
