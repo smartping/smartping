@@ -610,7 +610,7 @@
                 "<td style='text-align:center'><a class='btn btn-mini' onclick='pingcfg(this,null)' disabled='disabled'>配置</a></td>" +
                 "<td style='text-align:center'><a class='btn btn-mini' onclick='topocfg(this,false)' disabled='disabled'>配置</a></td>" +
                 //"<td style='text-align:center'><a class='btn btn-mini' onclick='toolcfg(this,null)' disabled='disabled'>配置</a></td>" +
-                "<td><i onclick='delAgent(this);' class='icon-large icon-trash'></i></td>" +
+                "<td><i onclick='delAgent(this,null);' class='icon-large icon-trash'></i></td>" +
                 "</tr>")
         }
         agent=new Object()
@@ -666,8 +666,12 @@
         $('#agentModal').modal('hide');
     }
     //Ping节点测试网络 - 删除节点
-    function delAgent(obj){
-        Addr=$(obj).parent().parent().find(".Addr").html()
+    function delAgent(obj,SelfAddr){
+        if(SelfAddr!=null){
+            Addr=SelfAddr
+        }else{
+            Addr=$(obj).parent().parent().find(".Addr").html()
+        }
         config=$.parseJSON(sessionStorage.getItem("config"))
         delete config["Network"][Addr];
         $.each(config["Network"], function(iAddr, agentconfig){
@@ -1151,14 +1155,12 @@
                         "<td style='text-align:center'><a class='btn btn-mini' "+disabled+" onclick='pingcfg(this,false)'>配置</a></td>" +
                         "<td style='text-align:center'><a class='btn btn-mini' "+disabled+" onclick='topocfg(this,false)'>配置</a></td>" +
                         //"<td style='text-align:center'><a class='btn btn-mini' "+disabled+" onclick='toolcfg(this,false)'>配置</a></td>" +
-                        "<td style='text-align: center'><i onclick='delAgent(this);' class='icon-large icon-trash'></i></td>" +
+                        "<td style='text-align: center'><i onclick='delAgent(this,null);' class='icon-large icon-trash'></i></td>" +
                         "</tr>")
                 }
             })
             refreshChinaMap();
         });
-
-
     });
 </script>
 
