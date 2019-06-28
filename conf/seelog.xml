@@ -1,4 +1,4 @@
-<seelog type="asynctimer" asyncinterval="5000000" minlevel="debug" maxlevel="error">
+<seelog type="asynctimer" asyncinterval="5000000" minlevel="info" maxlevel="error">
     <outputs formatid="main">
         <console/>
 

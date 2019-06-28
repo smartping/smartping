@@ -18,6 +18,7 @@ db/mapping/*.db
 db/mapping/*.lock
 html/config/*
 html/doc/*
+src/test*
 conf/config.json
 !bin/nssm.exe*
 logs/*
