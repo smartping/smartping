@@ -6,7 +6,7 @@ import (
 	"github.com/smartping/smartping/src/nettools"
 	"strconv"
 	"time"
-	_ "github.com/gy-games-libs/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 	"encoding/json"
 	"net/smtp"
 	"strings"

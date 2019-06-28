@@ -2,8 +2,8 @@ package nettools
 
 import (
 	"errors"
-	"github.com/gy-games-libs/golang/x/net/icmp"
-	"github.com/gy-games-libs/golang/x/net/ipv4"
+	"golang.org/x/net/icmp"
+	"golang.org/x/net/ipv4"
 	"math/rand"
 	"net"
 	"time"

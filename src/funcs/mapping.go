@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	_ "github.com/gy-games-libs/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 	"encoding/json"
 )
 
