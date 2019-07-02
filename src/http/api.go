@@ -32,8 +32,8 @@ func configApiRoutes() {
 		nconf := g.Config{}
 		nconf = g.Cfg
 		nconf.Password = ""
-		if ! AuthAgentIp(r.RemoteAddr){
-			nconf.Alert["SendEmailPassword"]="samepasswordasbefore"
+		if !AuthAgentIp(r.RemoteAddr) {
+			nconf.Alert["SendEmailPassword"] = "samepasswordasbefore"
 		}
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
@@ -492,7 +492,7 @@ func configApiRoutes() {
 		nconfig.Ver = g.Cfg.Ver
 		nconfig.Port = g.Cfg.Port
 		nconfig.Password = g.Cfg.Password
-		if nconfig.Alert["SendEmailPassword"]=="samepasswordasbefore" {
+		if nconfig.Alert["SendEmailPassword"] == "samepasswordasbefore" {
 			nconfig.Alert["SendEmailPassword"] = g.Cfg.Alert["SendEmailPassword"]
 		}
 		g.Cfg = nconfig
@@ -508,7 +508,7 @@ func configApiRoutes() {
 	})
 
 	//发送测试邮件
-	http.HandleFunc("/api/sendmailtest.json", func(w http.ResponseWriter, r *http.Request){
+	http.HandleFunc("/api/sendmailtest.json", func(w http.ResponseWriter, r *http.Request) {
 		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
@@ -538,8 +538,8 @@ func configApiRoutes() {
 			return
 		}
 
-		err := funcs.SendMail(r.Form["SendEmailAccount"][0], r.Form["SendEmailPassword"][0], r.Form["EmailHost"][0], r.Form["RevcEmailList"][0], "报警测试邮件 - SmartPing","报警测试邮件")
-		if err!=nil{
+		err := funcs.SendMail(r.Form["SendEmailAccount"][0], r.Form["SendEmailPassword"][0], r.Form["EmailHost"][0], r.Form["RevcEmailList"][0], "报警测试邮件 - SmartPing", "报警测试邮件")
+		if err != nil {
 			preout["info"] = err.Error()
 			RenderJson(w, preout)
 			return

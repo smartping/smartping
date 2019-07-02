@@ -20,6 +20,7 @@
     <div class="navbar-inner">
         <div class="container">
           <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+          <span id="banner_last_ck_time" class="pull-right " style="margin-top: 10px;"></span>
             <div class="nav-collapse">
             <!--
             <ul class="nav pull-right">
@@ -73,7 +74,7 @@
                   <input style="width:120px;" class="password" type="password" id="pass">
                   <button style="margin: -10px 0 0 0;" type="submit" class="btn btn-primary" onclick="saveconf()">保存</button>
                 </span>
-                <div style="text-align: center"><a href="?cloud"><i class="icon-cloud"></i> 切换到云模式 </a></div>
+                <div style="text-align: center"><a href="?dcloud"><i class="icon-cloud"></i> 切换到云模式 </a></div>
               </div>
 
             </div>
@@ -545,14 +546,14 @@
 <script src="assets/js/funcs.js"></script>
 <script>
     var tp = window.location.search;
-    console.log(tp)
-    if(tp=="?cloud"){
-        $(".localmode").remove();
+    //console.log(tp)
+    if(tp=="?cloud" || tp=="?dcloud" ){
+        $(".localmode").hide();
         $(".cloudmode").show();
     }
     if(tp=="?local"){
         $(".localmode").show();
-        $(".cloudmode").remove();
+        $(".cloudmode").hide();
     }
     //Ping节点测试网络 - 编辑本机节点
     function editSelfagentModal(Save){
@@ -751,7 +752,7 @@
             mnAddr=$("#topocfgAddr").val()
             NewTopoList = new Array()
             $('.topoModallist tr').each(function(i){
-                console.log($(this).find(".topoModalListChecked").is(":checked"))
+                //console.log($(this).find(".topoModalListChecked").is(":checked"))
                 if($(this).find(".topoModalListChecked").is(":checked")){
                     topoModal = new Map()
                     topoModal["Name"] = $(this).find(".topoModalListName").html()
@@ -1075,8 +1076,8 @@
                 return false
             }
             $.each(config["Network"], function(Addr, agentconfig){
-                console.log("1 "+config["Addr"]+config["Name"])
-                console.log("2 "+agentconfig["Addr"]+agentconfig["Name"]+Addr)
+                //console.log("1 "+config["Addr"]+config["Name"])
+                //console.log("2 "+agentconfig["Addr"]+agentconfig["Name"]+Addr)
                 if(agentconfig["Addr"]==config["Addr"] && agentconfig["Name"]==config["Name"]&& Addr==config["Addr"] ){
                     selfFlag=true
                     return false
@@ -1139,6 +1140,11 @@
             AgentMode(result["Mode"])
             if(result["Mode"]["Type"]=="cloud"){
                 $("#LastSuccTimeStr").html("<span class='alert-success' style='padding:10px;'>最近一次成功同步时间："+result["Mode"]["LastSuccTime"]+"</span><br/>")
+            }else{
+                if( tp!="?dcloud" ) {
+                    $(".localmode").show();
+                    $(".cloudmode").remove();
+                }
             }
             $("#agentname").html(" ("+result["Name"]+")")
             sessionStorage.setItem("config",JSON.stringify(result))

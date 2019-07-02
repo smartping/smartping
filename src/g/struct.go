@@ -1,26 +1,26 @@
 package g
 
 type Config struct {
-	Ver string
-	Port int
-	Name string
-	Addr string
-	Mode map[string]string
-	Base map[string]int
-	Topology map[string]string
-	Alert map[string]string
-	Network map[string]NetworkMember
-	Chinamap    map[string]map[string][]string
-	Toollimit int
+	Ver        string
+	Port       int
+	Name       string
+	Addr       string
+	Mode       map[string]string
+	Base       map[string]int
+	Topology   map[string]string
+	Alert      map[string]string
+	Network    map[string]NetworkMember
+	Chinamap   map[string]map[string][]string
+	Toollimit  int
 	Authiplist string
-	Password string
+	Password   string
 }
 
 type NetworkMember struct {
-	Name string
-	Addr string
+	Name      string
+	Addr      string
 	Smartping bool
-	Ping []string
+	Ping      []string
 	//Tools map[string][]string
 	Topology []map[string]string
 }
@@ -51,12 +51,12 @@ type PingLog struct {
 }
 
 type AlertLog struct {
-	Logtime  string
-	Targetip string
-	Targetname   string
-	Tracert  string
-	Fromip string
-	Fromname string
+	Logtime    string
+	Targetip   string
+	Targetname string
+	Tracert    string
+	Fromip     string
+	Fromname   string
 }
 
 type ChinaMp struct {

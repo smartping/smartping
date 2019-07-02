@@ -21,6 +21,7 @@
   <div class="navbar-inner">
     <div class="container">
       <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+      <span id="banner_last_ck_time" class="pull-right " style="margin-top: 10px;"></span>
     </div>
     <!-- /container -->
   </div>
@@ -210,7 +211,7 @@
                                     FromToObj[FromObjInfo["Addr"]+"-"+ToAddr]["Curveness"]=0.2
                                     FromToObj[FromObjInfo["Addr"]+"-"+ToAddr]["Color"]="red"
                                     if ($("#alert").length < 1) {
-                                        $(".main").append('<audio id="alert" style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src="' + result["Tsound"] + '" type="audio/mp3"  /></audio>');
+                                        $(".main").append('<audio id="alert" style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src="' + result["Topology"]["Tsound"] + '" type="audio/mp3"  /></audio>');
                                     }
                                     //console.log(FromObjInfo["Addr"]+"-"+ToAddr)
                                 }
@@ -231,7 +232,7 @@
                     $(".alerticon-" + FromObjInfo["Name"] + "").tooltip();
                     FromObj[FromObjInfo["Addr"]]["Color"]="red"
                     if ($("#alert").length < 1) {
-                       $(".main").append('<audio id="alert" style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src="' + result["Alertsound"] + '" type="audio/mp3"  /></audio>');
+                       $(".main").append('<audio id="alert" style="display:none"  autoplay="autoplay"  controls="controls" loop="loop"><source src="' + result["Topology"]["Tsound"]+ '" type="audio/mp3"  /></audio>');
                     }
                     if(ajaxCnt==0){
                         Dawr()

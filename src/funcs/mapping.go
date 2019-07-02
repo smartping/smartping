@@ -1,9 +1,10 @@
 package funcs
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"fmt"
 	"github.com/cihub/seelog"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/nettools"
 	"math"
@@ -11,8 +12,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	_ "github.com/mattn/go-sqlite3"
-	"encoding/json"
 )
 
 var (
@@ -27,7 +26,7 @@ func Mapping() {
 	for tel, provDetail := range g.Cfg.Chinamap {
 		for prov, _ := range provDetail {
 			seelog.Debug("[func:Mapping]", g.Cfg.Chinamap[tel][prov])
-			if len( g.Cfg.Chinamap[tel][prov])>0 {
+			if len(g.Cfg.Chinamap[tel][prov]) > 0 {
 				go MappingTask(tel, prov, g.Cfg.Chinamap[tel][prov], &wg)
 				wg.Add(1)
 			}
@@ -39,7 +38,7 @@ func Mapping() {
 
 //ping main function
 func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
-	seelog.Info("Start MappingTask " + tel + " "+prov + "..")
+	seelog.Info("Start MappingTask " + tel + " " + prov + "..")
 	statMap := []g.PingSt{}
 	for _, ip := range ips {
 		seelog.Debug("[func:StartChinaMapPing]", ip)
@@ -110,26 +109,25 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 	MapStatus[prov] = append(MapStatus[prov], gMapVal)
 	MapLock.Unlock()
 	wg.Done()
-	seelog.Info("Finish MappingTask " + tel + " "+prov+ "..")
+	seelog.Info("Finish MappingTask " + tel + " " + prov + "..")
 }
-
 
 func MapPingStorage() {
 	seelog.Info("Start MapPingStorage...")
 	seelog.Info(MapStatus)
 	jdata, err := json.Marshal(MapStatus)
-	if err!=nil{
-		seelog.Error("[func:StartPing] Json Error ",err)
+	if err != nil {
+		seelog.Error("[func:StartPing] Json Error ", err)
 	}
-	sql := "INSERT INTO [mappinglog] (logtime, mapjson) values('" + time.Now().Format("2006-01-02 15:04") + "','" + string(jdata)+ "')"
+	sql := "INSERT INTO [mappinglog] (logtime, mapjson) values('" + time.Now().Format("2006-01-02 15:04") + "','" + string(jdata) + "')"
 	g.DLock.Lock()
 	g.Db.Exec(sql)
-	_,err =g.Db.Exec(sql)
+	_, err = g.Db.Exec(sql)
 	//seelog.Info(sql)
-	if err!=nil{
-		seelog.Error("[func:StartPing] Sql Error ",err)
+	if err != nil {
+		seelog.Error("[func:StartPing] Sql Error ", err)
 	}
 	g.DLock.Unlock()
-	seelog.Debug("[func:MapPingStorage] ",sql)
+	seelog.Debug("[func:MapPingStorage] ", sql)
 	seelog.Info("Finish MapPingStorage...")
 }

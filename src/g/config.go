@@ -2,8 +2,10 @@ package g
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"github.com/cihub/seelog"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,21 +14,19 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"io"
-	"database/sql"
 )
 
 var (
-	Root           string
-	Cfg            Config
+	Root string
+	Cfg  Config
 	//CLock	       sync.Mutex
 	SelfCfg        NetworkMember
 	AlertStatus    map[string]bool
 	AuthUserIpMap  map[string]bool
 	AuthAgentIpMap map[string]bool
 	ToolLimit      map[string]int
-	Db    		*sql.DB
-	DLock 		sync.Mutex
+	Db             *sql.DB
+	DLock          sync.Mutex
 )
 
 func IsExist(fp string) bool {
@@ -103,7 +103,7 @@ func ParseConfig(ver string) {
 		io.Copy(dst, src)
 	}
 	seelog.Info("Config loaded")
-	Db, err = sql.Open("sqlite3", Root + "/db/database.db")
+	Db, err = sql.Open("sqlite3", Root+"/db/database.db")
 	if err != nil {
 		log.Fatalln("[Fault]db open fail .", err)
 	}
@@ -130,22 +130,23 @@ func SaveCloudConfig(url string) (Config, error) {
 		config.Name = string(body)
 		return config, err
 	}
-	Name:=Cfg.Name
-	Addr:=Cfg.Addr
-	Ver:=Cfg.Ver
-	Password:=Cfg.Password
-	Port:=Cfg.Port
-	Endpoint:=Cfg.Mode["Endpoint"]
+	Name := Cfg.Name
+	Addr := Cfg.Addr
+	Ver := Cfg.Ver
+	Password := Cfg.Password
+	Port := Cfg.Port
+	Endpoint := Cfg.Mode["Endpoint"]
 	Cfg = config
 	Cfg.Name = Name
 	Cfg.Addr = Addr
 	Cfg.Ver = Ver
 	Cfg.Port = Port
 	Cfg.Password = Password
-	Cfg.Mode["LastSuccTime"]=time.Now().Format("2006-01-02 15:04:05")
+	Cfg.Mode["LastSuccTime"] = time.Now().Format("2006-01-02 15:04:05")
 	Cfg.Mode["Status"] = "true"
 	Cfg.Mode["Endpoint"] = Endpoint
 	Cfg.Mode["Type"] = "cloud"
+	SelfCfg = Cfg.Network[Cfg.Addr]
 	saveAuth()
 	return config, nil
 }

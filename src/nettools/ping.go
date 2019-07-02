@@ -1,12 +1,12 @@
 package nettools
 
 import (
+	"encoding/binary"
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
 	"math/rand"
 	"net"
 	"time"
-	"encoding/binary"
 )
 
 type pkg struct {
