@@ -30,13 +30,15 @@ func configApiRoutes() {
 		}
 		r.ParseForm()
 		nconf := g.Config{}
-		nconf = g.Cfg
+		cfgJson, _ := json.Marshal(g.Cfg)
+		json.Unmarshal(cfgJson,&nconf)
 		nconf.Password = ""
 		if !AuthAgentIp(r.RemoteAddr,false) {
 			if nconf.Alert["SendEmailPassword"] !=""{
 				nconf.Alert["SendEmailPassword"] = "samepasswordasbefore"
 			}
 		}
+		//fmt.Print(g.Cfg.Alert["SendEmailPassword"])
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
 		json.Indent(&out, onconf, "", "\t")
