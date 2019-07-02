@@ -4,21 +4,29 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"github.com/gy-games-libs/seelog"
+	"github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
-	DLock sync.Mutex
-	Root  string
-	Db    *sql.DB
-	Cfg   Config
+	Root string
+	Cfg  Config
+	//CLock	       sync.Mutex
+	SelfCfg        NetworkMember
+	AlertStatus    map[string]bool
+	AuthUserIpMap  map[string]bool
+	AuthAgentIpMap map[string]bool
+	ToolLimit      map[string]int
+	Db             *sql.DB
+	DLock          sync.Mutex
 )
 
 func IsExist(fp string) bool {
@@ -26,7 +34,6 @@ func IsExist(fp string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-// Opening config file in JSON format
 func ReadConfig(filename string) Config {
 	config := Config{}
 	file, err := os.Open(filename)
@@ -43,6 +50,7 @@ func ReadConfig(filename string) Config {
 }
 
 func GetRoot() string {
+	//return "D:\\gopath\\src\\github.com\\smartping\\smartping"
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal("Get Root Path Error:", err)
@@ -65,15 +73,17 @@ func ParseConfig(ver string) {
 		}
 		cfile = "config-base.json"
 	}
-
 	logger, err := seelog.LoggerFromConfigAsFile(Root + "/conf/" + "seelog.xml")
+	if err != nil {
+		log.Fatalln("[Fault]log config open fail .", err)
+	}
 	seelog.ReplaceLogger(logger)
 	Cfg = ReadConfig(Root + "/conf/" + cfile)
 	if Cfg.Name == "" {
 		Cfg.Name, _ = os.Hostname()
 	}
-	if Cfg.Ip == "" {
-		Cfg.Ip = "127.0.0.1"
+	if Cfg.Addr == "" {
+		Cfg.Addr = "127.0.0.1"
 	}
 	Cfg.Ver = ver
 	if !IsExist(Root + "/db/" + "database.db") {
@@ -92,29 +102,57 @@ func ParseConfig(ver string) {
 		defer dst.Close()
 		io.Copy(dst, src)
 	}
-	Cfg.Db = Root + "/db/database.db"
 	seelog.Info("Config loaded")
-	Db, err = sql.Open("sqlite3", Cfg.Db)
+	Db, err = sql.Open("sqlite3", Root+"/db/database.db")
 	if err != nil {
 		log.Fatalln("[Fault]db open fail .", err)
 	}
-	for k, target := range Cfg.Targets {
-		if target.Thdavgdelay == 0 {
-			Cfg.Targets[k].Thdavgdelay = Cfg.Thdavgdelay
-		}
-		if target.Thdchecksec == 0 {
-			Cfg.Targets[k].Thdchecksec = Cfg.Thdchecksec
-		}
-		if target.Thdloss == 0 {
-			Cfg.Targets[k].Thdloss = Cfg.Thdloss
-		}
-		if target.Thdoccnum == 0 {
-			Cfg.Targets[k].Thdoccnum = Cfg.Thdoccnum
-		}
+	SelfCfg = Cfg.Network[Cfg.Addr]
+	AlertStatus = map[string]bool{}
+	ToolLimit = map[string]int{}
+	saveAuth()
+}
+
+func SaveCloudConfig(url string) (Config, error) {
+	config := Config{}
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
 	}
+	resp, err := client.Get(url)
+	if err != nil {
+		return config, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &config)
+	if err != nil {
+		config.Name = string(body)
+		return config, err
+	}
+	Name := Cfg.Name
+	Addr := Cfg.Addr
+	Ver := Cfg.Ver
+	Password := Cfg.Password
+	Port := Cfg.Port
+	Endpoint := Cfg.Mode["Endpoint"]
+	Cfg = config
+	Cfg.Name = Name
+	Cfg.Addr = Addr
+	Cfg.Ver = Ver
+	Cfg.Port = Port
+	Cfg.Password = Password
+	Cfg.Mode["LastSuccTime"] = time.Now().Format("2006-01-02 15:04:05")
+	Cfg.Mode["Status"] = "true"
+	Cfg.Mode["Endpoint"] = Endpoint
+	Cfg.Mode["Type"] = "cloud"
+	SelfCfg = Cfg.Network[Cfg.Addr]
+	saveAuth()
+	return config, nil
 }
 
 func SaveConfig() error {
+	saveAuth()
 	rrs, _ := json.Marshal(Cfg)
 	var out bytes.Buffer
 	errjson := json.Indent(&out, rrs, "", "\t")
@@ -128,4 +166,19 @@ func SaveConfig() error {
 		return err
 	}
 	return nil
+}
+
+func saveAuth() {
+	AuthUserIpMap = map[string]bool{}
+	AuthAgentIpMap = map[string]bool{}
+	for _, k := range Cfg.Network {
+		AuthAgentIpMap[k.Addr] = true
+	}
+	Cfg.Authiplist = strings.Replace(Cfg.Authiplist, " ", "", -1)
+	if Cfg.Authiplist != "" {
+		authiplist := strings.Split(Cfg.Authiplist, ",")
+		for _, ip := range authiplist {
+			AuthUserIpMap[ip] = true
+		}
+	}
 }

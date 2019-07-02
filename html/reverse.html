@@ -19,13 +19,8 @@
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashboard </a>
-      <div class="nav-collapse">
-        <ul class="nav pull-right">
-          <li></li>
-        </ul>
-      </div>
-      <!--/.nav-collapse -->
+      <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+      <span id="banner_last_ck_time" class="pull-right " style="margin-top: 10px;"></span>
     </div>
     <!-- /container -->
   </div>
@@ -36,11 +31,12 @@
   <div class="subnavbar-inner">
     <div class="container">
       <ul class="mainnav">
-        <li><a href="index.html"><i class="icon-mail-forward"></i><span>Forward Ping</span> </a> </li>
-        <li class="active"><a href="reverse.html"><i class="icon-mail-reply"></i><span>Reverse Ping</span> </a> </li>
-        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Topology</span> </a> </li>
-        <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
-        <li><a href="config.html"><i class="icon-cog"></i><span>Config</span> </a> </li>
+        <li><a href="index.html"><i class="icon-mail-forward"></i><span>正向Ping</span> </a> </li>
+        <li  class="active"><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
+        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
+        <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
+        <li ><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
+        <li><a  id="cfgUrl"  href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
       </ul>
     </div>
     <!-- /container -->
@@ -60,15 +56,12 @@
         <div class="span2">
           <div class="widget widget-table action-table">
             <div class="widget-header"> <i class="icon-th-list"></i>
-              <h3>Agent List</h3>
+              <h3>节点列表</h3>
             </div>
             <!-- /widget-header -->
             <div class="widget-content">
               <table class="table table-striped table-bordered">
                 <thead>
-                <tr>
-                  <th> Agent </th>
-                </tr>
                 </thead>
                 <tbody class="agentlist">
 
@@ -93,7 +86,7 @@
   <div class="footer-inner">
     <div class="container">
       <div class="row">
-        <div class="span12"> &copy; 2017 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
+        <div class="span12"> &copy; 2017 - 2020 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
         <!-- /span12 -->
       </div>
       <!-- /row -->
@@ -126,129 +119,47 @@
 <script src="assets/js/bootstrap.js"></script>
 <script src="assets/js/echarts.min.js"></script>
 <script language="JavaScript" type="text/javascript" src="assets/js/My97DatePicker/WdatePicker.js"></script>
+<script src="assets/js/funcs.js"></script>
 <script>
-    var int
-    function Refresh(){
-        window.location.reload();
+    //var int
+    getLineChart("");
+    function changeAgent(n,url){
+        $(".alerticon-" + n).addClass("icon-spinner").addClass("icon-spin").addClass("animated");
+        getLineChart(url)
     }
-    getLineChart();
-    function getLineChart() {
-        $("#main").html("");
-        $(".agentlist").html("");
-        $.getJSON("/api/config.json", function (result) {
-            int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
+    function getLineChart(url) {
+        if(url!=""){
+            url="/api/proxy.json?g="+url
+        }
+        $.getJSON(url+"/api/config.json", function (result) {
+            $("#main").html("");
+            $(".agentlist").html("");
+            $("#agentname").html(" ("+result["Name"]+")")
+            AgentMode(result["Mode"])
+            //int = setTimeout('Refresh()',result["Alertcycle"]*60*1000);
             $("#verion").html("Version: " + result["Ver"])
-            $.each(result["Targets"], function (i, field) {
-                if (field.Type == "CS") {
-                    if (field.Addr == result["Ip"]) {
-                        return true;
-                    }
-                    $(".agentlist").append("<tr><td><i class='icon-spinner icon-spin animated alerticon-" + field.Name + "'></i>&nbsp;<a target='_blank' href='http://" + field.Addr + ":" + result["Port"] + "/reverse.html'>" + field.Name + "</a></td></tr>");
+            $.each(result["Network"], function(i, network){
+                if(network["Smartping"]) {
+                    $(".agentlist").append("<tr><td><i class='alerticon-" + network["Name"] + "'></i>&nbsp;" +
+                        "<a onclick=changeAgent('" + network["Name"] + "','http://" + network["Addr"] + ":" + result["Port"] + "')>" + network["Name"] + "</a></td></tr>");
                 }
             });
-            optmini = {
-                title: {
-                    text: '',
-                    'x': 'center'
-                },
-                tooltip: {},
-                grid: {
-                    left: '3%',
-                    right: '3%',
-                    bottom: '3%',
-                    top: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    data: []
-                },
-                yAxis: [{
-                    type: 'value',
-                    position: 'left'
-                }, {
-                    type: 'value',
-                    min: 0,
-                    max: 100,
-                    position: 'right'
-                }],
-                series: [
-                    {
-                        name: 'avgDelay',
-                        type: 'line',
-                        data: [],
-                        itemStyle: {
-                            normal: {
-                                color: '#00CC66'
-                            }
-                        },
-                        animation: false,
-                        areaStyle: {
-                            normal: {}
-                        },
-                        lineStyle: {
-                            normal: {
-                                width: 0
-                            }
-                        }
-                    },
-                    {
-                        name: 'lossPk',
-                        type: 'line',
-                        yAxisIndex: 1,
-                        data: [],
-                        itemStyle: {
-                            normal: {
-                                color: '#FF0000'
-                            }
-                        },
-                        animation: false,
-                        areaStyle: {
-                            normal: {}
-                        },
-                        lineStyle: {
-                            normal: {
-                                width: 0
-                            }
-                        }
-                    }]
-            }
-            $.each(result["Targets"], function (i, field) {
-                if (field.Type == "CS") {
-                    if (field.Addr == result["Ip"]) {
-                        return true;
-                    }
-                    $("#main").append("<div id='" + field.Name + "_pannel' style='float:left;width:30%;height:130px;margin-right:3%;margin-top:20px;'  class='showcharts' apiurl='http://" + field.Addr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Ip'] + "'></div>");
-                    var chart = echarts.init(document.getElementById(field.Name + "_pannel"));
-                    chart.setOption(optmini);
-                    chart.setOption({title: {text: field.Name + "->" + result["Name"], textStyle: {'fontSize': 13}}});
-                    $.ajax({
-                        dataType: "json",
-                        url: 'http://' + field.Addr + ':' + result["Port"] + '/api/ping.json?ip=' + result["Ip"],
-                        success: function (data) {
-                            $(".alerticon-" + field.Name + "").remove();
-                            //var data = JSON.parse(data);
-                            chart.setOption({
-                                xAxis: {
-                                    data: data.lastcheck
-                                },
-                                series: [{
-                                    name: 'avgDelay',
-                                    data: data.avgdelay
-                                }, {
-                                    name: 'lossPk',
-                                    data: data.losspk
-                                }]
-                            });
-                        },
-                        timeout: result["Timeout"] * 1000
-                    }).fail(function (xhr, status) {
-                        $(".alerticon-" + field.Name + "").removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
-                        $(".alerticon-" + field.Name + "").addClass("icon-warning-sign");
-                    });
+            $.each(result["Network"], function(rAddr, network){
+                if (rAddr==result["Addr"]){
+                    return true
                 }
+                $.each(network["Ping"], function(i, ping){
+                    if(ping==result["Addr"]){
+                        $("#main").append("<div style='text-align:center;float:left;width:30.3%;height:130px;margin-right:3%;margin-top:20px;background-size:100% 100%;' " +
+                            "class='img showcharts' imgsrc='/api/graph.png?g=http://"+rAddr+":"+result["Port"]+"/api/ping.json?ip="+result["Addr"]+"' " +
+                            "apiurl='/api/proxy.json?g=http://" + rAddr + ":" + result['Port'] + "/api/ping.json?ip=" + result['Addr'] + "' " +
+                            "><b style='font-color:#333333'>"+network["Name"]+"->"+result["Name"]+"</b></div>");
+                    }
+                })
             });
+            layzeImg()
             $("#main").on("click", ".showcharts", function () {
-                window.clearInterval(int)
+                //window.clearInterval(int)
                 var modalWidth = $("#charts").width();
                 var left = "-" + parseInt(modalWidth) / 2 + "px";
                 $('#charts').modal('show').css({"margin-left": left});
@@ -279,13 +190,16 @@
                     });
                 });
             });
+        }).fail(function (xhr, status) {
+            alert(xhr.responseText);
+            Refresh();
         });
     }
     $(".sgraph").click(function(){
         start   = $("#starttime").val();
         endtime = $("#endtime").val();
         url = $("#pannelurl").attr("value");
-        $.get(url+"&starttime="+start+"&endtime="+endtime).done(function (data) {
+        $.get(url+"%26starttime="+start+"%26endtime="+endtime).done(function (data) {
             //var data = JSON.parse(data);
             myChart.setOption({
                 xAxis: {
@@ -420,6 +334,29 @@
     }
     var myChart = echarts.init(document.getElementById('pannel-show'));
     myChart.setOption(opt);
+    function layzeImg() {
+        var aImg = document.querySelectorAll('div.img');
+        var len = aImg.length;
+        var n = 0;
+        for (var i = n; i < len; i++) {
+            if (aImg[i].offsetTop < document.documentElement.clientHeight + (document.body.scrollTop || document.documentElement.scrollTop)) {
+                if (aImg[i].style.backgroundImage == '') {
+                    aImg[i].style.backgroundImage = "url('"+aImg[i].getAttribute('imgsrc')+"')";
+                }
+                n = i + 1;
+            }
+        }
+        window.onscroll = function () {
+            for (var i = n; i < len; i++) {
+                if (aImg[i].offsetTop < document.documentElement.clientHeight + (document.body.scrollTop || document.documentElement.scrollTop)) {
+                    if (aImg[i].style.backgroundImage == '') {
+                        aImg[i].style.backgroundImage = "url('"+aImg[i].getAttribute('imgsrc')+"')";
+                    }
+                    n = i + 1;
+                }
+            }
+        };
+    };
 </script>
 </body>
 </html>

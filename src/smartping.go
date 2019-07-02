@@ -1,19 +1,19 @@
 package main
 
 import (
-	"./funcs"
-	"./g"
-	"./http"
 	"flag"
 	"fmt"
-	"github.com/gy-games-libs/cron"
+	"github.com/jakecoffman/cron"
+	"github.com/smartping/smartping/src/funcs"
+	"github.com/smartping/smartping/src/g"
+	"github.com/smartping/smartping/src/http"
 	"os"
 	"runtime"
-	"sync"
+	//"sync"
 )
 
 // Init config
-var Version = "0.5.0"
+var Version = "0.8.0"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -24,25 +24,17 @@ func main() {
 		os.Exit(0)
 	}
 	g.ParseConfig(Version)
-
-	for _, target := range g.Cfg.Targets {
-		go funcs.CreatePingTable(target)
-	}
+	go funcs.ClearArchive()
 	c := cron.New()
 	c.AddFunc("*/60 * * * * *", func() {
-		var wg sync.WaitGroup
-		for _, target := range g.Cfg.Targets {
-			if target.Addr != g.Cfg.Ip {
-				wg.Add(1)
-				go funcs.StartPing(target, &wg)
-			}
+		go funcs.Ping()
+		go funcs.Mapping()
+		if g.Cfg.Mode["Type"] == "cloud" {
+			go funcs.StartCloudMonitor()
 		}
-		wg.Wait()
-		go funcs.StartAlert()
 	}, "ping")
-	c.AddFunc("0 0 0 * * *", func() {
-		go funcs.ClearAlertTable()
-		go funcs.ClearPingTable()
+	c.AddFunc("0 0 * * * *", func() {
+		go funcs.ClearArchive()
 	}, "mtc")
 	c.Start()
 	http.StartHttp()

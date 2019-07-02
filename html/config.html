@@ -17,30 +17,39 @@
 </head>
 <body>
 <div class="navbar navbar-fixed-top">
-  <div class="navbar-inner">
-    <div class="container">
-      <a class="brand" href="index.html">SmartPing Dashboard </a>
-      <div class="nav-collapse">
-        <ul class="nav pull-right">
-          <li></li>
-        </ul>
-      </div>
-      <!--/.nav-collapse -->
+    <div class="navbar-inner">
+        <div class="container">
+          <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+          <span id="banner_last_ck_time" class="pull-right " style="margin-top: 10px;"></span>
+            <div class="nav-collapse">
+            <!--
+            <ul class="nav pull-right">
+                <li class="dropdown">
+                    <a target="_blank" href="http://smartping.cn/" >
+                        <i class="icon-comment"></i>
+                        Know About SmartPing.CN ?
+                    </a>
+                </li>
+            </ul>
+            -->
+        </div>
+            <!--/.nav-collapse -->
+        </div>
+        <!-- /container -->
     </div>
-    <!-- /container -->
-  </div>
-  <!-- /navbar-inner -->
+    <!-- /navbar-inner -->
 </div>
 <!-- /navbar -->
 <div class="subnavbar">
   <div class="subnavbar-inner">
     <div class="container">
       <ul class="mainnav">
-        <li><a href="index.html"><i class="icon-mail-forward"></i><span>Forward Ping</span> </a> </li>
-        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>Reverse Ping</span> </a> </li>
-        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Topology</span> </a> </li>
-        <li><a href="alerts.html"><i class="icon-warning-sign"></i><span>Alerts</span> </a> </li>
-        <li  class="active"><a href="config.html"><i class="icon-cog"></i><span>Config</span> </a> </li>
+        <li><a href="index.html"><i class="icon-mail-forward"></i><span>正向Ping</span> </a> </li>
+        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
+        <li ><a   href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
+          <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
+          <li ><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
+          <li class="active"><a  id="cfgUrl"  href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
       </ul>
     </div>
     <!-- /container --> 
@@ -48,170 +57,415 @@
   <!-- /subnavbar-inner --> 
 </div>
 <!-- /subnavbar -->
-<div class="main" style="margin-top:-20px;">
+<div class="main localmode" style="margin-top:-20px;">
   <div class="main-inner">
     <div class="container" id="main">
-
       <div class="row">
           <div class="span4">
-
             <div class="widget-header">
               <i class="icon-user"></i>
-              <h3>Save Configuration</h3>
+              <h3>保存配置 </h3>
+               <span style="float: right;margin-right: 25px;"><a  target="_blank" href="/api/config.json"><i class="icon-file"></i></a></span>
             </div> <!-- /widget-header -->
-
             <div class="widget-content">
               <div style="text-align: center">
                 <span>
-                  <b style="top:-5px;"><a title="Default Password : smartping">Password:</a></b>
-                  <input class="span2 password" type="password" id="pass">
-                  <button style="margin: -10px 0 0 0;" type="submit" class="btn btn-primary" onclick="saveconf()">Save</button>
+                  <b>密码:</b>
+                  <input style="width:120px;" class="password" type="password" id="pass">
+                  <button style="margin: -10px 0 0 0;" type="submit" class="btn btn-primary" onclick="saveconf()">保存</button>
                 </span>
+                <div style="text-align: center"><a href="?dcloud"><i class="icon-cloud"></i> 切换到云模式 </a></div>
               </div>
+
             </div>
             <br/>
             <div class="widget-header">
               <i class="icon-user"></i>
-              <h3>Base Configuration</h3>
+              <h3>基础配置</h3>
             </div> <!-- /widget-header -->
 
             <div class="widget-content">
 
-            <h4>Base</h4><br>
-            <div class="control-group"  style="float: left;width: 30%;">
-              <label class="control-label" for="Name" >Agent Name</label>
-              <div class="controls">
-                <input type="text" style="width:100%" id="Name" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
+            <h4>基础</h4><br>
 
-            <div class="control-group" style="float: left;width: 60%;margin-left: 20px;">
-              <label class="control-label" for="Ip">Agent Ip</label>
-              <div class="controls">
-                <input type="text"  style="width:100%" id="Ip" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-              <div class="control-group"  style="float: left;width: 30%;">
-                <label class="control-label" for="Name" >Timeout(s)</label>
+              <div class="control-group"  style="float: left;width: 28%;">
+                <label class="control-label" >接口超时(秒)</label>
                 <div class="controls">
-                  <input type="text" style="width:100%" id="Timeout" value="">
+                  <input type="text" style="width:100%" id="Timeout" value="" >
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
-              <div class="control-group"  style="float: left;width: 20%;margin-left: 20px;">
-                <label class="control-label" for="Alertcycle">Refresh(min)</label>
+              <div class="control-group"  style="float: left;width: 28%;margin-left: 20px;">
+                <label class="control-label" for="Refresh">页面刷新(分钟)</label>
                 <div class="controls">
-                  <input type="text"   style="width:100%" id="Alertcycle" value="">
+                  <input type="text"   style="width:100%" id="Refresh" value=""  >
+                </div> <!-- /controls -->
+              </div> <!-- /control-group -->
+
+
+              <div class="control-group"  style="width: 28%;float: left;margin-left: 20px;">
+                <label class="control-label ttip" for="Archive" data-toggle='tooltip' title='此配置仅针对全国延迟与报警日志数据生效,Ping数据默认保存30天不可修改!'  data-placement='bottom'>数据存档(天)</label>
+                <div class="controls">
+                  <input type="text" style="width:100%"   id="Archive" value=""  >
                 </div> <!-- /controls -->
               </div> <!-- /control-group -->
 
             <hr style="clear:both;">
+            <h4>Ping拓扑</h4><br>
 
-            <h4>Alert</h4><br>
-
-            <div class="control-group"  style="float: left">
-              <label class="control-label" for="Thdchecksec">Check Period(s)&nbsp;&nbsp;&nbsp;</label>
+            <div class="control-group" style="float: left;width: 43%;">
+              <label class="control-label" for="Tsound">报警声音</label>
               <div class="controls">
-                <input type="text"  class="span1" id="Thdchecksec" value="">
+                <input type="text"  style="width:97%" id="Tsound" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group" style="float: left">
-              <label class="control-label" for="Thdloss">Loss Percent(%)&nbsp;&nbsp;</label>
-              <div class="controls">
-                <input type="text"  class="span1" id="Thdloss" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="float: left">
-              <label class="control-label" for="Thdavgdelay">Average Delay(ms)</label>
-              <div class="controls">
-                <input type="text"  class="span1" id="Thdavgdelay" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-              <div class="control-group"  style="float: left">
-                <label class="control-label" for="Thdoccnum">Occur Times&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                <div class="controls">
-                  <input type="text"  class="span1" id="Thdoccnum" value="">
-                </div> <!-- /controls -->
-              </div> <!-- /control-group -->
-
-              <div class="control-group"  style="float: left">
-                <label class="control-label" for="Alerthistory">Archive Days&nbsp;&nbsp;</label>
-                <div class="controls">
-                  <input type="text"  class="span1" id="Alerthistory" value="">
-                </div> <!-- /controls -->
-              </div> <!-- /control-group -->
-
-            <hr style="clear:both;">
-            <h4>Topology</h4><br>
-
-            <div class="control-group">
-              <label class="control-label" for="Alertsound">Alert Sound</label>
-              <div class="controls">
-                <input type="text"  style="width:97%" id="Alertsound" value="">
-              </div> <!-- /controls -->
-            </div> <!-- /control-group -->
-
-            <div class="control-group"  style="width: 28%;float: left">
-              <label class="control-label" for="Tline">Line Thickness</label>
+            <div class="control-group"  style="width: 20%;float: left;margin-left: 20px;">
+              <label class="control-label" for="Tline">连线粗细</label>
               <div class="controls">
                 <input type="text"  style="width:100%"  id="Tline" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <div class="control-group"  style="width: 25%;float: left;margin-left: 20px;">
-              <label class="control-label" for="Tsymbolsize">Symbol Size</label>
+            <div class="control-group"  style="width: 20%;float: left;margin-left: 20px;">
+              <label class="control-label" for="Tsymbolsize">形状大小</label>
               <div class="controls">
                 <input type="text" style="width:100%"   id="Tsymbolsize" value="">
               </div> <!-- /controls -->
             </div> <!-- /control-group -->
 
-            <br/><br/>
+           <hr style="clear:both;">
+           <h4>报警邮件<button style="float: right" onclick="sendMailTest(this)">发送测试邮件</button></h4><br>
+            <div class="control-group" >
+                <label class="control-label" for="Tsymbolsize">邮件服务器</label>
+                <div class="controls">
+                    <input type="text" style="width:97%"   id="EmailHost" value="">
+                </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <div class="control-group"  style="width: 46%;float: left;">
+                <label class="control-label" for="Tsymbolsize">发件邮件</label>
+                <div class="controls">
+                    <input type="text" style="width:100%"   id="SendEmailAccount" value="">
+                </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <div class="control-group"  style="width: 46%;float: left;margin-left: 20px;">
+                <label class="control-label" for="Tsymbolsize">发件邮箱密码</label>
+                <div class="controls">
+                    <input type="password" style="width:100%"   id="SendEmailPassword" value="">
+                </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <div class="control-group" >
+                <label class="control-label" for="Tsymbolsize">收件邮箱列表(分号隔开)</label>
+                <div class="controls">
+                    <input type="text" style="width:97%"   id="RevcEmailList" value="">
+                </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+
+
+              <hr style="clear:both;">
+
+              <h4>检测工具</h4><br>
+
+              <div class="control-group"  style="float: left;width: 45%;">
+                <label class="control-label" for="Toollimit">限定频率(秒)</label>
+                <div class="controls">
+                  <input type="text"   style="width:100%" id="Toollimit" value="">
+                </div> <!-- /controls -->
+              </div> <!-- /control-group -->
+
+            <hr style="clear:both;">
+            <h4>授权管理</h4><br>
+            <div class="control-group"  style="width: 96%;">
+                <label class="control-label" for="Authiplist">用户IP列表(逗号隔开)</label>
+                <div class="controls">
+                    <input type="text" style="width:100%"  id="Authiplist" value="" >
+                </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <br/>
 
           </div>
           </div>
           <div class="span8">
-              <!-- /widget -->
-              <div class="widget widget-table action-table">
+            <!-- /widget -->
+            <div class="widget widget-table action-table">
                 <div class="widget-header"> <i class="icon-th-list"></i>
-                  <h3>SmartPing NetWork</h3>
+                  <h3>Ping节点测试网络</h3>
                 </div>
                 <!-- /widget-header -->
                 <div class="widget-content">
                   <table class="table table-striped table-bordered">
                     <thead>
-                    <tr>
-                      <th> Name </th>
-                      <th> Ip </th>
-                      <th> Type </th>
-                      <th> <a title="Check Period">Alert CP(s)</a> </th>
-                      <th> <a title="Loss Percent">Alert LP(%)</a>  </th>
-                      <th> <a title="Average Delay">Alert AD(ms)</a>  </th>
-                      <th> <a title="Occur Times">Alert OT(t)</a>  </th>
-                      <th>  </th>
-                    </tr>
+                      <tr>
+                        <th> 节点名称(本机) </th>
+                        <th> 节点IP(本机) </th>
+                        <th> SmartPing </th>
+                        <th style="width:60px;"> 正向Ping </th>
+                        <th style="width:60px;text-align: center">Ping拓扑</th>
+                        <!--<th style="width:60px;text-align: center">检测工具</th>-->
+                        <th  style="width:15px;">  </th>
+                      </tr>
                     </thead>
-                    <tbody class="agentlist">
-                    <tr>
-
-                    </tr>
-                    </tbody>
+                    <tbody  class="selfagent"></tbody>
+                    <thead>
+                      <tr>
+                        <th> 节点名称 </th>
+                        <th> 节点IP </th>
+                        <th style="width:60px;"> SmartPing </th>
+                        <th style="width:60px;"> 正向Ping </th>
+                        <th style="width:60px;text-align: center">Ping拓扑</th>
+                        <!--<th style="width:60px;text-align: center">检测工具</th>-->
+                        <th  style="width:15px;">  </th>
+                      </tr>
+                    </thead>
+                    <tbody class="agentlist"></tbody>
                     <tfoot>
-                    <tr>
-                      <td colspan="8" style="text-align: center"><input style='margin:4px 3px 0 0;' type='button' onclick='addTr();' class='btn btn-small' value='Add Agent'></td>
-                    </tr>
+                      <tr>
+                        <td colspan="8" style="text-align: center"><input style='margin:4px 3px 0 0;' type='button' class='btn btn-small' value='添加节点' data-toggle="modal" data-target="#agentModal"></td>
+                      </tr>
                     </tfoot>
                   </table>
-                  <input type="hidden" value="0" class="agentnum" />
                 </div>
                 <!-- /widget-content -->
               </div>
-              <!-- /widget -->
+
+            <!-- editSelfAgentModal -->
+            <div class="modal fade" id="editSelfagentModal" tabindex="-1" role="dialog"  style="width:480px;">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">编辑本机节点</h4>
+                  </div>
+                  <div class="modal-body form-horizontal" >
+                    节点名称：<input id="editAgentName" type="text" style="width: 150px;"> 节点IP： <input id="editAgentIp" type="text" style="width: 150px;">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="editSelfagentModal(true)">暂存</button>
+                  </div>
+                </div>
+              </div>
             </div>
-      </div>
+
+            <!-- NewAgentModal -->
+            <div class="modal fade" id="agentModal" tabindex="-1" role="dialog"  style="width:480px;">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">新增节点</h4>
+                  </div>
+                  <div class="modal-body form-horizontal" >
+                    节点名称：<input id="newAgentName" type="text" style="width: 150px;"> 节点IP： <input id="newAgentIp" type="text" style="width: 150px;">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addAgent(null,null)">暂存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PingModal -->
+            <div class="modal fade" id="pingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="width:500px;">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Ping配置</h4>
+                  </div>
+                  <div class="modal-body">
+                    <table class="table table-striped table-bordered">
+                      <thead>
+                      <tr>
+                        <th> 节点名称 </th>
+                        <th> 节点IP </th>
+                        <th style="text-align: center"> 正向Ping <input type='checkbox' class="allchecked"></th>
+                      </tr>
+                      </thead>
+                      <tbody class="pingModalist"></tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="pingcfg(null,true)" >暂存</button>
+                    <input type='hidden' id='pingcfgAddr' value=''/>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TopoModal -->
+            <div class="modal fade" id="topoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="width:800px;">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">拓扑配置</h4>
+                  </div>
+                  <div class="modal-body">
+                    <table class="table table-striped table-bordered">
+                      <thead>
+                      <tr>
+                        <th> 节点名称 </th>
+                        <th> 节点IP </th>
+                        <th style="width:70px;"> 正向拓扑 <input type='checkbox' class="allchecked" style="margin-top: 2px"  v="topoCheck" /></th>
+                        <th style="width:450px;"> 报警规则 </th>
+                      </tr>
+                      </thead>
+                      <tbody class="topoModallist"></tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="topocfg(null,true)">暂存</button>
+                    <input type='hidden' id='topocfgAddr' value=''/>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ToolsModal
+            <div class="modal fade" id="toolModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="width:800px;">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">工具配置</h4>
+                  </div>
+                  <div class="modal-body">
+                    <table class="table table-striped table-bordered">
+                      <thead>
+                      <tr>
+                        <th> 节点名称 </th>
+                        <th> 节点IP </th>
+                        <th style="width:450px;"> 可用工具 </th>
+                      </tr>
+                      </thead>
+                      <tbody class="toolModallist" ></tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="toolcfg(null,true)">暂存</button>
+                    <input type='hidden' id='toolscfgAddr' value=''/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            -->
+
+            <!-- /全国延迟测试网络 -->
+            <div class="widget widget-table action-table">
+              <div class="widget-header"> <i class="icon-th-list"></i>
+                <h3>全国延迟测试网络</h3>
+              </div>
+              <!-- /widget-header -->
+              <div class="widget-content chinamaplist" style="padding:10px;"></div>
+            <!-- /widget -->
+            </div>
+
+            <!-- chinamapModal -->
+            <div class="modal fade" id="addChinaMapModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="width:550px;">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" >新增全国延迟测试节点</h4>
+                  </div>
+                  <div class="modal-body ">
+                    <div style="text-align: center"><select class='provSelect' style='width:70px;'><option value='北京'>北京</option><option value='浙江'>浙江</option><option value='天津'>天津</option><option value='安徽'>安徽</option><option value='上海'>上海</option><option value='福建'>福建</option><option value='重庆'>重庆</option><option value='江西'>江西</option><option value='山东'>山东</option><option value='河南'>河南</option><option value='湖北'>湖北</option><option value='湖南'>湖南</option><option value='广东'>广东</option><option value='海南'>海南</option><option value='山西'>山西</option><option value='青海'>青海</option><option value='江苏'>江苏</option><option value='辽宁'>辽宁</option><option value='吉林'>吉林</option><option value='台湾'>台湾</option><option value='河北'>河北</option><option value='贵州'>贵州</option><option value='四川'>四川</option><option value='云南'>云南</option><option value='陕西'>陕西</option><option value='甘肃'>甘肃</option><option value='黑龙江'>黑龙江</option><option value='香港'>香港</option><option value='澳门'>澳门</option><option value='广西'>广西</option><option value='宁夏'>宁夏</option><option value='新疆'>新疆</option><option value='内蒙古'>内蒙古</option><option value='西藏'>西藏</option></select></div>
+                    <div style="float: left;width: 31%;padding:5px;">
+                      <table class="table table-striped table-bordered">
+                        <thead>
+                        <tr>
+                          <th> 电信 </th>
+                        </tr>
+                        </thead>
+                        <tbody class="add_chinamap_ctcc" ></tbody>
+                      </table>
+                      <input type="button" style="width: 100%;margin-top: -10px;" value=" + " onclick="addChinaMapCell('add_chinamap_ctcc')">
+                    </div>
+                    <div style="float: left;width: 31%;padding:5px;">
+                      <table class="table table-striped table-bordered">
+                        <thead>
+                        <tr>
+                          <th> 联通 </th>
+                        </tr>
+                        </thead>
+                        <tbody class="add_chinamap_cucc" ></tbody>
+                      </table>
+                      <input type="button" style="width: 100%;margin-top: -10px;" value=" + " onclick="addChinaMapCell('add_chinamap_cucc')">
+                    </div>
+                    <div style="float: left;width: 31%;padding:5px;">
+                      <table class="table table-striped table-bordered">
+                        <thead>
+                        <tr>
+                          <th> 移动 </th>
+                        </tr>
+                        </thead>
+                        <tbody class="add_chinamap_cmcc" ></tbody>
+                      </table>
+                      <input type="button" style="width: 100%;margin-top: -10px;" value=" + " onclick="addChinaMapCell('add_chinamap_cmcc')">
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" onclick="addChinaMap(true)">暂存</button>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- chinamapModal -->
+            <div class="modal fade" id="chinaMapModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="width:550px;">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title editChinaMapProv" ></h4>
+                  </div>
+                  <div class="modal-body ">
+                    <div style="float: left;width: 31%;padding:5px;">
+                        <table class="table table-striped table-bordered form-horizontal">
+                          <thead>
+                            <tr>
+                              <th> 电信 </th>
+                            </tr>
+                          </thead>
+                          <tbody class="chinamap_ctcc" ></tbody>
+                        </table>
+                        <input type="button" style="width: 100%;margin-top: -10px;" value=" + " onclick="addChinaMapCell('chinamap_ctcc')">
+                      </div>
+                      <div style="float: left;width: 31%;padding:5px;">
+                        <table class="table table-striped table-bordered form-horizontal">
+                          <thead>
+                          <tr>
+                            <th> 联通 </th>
+                          </tr>
+                          </thead>
+                          <tbody class="chinamap_cucc" ></tbody>
+                        </table>
+                        <input type="button" style="width: 100%;margin-top: -10px;" value=" + " onclick="addChinaMapCell('chinamap_cucc')">
+                      </div>
+                      <div style="float: left;width: 31%;padding:5px;">
+                        <table class="table table-striped table-bordered form-horizontal">
+                          <thead>
+                          <tr>
+                            <th> 移动 </th>
+                          </tr>
+                          </thead>
+                          <tbody class="chinamap_cmcc" ></tbody>
+                        </table>
+                        <input type="button" style="width: 100%;margin-top: -10px;" value=" + " onclick="addChinaMapCell('chinamap_cmcc')">
+                      </div>
+                  </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-danger pull-left" onclick="delChinaMap()">删除</button>
+                    <button type="button" class="btn btn-primary" onclick="editChinaMap(null,true)">暂存</button>
+                  </div>
+                </div>
+              </div>
+
+
+          </div>
+          </div>
       <hr>
     </div>
     <!-- /container --> 
@@ -219,12 +473,61 @@
   <!-- /main-inner --> 
 </div>
 <!-- /main -->
+<div class="main cloudmode" style="margin-top:-20px;">
+  <div class="main-inner">
+    <div class="container">
+      <div class="row">
+        <div class="span3"> &nbsp;</div>
+        <div class="span6">
+            <div class="widget-content">
+                <div id="LastSuccTimeStr" style="text-align: center"></div>
+                <div class="control-group">
+              <label class="control-label">云配置地址</label>
+              <div class="controls">
+                <div class="input-append">
+                  <input  style="width:98%" class="m-wrap" id="Endpoint" value="http://" type="text">
+                </div>
+              </div>	<!-- /controls -->
+            </div> <!-- /control-group -->
+            <div class="row">
+              <div class="span2" style="width: 44.4%;">
+                <div class="control-group">
+                  <label class="control-label">节点名称(本机)</label>
+                  <div class="controls">
+                    <input class="cpassword" type="text" style="width:97%"  id="CloudSelfName" value="">
+                  </div> <!-- /controls -->
+                </div> <!-- /control-group -->
+              </div>
+              <div class="span2" style="width: 44.4%;">
+                <div class="control-group">
+                  <label class="control-label">节点IP(本机)</label>
+                  <div class="controls">
+                    <input class="cpassword" type="text" style="width:97%"  id="CloudSelfAddr" value="">
+                  </div> <!-- /controls -->
+                </div> <!-- /control-group -->
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">密码</label>
+              <div class="controls">
+                <input class="cpassword" type="password" style="width:97%"  id="CloudPass" value="">
+              </div> <!-- /controls -->
+            </div> <!-- /control-group -->
+            <button style="width:100%"  type="submit" class="btn btn-primary" onclick="savecloudconf()">检测并保存</button>
+            <div style="text-align: center;margin-top: 10px;"><a  href="?local"><i class="icon-home"></i> 切换到本地模式 </a></div>
+          </div>
+        </div>
+        <div class="span3">&nbsp;</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="footer">
   <div class="footer-inner">
     <div class="container">
       <div class="row">
-        <div class="span12"> &copy; 2017 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
+        <div class="span12"> &copy; 2017 - 2020 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
         <!-- /span12 --> 
       </div>
       <!-- /row --> 
@@ -236,46 +539,506 @@
 <!-- /footer --> 
 <!-- Le javascript
 ================================================== --> 
-<!-- Placed at the end of the document so the pages load faster --> 
+<!-- Placed at the end of the document so the pages load faster -->
 <script src="assets/js/jquery-1.7.2.min.js"></script>
+<script src="assets/js/jquery.cookie.js"></script>
 <script src="assets/js/bootstrap.js"></script>
+<script src="assets/js/funcs.js"></script>
 <script>
-
+    var tp = window.location.search;
+    //console.log(tp)
+    if(tp=="?cloud" || tp=="?dcloud" ){
+        $(".localmode").hide();
+        $(".cloudmode").show();
+    }
+    if(tp=="?local"){
+        $(".localmode").show();
+        $(".cloudmode").hide();
+    }
+    //Ping节点测试网络 - 编辑本机节点
+    function editSelfagentModal(Save){
+        if(Save){
+            editAgentName = $("#editAgentName").val();
+            editAgentAddr = $("#editAgentIp").val();
+            config=$.parseJSON(sessionStorage.getItem("config"))
+            config["Name"]=editAgentName
+            config["Addr"]=editAgentAddr
+            sessionStorage.setItem("config",JSON.stringify(config))
+            delAgent(null,$(".selfAgentAddr").html())
+            $(".selfAgentName").html(editAgentName)
+            $(".selfAgentAddr").html(editAgentAddr)
+            addAgent(editAgentName,editAgentAddr)
+            config["Network"][editAgentAddr]["Smartping"]=true
+            sessionStorage.setItem("config",JSON.stringify(config))
+            $('#editSelfagentModal').modal("hide");
+            return
+        }
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        $("#editAgentName").val(config["Name"]);
+        $("#editAgentIp").val(config["Addr"]);
+        $('#editSelfagentModal').modal();
+    }
+    //Ping节点测试网络 - 新增节点
+    function addAgent(Name,Ip){
+        if(Name==null && Ip==null){
+            newAgentName = $("#newAgentName").val();
+            newAgentIp = $("#newAgentIp").val();
+        }else{
+            newAgentName = Name
+            newAgentIp = Ip
+        }
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        //检测节点IP或Name是否重复
+        CheckFlag=""
+        $.each(config["Network"],function(Addr,network){
+            if(Addr==newAgentIp || network["Addr"]==newAgentIp){
+                CheckFlag = "节点IP不能重复！"
+                return false
+            }
+            if( network["Name"]==newAgentName){
+                CheckFlag = "节点名称不能重复！"
+                return false
+            }
+        })
+        if(CheckFlag!=""){
+            alert(CheckFlag)
+            return
+        }
+        //添加新节点
+        if(Name==null && Ip==null){
+            $(".agentlist").append("<tr class='agentlist-"+newAgentIp+"'>" +
+                "<td>"+newAgentName+"</td><td class='Addr'>"+newAgentIp+"</td>" +
+                "<td style='text-align:center'><input type='checkbox' onclick='checkSP(this)'></td>" +
+                "<td style='text-align:center'><a class='btn btn-mini' onclick='pingcfg(this,null)' disabled='disabled'>配置</a></td>" +
+                "<td style='text-align:center'><a class='btn btn-mini' onclick='topocfg(this,false)' disabled='disabled'>配置</a></td>" +
+                //"<td style='text-align:center'><a class='btn btn-mini' onclick='toolcfg(this,null)' disabled='disabled'>配置</a></td>" +
+                "<td><i onclick='delAgent(this,null);' class='icon-large icon-trash'></i></td>" +
+                "</tr>")
+        }
+        agent=new Object()
+        agent["Name"] = newAgentName
+        agent["Addr"]=newAgentIp
+        agent["Ping"]=new Array()
+        //agent["Tools"]=new Object()
+        //agent["Tools"]["Icmpping"]=new Array()
+        agent["Topology"]=new Array()
+        /*
+        $.each(config["Network"], function(Addr, agentconfig){
+            agent["Ping"].push(Addr)
+            agent["Tools"]["Icmpping"].push(Addr)
+            topoMap = new Map()
+            topoMap["Name"]=agentconfig["Name"]
+            topoMap["Addr"]=agentconfig["Addr"]
+            topoMap["Thdchecksec"]="0"
+            topoMap["Thdoccnum"]="0"
+            topoMap["Thdavgdelay"]="0"
+            topoMap["Thdloss"]="0"
+            agent["Topology"].push(topoMap)
+        })
+        */
+        config["Network"][newAgentIp]=agent
+       //每个已有节点下加入新节点
+        /*
+        $.each(config["Network"], function(Addr, obj){
+            config["Network"][Addr]["Ping"].push(newAgentIp);
+            config["Network"][Addr]["Tools"]["Icmpping"].push(newAgentIp);
+            NewtopoMap = new Map()
+            NewtopoMap["Name"]=newAgentName
+            NewtopoMap["Addr"]=newAgentIp
+            NewtopoMap["Thdchecksec"]="0"
+            NewtopoMap["Thdoccnum"]="0"
+            NewtopoMap["Thdavgdelay"]="0"
+            NewtopoMap["Thdloss"]="0"
+            config["Network"][Addr]["Topology"].push(NewtopoMap)
+        })
+        */
+        config["Network"][config["Addr"]]["Ping"].push(newAgentIp);
+        //config["Network"][config["Addr"]]["Tools"]["Icmpping"].push(newAgentIp);
+        NewtopoMap = new Map()
+        NewtopoMap["Name"]=newAgentName
+        NewtopoMap["Addr"]=newAgentIp
+        NewtopoMap["Thdchecksec"]="900"
+        NewtopoMap["Thdoccnum"]="3"
+        NewtopoMap["Thdavgdelay"]="200"
+        NewtopoMap["Thdloss"]="30"
+        config["Network"][config["Addr"]]["Topology"].push(NewtopoMap)
+        sessionStorage.setItem("config",JSON.stringify(config))
+        $("#newAgentName").val("")
+        $("#newAgentIp").val("")
+        $('#agentModal').modal('hide');
+    }
+    //Ping节点测试网络 - 删除节点
+    function delAgent(obj,SelfAddr){
+        if(SelfAddr!=null){
+            Addr=SelfAddr
+        }else{
+            Addr=$(obj).parent().parent().find(".Addr").html()
+        }
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        delete config["Network"][Addr];
+        $.each(config["Network"], function(iAddr, agentconfig){
+            $.each(agentconfig["Ping"], function(pingIndex, pingAddr){
+                if(pingAddr==Addr){
+                    config["Network"][iAddr]["Ping"].splice(pingIndex,1)
+                    return false
+                }
+            })
+            /*
+            $.each(agentconfig["Tools"]["Icmpping"], function(toolIcmpIndex, toolIcmpAddr){
+                if(toolIcmpAddr==Addr){
+                    config["Network"][iAddr]["Tools"]["Icmpping"].splice(toolIcmpIndex,1)
+                    return false
+                }
+            })
+            */
+            $.each(agentconfig["Topology"], function(topoIndex, topoObj){
+                if(topoObj["Addr"]==Addr){
+                    config["Network"][iAddr]["Topology"].splice(topoIndex,1)
+                    return false
+                }
+            })
+        })
+        sessionStorage.setItem("config",JSON.stringify(config))
+        $(obj).parent().parent().remove();
+    }
+    //Ping节点测试网络 - 正向PING配置弹窗
+    function pingcfg(obj,Save){
+        if($(obj).attr("disabled") == "disabled"){
+            return
+        }
+        $(".allchecked").removeAttr("checked")
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        if(Save==true){
+            nAddr=$("#pingcfgAddr").val()
+            NewPingList = new Array()
+            $('.pingModalist tr').each(function(i){
+                if($(this).children('td').children('input').is(":checked")){
+                    NewPingList.push($(this).find(".pingModalistAddr").html())
+                }
+            });
+            config["Network"][nAddr]["Ping"]=NewPingList;
+            sessionStorage.setItem("config",JSON.stringify(config))
+            $('#pingModal').modal("hide")
+            return
+        }
+        Addr=$(obj).parent().parent().find(".Addr").html()
+        selfconfig=config["Network"][Addr];
+        $(".pingModalist").html("")
+        $.each(config["Network"], function(iAddr, agentconfig){
+            checked=""
+            $.each(selfconfig["Ping"], function(i, ip){
+                if(agentconfig["Addr"]==ip){
+                    checked="checked"
+                    return false
+                }
+            })
+            $(".pingModalist").append("<tr>" +
+                "<td>"+agentconfig["Name"]+"</td>" +
+                "<td class='pingModalistAddr'>"+agentconfig["Addr"]+"</td>" +
+                "<td  class='form-horizontal' style='text-align: center'><input type='checkbox' style='margin-top: -3px' "+checked+"></td>" +
+             "</tr>")
+        })
+        $("#pingcfgAddr").val(Addr)
+        $('#pingModal').modal()
+    }
+    //Ping节点测试网络 - 拓扑配置弹窗
+    function topocfg(obj,Save){
+        if($(obj).attr("disabled") == "disabled"){
+            return
+        }
+        $(".allchecked").removeAttr("checked")
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        if(Save==true){
+            mnAddr=$("#topocfgAddr").val()
+            NewTopoList = new Array()
+            $('.topoModallist tr').each(function(i){
+                //console.log($(this).find(".topoModalListChecked").is(":checked"))
+                if($(this).find(".topoModalListChecked").is(":checked")){
+                    topoModal = new Map()
+                    topoModal["Name"] = $(this).find(".topoModalListName").html()
+                    topoModal["Addr"] = $(this).find(".topoModalListAddr").html()
+                    topoModal["Thdchecksec"] = $(this).find(".topoModalListThdchecksec").val()
+                    topoModal["Thdoccnum"] = $(this).find(".topoModalListThdoccnum").val()
+                    topoModal["Thdavgdelay"] = $(this).find(".topoModalListThdavgdelay").val()
+                    topoModal["Thdloss"] = $(this).find(".topoModalListThdloss").val()
+                    NewTopoList.push(topoModal)
+                }
+            })
+            config["Network"][mnAddr]["Topology"]=NewTopoList;
+            sessionStorage.setItem("config",JSON.stringify(config))
+            $('#topoModal').modal("hide")
+            return
+        }
+        mAddr=$(obj).parent().parent().find(".Addr").html()
+        $(".topoModallist").html("")
+        $.each(config["Network"], function(Addr, agentconfig){
+            var itopocfg= new Map()
+            itopocfg["Thdchecksec"] = 0
+            itopocfg["Thdoccnum"] = 0
+            itopocfg["Thdavgdelay"] = 0
+            itopocfg["Thdloss"] = 0
+            checked=""
+            disabled="disabled"
+            if(config["Network"].hasOwnProperty(mAddr)){
+                nodeConfig=config["Network"][mAddr]
+                $.each(nodeConfig["Topology"], function(i, cf){
+                    if(cf["Addr"]==Addr){
+                        itopocfg = cf
+                        checked="checked"
+                        disabled=""
+                        return false
+                    }
+                });
+            }
+            $(".topoModallist").append("<tr>" +
+                "<td class='topoModalListName'>"+agentconfig["Name"]+"</td>" +
+                "<td class='topoModalListAddr'>"+agentconfig["Addr"]+"</td>" +
+                "<td  style='text-align:center'><input class='topoModalListChecked' type='checkbox' "+checked+" onclick='enabledTopo(this)' ></td>" +
+                "<td class='form-horizontal'>" +
+                "<div class='controls' style='margin-left:0px;'>" +
+                "<div class='input-prepend input-append'>" +
+                "<input class='topoModalListThdchecksec' type='text' style='width:25px' value='"+itopocfg["Thdchecksec"]+"' "+disabled+" >" +
+                "<span class='add-on'>秒</span>" +
+                "</div>" +
+                "内出现" +
+                "<div class='input-prepend input-append'>" +
+                "<input class='topoModalListThdoccnum' type='text' style='width:20px' value='"+itopocfg["Thdoccnum"]+"' "+disabled+" >" +
+                "<span class='add-on'>次</span>" +
+                "</div>" +
+                "内延迟大于" +
+                "<div class='input-prepend input-append'>" +
+                "<input class='topoModalListThdavgdelay' type='text' value='"+itopocfg["Thdavgdelay"]+"' style='width:25px' "+disabled+" >" +
+                "<span class='add-on'>ms</span>" +
+                "</div>" +
+                "或丢包率大于" +
+                "<div class='input-prepend input-append'>" +
+                "<input class='topoModalListThdloss' type='text'  value='"+itopocfg["Thdloss"]+"' style='width:20px' "+disabled+" >" +
+                "<span class='add-on'>%</span>" +
+                "</div>" +
+                "</div>" +
+                "</td>" +
+                "</tr>")
+        })
+        $("#topocfgAddr").val(mAddr)
+        $('#topoModal').modal()
+    }
+    function enabledTopo(obj){
+        if($(obj).is(":checked")){
+            $(obj).closest("tr").find(".topoModalListThdchecksec").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdchecksec").val("900")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").val("3")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").val("200")
+            $(obj).closest("tr").find(".topoModalListThdloss").removeAttr("disabled")
+            $(obj).closest("tr").find(".topoModalListThdloss").val("30")
+        }else{
+            $(obj).closest("tr").find(".topoModalListThdchecksec").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdchecksec").val("0")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdoccnum").val("0")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdavgdelay").val("0")
+            $(obj).closest("tr").find(".topoModalListThdloss").attr("disabled","true")
+            $(obj).closest("tr").find(".topoModalListThdloss").val("0")
+        }
+    }
+    /*/Ping节点测试网络 - 检测工具配置
+    function toolcfg(obj,Save){
+        if($(obj).attr("disabled") == "disabled"){
+            return
+        }
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        if(Save){
+            nAddr=$("#toolscfgAddr").val()
+            NewToolsIcmpList = new Array()
+            $('.toolModallist tr').each(function(i){
+                if($(this).children('td').children('input').is(":checked")){
+                    NewToolsIcmpList.push($(this).find(".toolModalistAddr").html())
+                }
+            });
+            config["Network"][nAddr]["Tools"]["Icmpping"]=NewToolsIcmpList;
+            sessionStorage.setItem("config",JSON.stringify(config))
+            $('#toolModal').modal("hide")
+            return
+        }
+        $(".toolModallist").html("")
+        Addr=$(obj).parent().parent().find(".Addr").html()
+        selfconfig=config["Network"][Addr]
+        $.each(config["Network"], function(iAddr, agentconfig){
+            checked=""
+            $.each(selfconfig["Tools"]["Icmpping"], function(i, ip){
+                if(agentconfig["Addr"]==ip){
+                    checked="checked"
+                    return false
+                }
+            })
+            $(".toolModallist").append("<tr>" +
+                "<td>"+agentconfig["Name"]+"</td>" +
+                "<td class='toolModalistAddr'>"+agentconfig["Addr"]+"</td>" +
+                "<td  class='form-horizontal' style='text-align: left'><input type='checkbox' style='margin-top: -3px' "+checked+">ICMP PING</td>" +
+                "</tr>")
+        })
+        $('#toolscfgAddr').val(Addr)
+        $('#toolModal').modal()
+    }
+    */
+    //发送邮件测试
+    function sendMailTest(obj){
+        $(obj).html("测试邮件发送中(最长1分钟,请等待)...")
+        data = {}
+        data["EmailHost"] = $("#EmailHost").val();
+        data["SendEmailAccount"] = $("#SendEmailAccount").val();
+        data["SendEmailPassword"] = $("#SendEmailPassword").val();
+        data["RevcEmailList"] = $("#RevcEmailList").val();
+        $.ajax({
+            dataType: "json",
+            type: 'POST',
+            url: "/api/sendmailtest.json",
+            data: data,
+            success: function( retdata ) {
+                if (retdata["status"]=="true"){
+                    alert("测试邮件发送成功!")
+                }else{
+                    alert("测试邮件发送失败 ("+retdata["info"]+")")
+                }
+                $(obj).html("发送测试邮件")
+            },
+            timeout: 65*1000
+        }).fail( function( xhr, status ) {
+            alert("测试邮件发送失败 (API错误!)")
+            $(obj).html("发送测试邮件")
+        });
+    }
+    //全国延迟测试网络-新增节点
+    function addChinaMap(Save){
+        if(Save){
+            nprov=$('.provSelect').attr('value')
+            cmap=new Map()
+            cucc=new Array()
+            $(".add_chinamap_cucc").children('tr').children('td').children('.val').each(function(i,ip){
+                cucc.push($(ip).val())
+            })
+            cmap["cucc"]=cucc
+            ctcc=new Array()
+            $(".add_chinamap_ctcc").children('tr').children('td').children('.val').each(function(i,ip){
+                ctcc.push($(ip).val())
+            })
+            cmap["ctcc"]=ctcc
+            cmcc=new Array()
+            $(".add_chinamap_cmcc").children('tr').children('td').children('.val').each(function(i,ip){
+                cmcc.push($(ip).val())
+            })
+            cmap["cmcc"]=cmcc
+            config["Chinamap"][nprov]=cmap
+            $('#addChinaMapModal').modal("hide")
+            sessionStorage.setItem("config",JSON.stringify(config))
+            refreshChinaMap()
+            return
+        }
+        $.each(config["Chinamap"], function(prov, detail){
+            $(".provSelect option[value='"+prov+"']").remove();
+        })
+        $(".add_chinamap_cucc").find("tr").remove()
+        $(".add_chinamap_ctcc").find("tr").remove()
+        $(".add_chinamap_cmcc").find("tr").remove()
+        $('#addChinaMapModal').modal()
+    }
+    //全国延迟测试网络-删除节点
+    function delChinaMap(){
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        nprov=$(".editChinaMapProv").html()
+        delete config["Chinamap"][nprov]
+        $('#chinaMapModal').modal("hide")
+        sessionStorage.setItem("config",JSON.stringify(config))
+        refreshChinaMap()
+        return
+    }
+    //全国延迟测试网络-编辑节点
+    function editChinaMap(prov,Save){
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        if(Save){
+            nprov=$(".editChinaMapProv").html()
+            cmap=new Map()
+            cucc=new Array()
+            $(".chinamap_cucc").children('tr').children('td').children('.val').each(function(i,ip){
+                cucc.push($(ip).val())
+            })
+            cmap["cucc"]=cucc
+            ctcc=new Array()
+            $(".chinamap_ctcc").children('tr').children('td').children('.val').each(function(i,ip){
+                ctcc.push($(ip).val())
+            })
+            cmap["ctcc"]=ctcc
+            cmcc=new Array()
+            $(".chinamap_cmcc").children('tr').children('td').children('.val').each(function(i,ip){
+                cmcc.push($(ip).val())
+            })
+            cmap["cmcc"]=cmcc
+            config["Chinamap"][nprov]=cmap
+            $('#chinaMapModal').modal("hide")
+            sessionStorage.setItem("config",JSON.stringify(config))
+            refreshChinaMap()
+            return
+        }
+        $(".editChinaMapProv").html(prov)
+        $(".chinamap_cmcc").html("")
+        $(".chinamap_ctcc").html("")
+        $(".chinamap_cucc").html("")
+        detail = config["Chinamap"][prov]
+        $.each(detail["cmcc"],function(i,cmcc){
+            $(".chinamap_cmcc").append("<tr><td><input class='val' type='text' style='width: 108px' value='"+cmcc+"'> <input onclick='deletedMapingTr(this);' style='margin-top: -1px;' type='button' value=' - '></td></tr>")
+        })
+        $.each(detail["ctcc"],function(i,ctcc){
+            $(".chinamap_ctcc").append("<tr><td><input class='val' type='text' style='width: 108px' value='"+ctcc+"'> <input onclick='deletedMapingTr(this);' style='margin-top: -1px;' type='button' value=' - '></td></tr>")
+        })
+        $.each(detail["cucc"],function(i,cucc){
+            $(".chinamap_cucc").append("<tr><td><input class='val' type='text' style='width: 108px' value='"+cucc+"'> <input onclick='deletedMapingTr(this);' style='margin-top: -1px;' type='button' value=' - '></td></tr>")
+        })
+        $('#chinaMapModal').modal()
+    }
+    //全国延迟测试网络-刷新面板
+    function refreshChinaMap(){
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        $(".chinamaplist").html("")
+        $.each(config["Chinamap"], function(prov, detail){
+            cmcc=detail["cmcc"].length
+            ctcc=detail["ctcc"].length
+            cucc=detail["cucc"].length
+            text=prov+"(电信"+ctcc+",联通"+cucc+",移动"+cmcc+")"
+            $(".chinamaplist").append("<input type='button' value='"+text+"' onclick='editChinaMap(\""+prov+"\")' style='margin-right: 10px;width:177px;'>")
+        })
+        $(".chinamaplist").append("<input type='button' value=' + ' style='width: 50px;' onclick='addChinaMap(false)'> ")
+    }
+    //全国延迟测试网络-添加IP条目
+    function addChinaMapCell(cell){
+        $("."+cell).append("<tr><td><input  class='val' type='text' style='width: 108px' value=''>  <input onclick='deletedMapingTr(this);' style='margin-top: -1px;' type='button' value=' - '></td></tr>")
+    }
+    //全国延迟测试网络-删除IP条目
+    function deletedMapingTr(nowTr){
+        $(nowTr).parent().parent().remove();
+    }
+    //保存配置
     function saveconf(){
-        targets = []
-        $("input[name^='tsnum']").each(function(i, t) {
-            eval($(this).val());
-        });
-        $("[name^='targets']").each(function(i, el) {
-            if (el.name.indexOf("Thdchecksec")>0 || el.name.indexOf("Thdoccnum")>0 || el.name.indexOf("Thdloss")>0 || el.name.indexOf("Thdavgdelay")>0){
-                eval(el.name+"="+$(this).val()+"");
-            }else{
-                eval(el.name+"=\""+$(this).val()+"\"");
-            }
-            console.log(el.name)
-        });
-        //$.grep(targets, function(n) {return $.trim(n).length > 0;})
-        ntargets  = []
-        $.each(targets,function(index,value){
-            if (value) {
-                ntargets.push(value)
-            }
-        });
-        config = {}
-        config["Name"] = $("#Name").val();
-        config["Ip"] = $("#Ip").val();
-        config["Ping"] = $("#Ping").val();
-        config["Thdchecksec"] =  parseInt($("#Thdchecksec").val());
-        config["Thdoccnum"] = parseInt($("#Thdoccnum").val());
-        config["Thdloss"] = parseInt($("#Thdloss").val());
-        config["Thdavgdelay"] = parseInt($("#Thdavgdelay").val());
-        config["Alertsound"] = $("#Alertsound").val();
-        config["Tline"] = $("#Tline").val();
-        config["Tsymbolsize"] = $("#Tsymbolsize").val();
-        config["Timeout"] = $("#Timeout").val();
-        config["Alertcycle"] = parseInt($("#Alertcycle").val());
-        config["Alerthistory"] = parseInt($("#Alerthistory").val());
-        config["Targets"] = ntargets;
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        //config = {}
+        config["Name"] = $("#selfAgentName").html();
+        config["Addr"] = $("#selfAgentAddr").html();
+        config["Mode"]["Type"]="local"
+        config["Mode"]["Endpoint"]=""
+        config["Mode"]["LastSuccTime"]=""
+        config["Base"]["Timeout"]= parseInt($("#Timeout").val());
+        config["Base"]["Archive"]= parseInt($("#Archive").val());
+        config["Base"]["Refresh"]= parseInt($("#Refresh").val());
+        config["Topology"]["Tsound"] = $("#Tsound").val();
+        config["Topology"]["Tline"] = $("#Tline").val();
+        config["Topology"]["Tsymbolsize"] = $("#Tsymbolsize").val();
+        config["Alert"]["EmailHost"] = $("#EmailHost").val();
+        config["Alert"]["SendEmailAccount"] = $("#SendEmailAccount").val();
+        config["Alert"]["SendEmailPassword"] = $("#SendEmailPassword").val();
+        config["Alert"]["RevcEmailList"] = $("#RevcEmailList").val();
+        config["Authiplist"] = $("#Authiplist").val();
+        config["Toollimit"] = parseInt($("#Toollimit").val());
         data = {}
         data['config'] = JSON.stringify(config)
         data['password'] = $(".password").val()
@@ -285,62 +1048,165 @@
             url: "/api/saveconfig.json",
             data: data,
             success: function( retdata ) {
-                //console.log(retdata)
                 if (retdata["status"]=="true"){
-                    alert("Config saved success!")
+                    alert("系统配置保存成功!")
+                    window.location.reload();
                 }else{
-                    alert("Config saved fail ("+retdata["info"]+")")
+                    alert("系统配置保存失败 ("+retdata["info"]+")")
                 }
             },
             timeout: 10*1000
-          }).fail( function( xhr, status ) {
-            alert("Config saved fail (api error!)")
-          });
+        }).fail( function( xhr, status ) {
+            alert("系统配置保存失败 (API错误!)")
+        });
     }
-
-    function deleteTr(nowTr){
-        i = $(".agentnum").val()
-        $(nowTr).parent().parent().remove();
-        $(".agentnum").val(i-1);
+    //云模式保存配置
+    function savecloudconf(){
+        //config = {}
+        endpoint = $("#Endpoint").val();
+        $.getJSON("/api/proxy.json?g="+endpoint+"",function(config){
+            config["Mode"]["Endpoint"] = $("#Endpoint").val();
+            config["Mode"]["Type"] = "cloud";
+            //config["Mode"]["Status"] = "true";
+            config["Addr"] = $("#CloudSelfAddr").val();
+            config["Name"] = $("#CloudSelfName").val();
+            selfFlag = false
+            if(!config.hasOwnProperty("Network")){
+                alert("远程配置文件解析错误！")
+                return false
+            }
+            $.each(config["Network"], function(Addr, agentconfig){
+                //console.log("1 "+config["Addr"]+config["Name"])
+                //console.log("2 "+agentconfig["Addr"]+agentconfig["Name"]+Addr)
+                if(agentconfig["Addr"]==config["Addr"] && agentconfig["Name"]==config["Name"]&& Addr==config["Addr"] ){
+                    selfFlag=true
+                    return false
+                }
+            })
+            if(!selfFlag){
+                alert("配置文件错误，本机节点与Ping节点测试网络信息不匹配！");
+                return
+            }
+            data = {}
+            data['config'] = JSON.stringify(config)
+            data['password'] = $("#CloudPass").val()
+            $.ajax({
+                dataType: "json",
+                type: 'POST',
+                url: "/api/saveconfig.json",
+                data: data,
+                success: function( retdata ) {
+                    if (retdata["status"]=="true"){
+                        alert("系统配置保存成功!")
+                        window.location.reload();
+                    }else{
+                        alert("系统配置保存失败 ("+retdata["info"]+")")
+                    }
+                },
+                timeout: 10*1000
+            }).fail( function( xhr, status ) {
+                alert("系统配置保存失败 (API错误!)")
+            });
+        }).fail(function (xhr, status) {
+            //alert("123")
+            alert(xhr.responseText);
+        });
     }
-    function addTr(){
-        i = $(".agentnum").val()
-        $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input  name='targets["+i+"][\"Name\"]' value='' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]' style='width:90%' value=''></td><td><select name='targets["+i+"][\"Type\"]'  style='width:47px;'><option value='C'>C</option><option value='CS'>CS</option></select></td><td><input  name='targets["+i+"][\"Thdchecksec\"]'  style='width:90%' value='"+$("#Thdchecksec").val()+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+$("#Thdloss").val()+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]'  style='width:90%' value='"+$("#Thdavgdelay").val()+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+$("#Thdoccnum").val()+"'> </td><td> <i onclick='deleteTr(this);' class='icon-large icon-trash'></i> </td></tr>");
-        $(".agentnum").val(parseInt(i)+1);
+    //选择是否为SmartPing
+    function checkSP(obj){
+        Addr=$(obj).parent().parent().find(".Addr").html()
+        config=$.parseJSON(sessionStorage.getItem("config"))
+        if($(obj).is(":checked")){
+            $(obj).parent().parent().find("a").each(function(i,elm) {
+                $(elm).removeAttr("disabled")
+                config["Network"][Addr]["Smartping"]=true
+            })
+        }else{
+            $(obj).parent().parent().find("a").each(function(i,elm){
+              $(elm).attr("disabled","true")
+                config["Network"][Addr]["Smartping"]=false
+                config["Network"][Addr]["Ping"]=new Array()
+                config["Network"][Addr]["Tools"]=new Object()
+                config["Network"][Addr]["Tools"]["Icmpping"]=new Array()
+                config["Network"][Addr]["Topology"]=new Array()
+            })
+        }
+        sessionStorage.setItem("config",JSON.stringify(config))
     }
     $(function(){
+        $(".ttip").tooltip();
+        var config = new Object()
         $.getJSON("/api/config.json",function(result){
-            if(result["Ping"]=="sysping"){
-                $("#Ping").find("option[name='sysping']").attr("selected",true);
-            }
-            if(result["Ping"]=="goping"){
-                console.log(result["Ping"])
-                $("#Ping option[name='goping']").attr("selected",true);
-            }
-            //console.log(result["Ping"])
-            $("#verion").html("Version: "+result["Ver"])
-            $("#Name").val(result["Name"]);
-            $("#Ip").val(result["Ip"]);
-            $("#Thdchecksec").val(result["Thdchecksec"]);
-            $("#Thdoccnum").val(result["Thdoccnum"]);
-            $("#Thdloss").val(result["Thdloss"]);
-            $("#Thdavgdelay").val(result["Thdavgdelay"]);
-            $("#Alertsound").val(result["Alertsound"]);
-            $("#Tline").val(result["Tline"]);
-            $("#Tsymbolsize").val(result["Tsymbolsize"]);
-            $("#Timeout").val(result["Timeout"]);
-            $("#Alertcycle").val(result["Alertcycle"]);
-            $("#Alerthistory").val(result["Alerthistory"]);
-            $.each(result["Targets"], function(i, field){
-                Ctype=""
-                CStype=""
-                if(field.Type=="C"){
-                    Ctype="selected"
-                }else{
-                    CStype="selected"
+            AgentMode(result["Mode"])
+            if(result["Mode"]["Type"]=="cloud"){
+                $("#LastSuccTimeStr").html("<span class='alert-success' style='padding:10px;'>最近一次成功同步时间："+result["Mode"]["LastSuccTime"]+"</span><br/>")
+            }else{
+                if( tp!="?dcloud" ) {
+                    $(".localmode").show();
+                    $(".cloudmode").remove();
                 }
-                $(".agentlist").append("<tr><td><input name='tsnum["+i+"]' value='targets["+i+"]={}' type='hidden'><input name='targets["+i+"][\"Name\"]' value='"+field.Name+"' style='width:90%'></td><td><input  name='targets["+i+"][\"Addr\"]'  style='width:90%' value='"+field.Addr+"'></td><td><select name='targets["+i+"][\"Type\"]'  style='width:47px;'><option value='C' "+Ctype+">C</option><option value='CS'"+CStype+">CS</option></select></td><td><input   name='targets["+i+"][\"Thdchecksec\"]' style='width:90%' value='"+field.Thdchecksec+"'> </td><td><input  name='targets["+i+"][\"Thdloss\"]' style='width:90%' value='"+field.Thdloss+"'> </td><td><input  name='targets["+i+"][\"Thdavgdelay\"]' style='width:90%' value='"+field.Thdavgdelay+"'> </td><td><input  name='targets["+i+"][\"Thdoccnum\"]' style='width:90%' value='"+field.Thdoccnum+"'> </td><td><i onclick='deleteTr(this);' class='icon-large icon-trash'></i></td></tr>");
-                $(".agentnum").val(i+1);
+            }
+            $("#agentname").html(" ("+result["Name"]+")")
+            sessionStorage.setItem("config",JSON.stringify(result))
+            config=result
+            $("#verion").html("Version: "+config["Ver"])
+            $("#Timeout").val(config["Base"]["Timeout"]);
+            $("#Refresh").val(config["Base"]["Refresh"]);
+            $("#Archive").val(config["Base"]["Archive"]);
+            $("#Tsound").val(config["Topology"]["Tsound"]);
+            $("#Tline").val(config["Topology"]["Tline"]);
+            $("#Tsymbolsize").val(config["Topology"]["Tsymbolsize"]);
+            $("#EmailHost").val(config["Alert"]["EmailHost"]);
+            $("#SendEmailAccount").val(config["Alert"]["SendEmailAccount"]);
+            $("#SendEmailPassword").val(config["Alert"]["SendEmailPassword"]);
+            $("#RevcEmailList").val(config["Alert"]["RevcEmailList"]);
+            $("#Authiplist").val(config["Authiplist"]);
+            $("#Toollimit").val(config["Toollimit"]);
+            selfconfig=config["Network"][config["Addr"]]
+            $("#CloudSelfName").val(selfconfig["Name"])
+            $("#CloudSelfAddr").val(selfconfig["Addr"])
+            if(config["Mode"]["Endpoint"]!=""){
+                $("#Endpoint").val(config["Mode"]["Endpoint"]);
+            }
+            $(".selfagent").html("<tr>" +
+                "<td class='selfAgentName' id='selfAgentName'>"+selfconfig["Name"]+"</td><td class='selfAgentAddr Addr' id='selfAgentAddr'>"+selfconfig["Addr"]+"</td>" +
+                "<td style='text-align:center'><input type='checkbox' checked disabled></td>" +
+                "<td style='text-align:center'><a class='btn btn-mini' onclick='pingcfg(this,false)'>配置</a></td>" +
+                "<td style='text-align:center'><a class='btn btn-mini' onclick='topocfg(this,false)'>配置</a></td>" +
+                //"<td style='text-align:center'><a class='btn btn-mini' onclick='toolcfg(this,false)'>配置</a></td>" +
+                "<td style='text-align: center'><i onclick='editSelfagentModal(false);' class='icon-large icon-edit'></i>" +
+                "</tr>")
+            $.each(config["Network"], function(Addr, agentconfig){
+                if(config["Addr"]!=Addr){
+                    checked=""
+                    disabled="disabled"
+                    if(agentconfig["Smartping"]){
+                        checked="checked"
+                        disabled=""
+                    }
+                    $(".agentlist").append("<tr class='agentlist-"+agentconfig["Addr"]+"'>" +
+                        "<td>"+agentconfig["Name"]+"</td><td class='Addr'>"+agentconfig["Addr"]+"</td>" +
+                        "<td style='text-align:center'><input type='checkbox' "+checked+" onclick='checkSP(this)'></td>" +
+                        "<td style='text-align:center'><a class='btn btn-mini' "+disabled+" onclick='pingcfg(this,false)'>配置</a></td>" +
+                        "<td style='text-align:center'><a class='btn btn-mini' "+disabled+" onclick='topocfg(this,false)'>配置</a></td>" +
+                        //"<td style='text-align:center'><a class='btn btn-mini' "+disabled+" onclick='toolcfg(this,false)'>配置</a></td>" +
+                        "<td style='text-align: center'><i onclick='delAgent(this,null);' class='icon-large icon-trash'></i></td>" +
+                        "</tr>")
+                }
+            })
+            refreshChinaMap();
+        });
+        $(".allchecked").click(function(){
+            var xz = $(this).prop("checked");
+            var topoCheck=false
+            if($(this).attr("v")=="topoCheck"){
+                topoCheck=true
+            }
+            $(this).parents().children("tbody").children("tr").each(function(i,obj) {
+                $(obj).find('input').attr("checked",xz);
+                if(topoCheck){
+                    enabledTopo($(obj).find('input'))
+                }
             });
         });
     });

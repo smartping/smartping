@@ -3,15 +3,15 @@
         <console/>
 
         <filter levels="info">
-            <rollingfile type="size" filename="./logs/info.log" maxsize="500000000000" maxrolls="5"/>
+            <rollingfile type="size" filename="./logs/info.log" maxsize="10240000" maxrolls="5"/>
         </filter>
 
         <filter levels="debug">
-            <rollingfile type="size" filename="./logs/debug.log" maxsize="500000000000" maxrolls="5"/>
+            <rollingfile type="size" filename="./logs/debug.log" maxsize="10240000" maxrolls="5"/>
         </filter>
 
         <filter levels="error">
-            <rollingfile type="size" filename="./logs/error.log" maxsize="500000000000" maxrolls="5"/>
+            <rollingfile type="size" filename="./logs/error.log" maxsize="10240000" maxrolls="5"/>
         </filter>
 
     </outputs>

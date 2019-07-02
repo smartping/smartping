@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SmartPing Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="assets/css/font-awesome.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
+<link href="assets/css/pages/dashboard.css" rel="stylesheet">
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+      <span id="banner_last_ck_time" class="pull-right " style="margin-top: 10px;"></span>
+    </div>
+    <!-- /container -->
+  </div>
+  <!-- /navbar-inner -->
+</div>
+<!-- /navbar -->
+<div class="subnavbar">
+  <div class="subnavbar-inner">
+    <div class="container">
+      <ul class="mainnav">
+        <li><a href="index.html"><i class="icon-mail-forward"></i><span>正向Ping</span> </a> </li>
+        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
+        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
+        <li><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
+        <li  class="active"><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
+        <li><a  id="cfgUrl"  href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
+      </ul>
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /subnavbar-inner --> 
+</div>
+<!-- /subnavbar -->
+<div class="main" style="margin-top:-20px;">
+  <div class="main-inner">
+    <div class="container">
+      <div class="row">
+        <div class="span12 form-horizontal" style="text-align: center">
+          <div class="control-group">
+            <div class="controls" style="padding:30px 0 0 0;margin: 0">
+              <div class="input-append">
+                <select style="width:100px;">
+                  <option>ICMP PING</option>
+                </select>
+                <input class="span4 m-wrap"  type="text" id="target">
+                <button class="btn" type="button" onclick="checkit()">检测一下!</button>
+              </div>
+            </div>	<!-- /controls -->
+          </div> <!-- /control-group -->
+
+          <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+              <th style="width:20px;"><input type='checkbox' checked id="allchecked"></th>
+              <th style="width:200px;"> 节点名称 </th>
+              <th> 解析IP </th>
+              <th> 发送 </th>
+              <th> 接收 </th>
+              <th> 丢弃 </th>
+              <th> 最大时间 </th>
+              <th> 最小时间 </th>
+              <th> 平均时间 </th>
+              <th style="width:15px;"> </th>
+            </tr>
+            </thead>
+            <tbody class="agentlist-tools" id="list">
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- /widget-content -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /main-inner --> 
+</div>
+<!-- /main -->
+
+<div class="footer">
+  <div class="footer-inner">
+    <div class="container">
+      <div class="row">
+        <div class="span12"> &copy; 2017 - 2020 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
+        <!-- /span12 --> 
+      </div>
+      <!-- /row --> 
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /footer-inner --> 
+</div>
+<!-- /footer --> 
+<!-- Le javascript
+================================================== --> 
+<!-- Placed at the end of the document so the pages load faster --> 
+<script src="assets/js/jquery-1.7.2.min.js"></script>
+<script src="assets/js/bootstrap.js"></script>
+<script src="assets/js/echarts.min.js"></script>
+<script src="assets/js/funcs.js"></script>
+<script>
+  function checkit(){
+      target = $("#target").val();
+      if(target==""){
+          alert("Target Error!")
+          return
+      }
+      $('#list tr').each(function(i){
+          checked = $($(this).children('td')[0]).children("input").is(":checked");
+          if(checked){
+              Addr = $($(this).children('td')[1]).attr("v");
+              var thisTr = $(this);
+              $(thisTr.children('td')[2]).html("");
+              $(thisTr.children('td')[3]).html("");
+              $(thisTr.children('td')[4]).html("");
+              $(thisTr.children('td')[5]).html("");
+              $(thisTr.children('td')[6]).html("");
+              $(thisTr.children('td')[7]).html("");
+              $(thisTr.children('td')[8]).html("");
+              $(thisTr.children('td')[9]).html("<i class='icon-spinner icon-spin animated erricon'  data-toggle='tooltip' title='' data-placement='bottom'></i>")
+              var p = $.getJSON("/api/proxy.json?t=10&g=http://"+Addr+"/api/tools.json?t="+target,function(result){
+                  if(result.status=="true"){
+                      $(thisTr.children('td')[2]).html(result.ip);
+                      $(thisTr.children('td')[3]).html(result.ping.SendPk);
+                      $(thisTr.children('td')[4]).html(result.ping.RevcPk);
+                      $(thisTr.children('td')[5]).html(result.ping.LossPk+"%");
+                      $(thisTr.children('td')[6]).html(result.ping.MaxDelay.toFixed(2)+"ms");
+                      $(thisTr.children('td')[7]).html(result.ping.MinDelay.toFixed(2)+"ms");
+                      $(thisTr.children('td')[8]).html(result.ping.AvgDelay.toFixed(2)+"ms");
+                      $(thisTr.children('td')[9]).html("")
+                      //thisTr.addClass("danger")
+                  }else{
+                      $(thisTr.children('td')[9]).html("<i class='icon-time animated erricon'  data-toggle='tooltip' title='"+result.error+"' data-placement='bottom'></i>")
+                      $(".erricon").tooltip();
+                  }
+              }).fail(function (xhr, status) {
+                  $(thisTr.children('td')[9]).html("<i class='icon-warning-sign animated erricon' data-toggle='tooltip' title='"+xhr.statusText+":"+xhr.responseText+"' data-placement='bottom'></i>")
+                  $(".erricon").tooltip();
+              });
+          }else{
+              $(this).remove()
+          }
+      });
+  }
+    $(function(){
+        $("#allchecked").click(function(){
+            var xz = $(this).prop("checked");
+            $('#list tr').each(function(i) {
+                $($(this).children('td')[0]).children("input").attr("checked",xz);
+            });
+        });
+        $.getJSON("/api/config.json",function(result){
+            $("#target").val(result["Addr"]);
+            $("#agentname").html(" ("+result["Name"]+")")
+            AgentMode(result["Mode"])
+            $("#verion").html("Version: "+result["Ver"])
+            $.each(result["Network"], function(i, network){
+                if(network["Smartping"]) {
+                    $(".agentlist-tools").append("<tr><td><input type='checkbox' checked></td><td v='" + network["Addr"] + ":" + result["Port"] + "'>" + network["Name"] + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>");
+                }
+            });
+        }).fail(function (xhr, status) {
+            alert(xhr.responseText);
+            Refresh();
+        });
+    });
+</script>
+</body>
+</html>

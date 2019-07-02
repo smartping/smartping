@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SmartPing Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="assets/css/font-awesome.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
+<link href="assets/css/pages/dashboard.css" rel="stylesheet">
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <span id="cloudbrand" class="brand" style="margin-right: -15px;"></span><a class="brand" href="index.html">SmartPing Dashbord<span id="agentname"></span></a>
+      <span id="banner_last_ck_time" class="pull-right " style="margin-top: 10px;"></span>
+    </div>
+    <!-- /container -->
+  </div>
+  <!-- /navbar-inner -->
+</div>
+<!-- /navbar -->
+<div class="subnavbar">
+  <div class="subnavbar-inner">
+    <div class="container">
+      <ul class="mainnav">
+        <li><a href="index.html"><i class="icon-mail-forward"></i><span>正向Ping</span> </a> </li>
+        <li><a href="reverse.html"><i class="icon-mail-reply"></i><span>反向Ping</span> </a> </li>
+        <li><a href="topology.html"><i class="icon-bar-chart"></i><span>Ping拓扑</span> </a> </li>
+        <li class="active"><a href="mapping.html"><i class="icon-map-marker"></i><span>全国延迟</span> </a> </li>
+        <li ><a href="tools.html"><i class="icon-wrench"></i><span>检测工具</span> </a> </li>
+        <li><a  id="cfgUrl"  href="config.html"><i class="icon-cog"></i><span>系统配置</span> </a> </li>
+      </ul>
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /subnavbar-inner --> 
+</div>
+<!-- /subnavbar -->
+<div class="main" style="margin-top:-20px;">
+  <div class="main-inner">
+    <div class="container">
+      <div class="row">
+        <div class="span10">
+          <span style="float: right"><input class="Wdate" id="pkdata" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm',onpicked:pickedFunc})" style="width:120px;position:absolute;margin-left: -120px;z-index: 99;"></span>
+          <div id="echarts-map" style="width: 100%;"></div>
+          <input type="hidden" id="agent" value="">
+        </div>
+        <!-- /span10 -->
+        <div class="span2">
+          <div class="widget widget-table action-table">
+            <div class="widget-header"> <i class="icon-th-list"></i>
+              <h3>节点列表</h3>
+            </div>
+            <!-- /widget-header -->
+            <div class="widget-content">
+              <table class="table table-striped table-bordered">
+                <tbody class="agentlist">
+
+                </tbody>
+              </table>
+            </div>
+            <!-- /widget-content -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /main-inner --> 
+</div>
+<!-- /main -->
+
+<div class="footer">
+  <div class="footer-inner">
+    <div class="container">
+      <div class="row">
+        <div class="span12"> &copy; 2017 - 2020 <a target="_blank" href="http://smartping.org" >SmartPing.org</a> <span style="float:right" id="verion"></span></div>
+        <!-- /span12 --> 
+      </div>
+      <!-- /row --> 
+    </div>
+    <!-- /container --> 
+  </div>
+  <!-- /footer-inner --> 
+</div>
+<!-- /footer --> 
+<!-- Le javascript
+================================================== --> 
+<!-- Placed at the end of the document so the pages load faster --> 
+<script src="assets/js/jquery-1.7.2.min.js"></script>
+<script src="assets/js/bootstrap.js"></script>
+<script src="assets/js/echarts-all.js"></script>
+<script language="JavaScript" type="text/javascript" src="assets/js/My97DatePicker/WdatePicker.js"></script>
+<script src="assets/js/funcs.js"></script>
+<script>
+    function pickedFunc(){
+        d=$("#pkdata").val()
+        var url = $("#agent").val();
+        if(url!=""){
+            url="/api/proxy.json?g="+url
+        }
+        $.getJSON(url+"/api/mapping.json?d="+d,function(result){
+            option = {
+                title : {
+                    text: result["text"],
+                    subtext: result["subtext"],
+                    x:'center'
+                },
+                tooltip : {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    x:'left',
+                    data:['电信','联通','移动'],
+                },
+                dataRange: {
+                    min: 0,
+                    max: 200,
+                    x: 'left',
+                    y: 'bottom',
+                    text:['高','低'],
+                    splitList: [
+                        {start: 200, color: 'red'},
+                        {start: 150, end: 200},
+                        {start: 100, end: 150},
+                        {start: 50, end: 100, color: 'Green'},
+                        {start: 0, end: 50,color: 'DarkGreen'}
+                    ],
+                    color: ['#E0022B', '#E09107', '#A3E00B']
+                },
+                toolbox: {
+                    show: true,
+                    orient : 'vertical',
+                    x: 'right',
+                    y: 'center',
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        saveAsImage : {show: true}
+                    }
+                },
+                series : [
+                    {
+                        name: '电信',
+                        type: 'map',
+                        mapType: 'china',
+                        mapValueCalculation:'average',
+                        itemStyle:{
+                            normal:{label:{show:true}},
+                            emphasis:{label:{show:true}}
+                        },
+                        data:result["avgdelay"]["ctcc"]
+                    },
+                    {
+                        name: '联通',
+                        type: 'map',
+                        mapType: 'china',
+                        mapValueCalculation:'average',
+                        itemStyle:{
+                            normal:{label:{show:true}},
+                            emphasis:{label:{show:true}}
+                        },
+                        data:result["avgdelay"]["cucc"]
+                    },
+                    {
+                        name: '移动',
+                        type: 'map',
+                        mapType: 'china',
+                        mapValueCalculation:'average',
+                        itemStyle:{
+                            normal:{label:{show:true}},
+                            emphasis:{label:{show:true}}
+                        },
+                        data:result["avgdelay"]["cmcc"]
+                    }
+                ]
+            };
+            var mainContainer = document.getElementById('echarts-map');
+            var resizeMainContainer = function () {
+                mainContainer.style.height = ($(window).height()-220)+"px";
+            };
+            resizeMainContainer();
+            var mainChart = echarts.init(mainContainer);
+            $(window).on('resize',function(){//
+                resizeMainContainer();
+                mainChart.resize();
+            });
+            mainChart.setOption(option);
+        }).fail(function (xhr, status) {
+            alert(xhr.responseText);
+            Refresh();
+        });;
+    }
+    function changeAgent(n,url){
+        $(".alerticon-" + n).addClass("icon-spinner").addClass("icon-spin").addClass("animated");
+        if(url!=""){
+            $("#agent").val(url);
+            url="/api/proxy.json?g="+url
+        }
+        $.getJSON(url+"/api/mapping.json",function(result){
+            option = {
+                title : {
+                    text: result["text"],
+                    subtext: result["subtext"],
+                    x:'center'
+                },
+                tooltip : {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    x:'left',
+                    data:['电信','联通','移动'],
+                },
+                dataRange: {
+                    min: 0,
+                    max: 200,
+                    x: 'left',
+                    y: 'bottom',
+                    text:['高','低'],
+                    splitList: [
+                        {start: 1000, color: 'red'},
+                        {start: 300, end: 1000},
+                        {start: 100, end: 300},
+                        {start: 50, end: 100, color: 'DarkGreen'},
+                        {start: 0, end: 50,color: 'Green'}
+                    ],
+                    color: ['#E0022B', '#E09107', '#A3E00B']
+                },
+                toolbox: {
+                    show: true,
+                    orient : 'vertical',
+                    x: 'right',
+                    y: 'center',
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        saveAsImage : {show: true}
+                    }
+                },
+                series : [
+                    {
+                        name: '电信',
+                        type: 'map',
+                        mapType: 'china',
+                        mapValueCalculation:'average',
+                        itemStyle:{
+                            normal:{label:{show:true}},
+                            emphasis:{label:{show:true}}
+                        },
+                        data:result["avgdelay"]["ctcc"]
+                    },
+                    {
+                        name: '联通',
+                        type: 'map',
+                        mapType: 'china',
+                        mapValueCalculation:'average',
+                        itemStyle:{
+                            normal:{label:{show:true}},
+                            emphasis:{label:{show:true}}
+                        },
+                        data:result["avgdelay"]["cucc"]
+                    },
+                    {
+                        name: '移动',
+                        type: 'map',
+                        mapType: 'china',
+                        mapValueCalculation:'average',
+                        itemStyle:{
+                            normal:{label:{show:true}},
+                            emphasis:{label:{show:true}}
+                        },
+                        data:result["avgdelay"]["cmcc"]
+                    }
+                ]
+            };
+            var mainContainer = document.getElementById('echarts-map');
+            var resizeMainContainer = function () {
+                mainContainer.style.height = ($(window).height()-220)+"px";
+            };
+            resizeMainContainer();
+            var mainChart = echarts.init(mainContainer);
+            $(window).on('resize',function(){//
+                resizeMainContainer();
+                mainChart.resize();
+            });
+            mainChart.setOption(option);
+            $(".alerticon-" + n).removeClass("icon-spinner").removeClass("icon-spin").removeClass("animated");
+        }).fail(function (xhr, status) {
+            alert(xhr.responseText);
+            Refresh();
+        });
+    }
+    $(function(){
+        $("#echarts").height($(window).height()-220);
+        $.getJSON("/api/config.json",function(result){
+            $("#agentname").html(" ("+result["Name"]+")")
+            AgentMode(result["Mode"])
+            $("#verion").html("Version: "+result["Ver"])
+            $.each(result["Network"], function(i, network){
+                //if(field.Agent==true) {
+                if(network["Smartping"]) {
+                    $(".agentlist").append("<tr><td><i class='alerticon-" + network["Name"] + "'></i>&nbsp;<a onclick=changeAgent('" + network["Name"] + "','http://" + network["Addr"] + ":" + result["Port"] + "')>" + network["Name"] + "</a></td></tr>");
+                }
+                //}
+            });
+            changeAgent("","");
+            setTimeout('Refresh()',result["Base"]["Refresh"]*60*1000);
+        }).fail(function (xhr, status) {
+            alert(xhr.responseText);
+            Refresh();
+        });
+
+    });
+</script>
+</body>
+</html>

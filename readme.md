@@ -4,7 +4,7 @@
     </a>
     <h3 align="center">SmartPing | 开源、高效、便捷的网络质量监控神器</h3>
     <p align="center">
-        各机器(点)间互PING检测工具，支持正向PING绘制，反向PING绘制，互PING拓扑绘制及报警功能
+        一个综合性网络质量(PING)检测工具，支持正/反向PING绘图、互PING拓扑绘图与报警、全国PING延迟地图与在线检测工具等功能
         <br>
         <a href="http://smartping.org"><strong>-- Browse website --</strong></a>
         <br>
@@ -24,16 +24,13 @@
 ## 功能 ##
 
 - 正向PING，反向Ping绘图
-- 互PING间机器的状态拓扑
-- 自定义延迟、丢包阈值报警
+- 互PING间机器的状态拓扑，自定义延迟、丢包阈值报警（声音报警与邮件报警），报警时MTR检测
+- 全国PING延迟地图（各省份可分电信、联通、移动三条线路）
+- 检测工具，支持使用SmartPing各节点进行网络相关检测
 
 ## 设计思路 ##
 
-本系统设计为无中心化原则，所有的数据均存储自身点中，默认每个Ping目标点的数据循环保留1个月时间，由自身点的数据绘制 **出PING包** 的状态，由各其他点的数据绘制 **进PING包** 的状态，从任意一点查询数据均会通过Ajax请求关联点的API接口获取其他点数据组装全部数据，绘制 出Ping曲线图，进Ping曲线图，网络互Ping拓扑图。并可以设置阈值进行报警，方便对网络质量的监控。
-
-- [去中心化](https://docs.smartping.org/arch/decentralized.html)
-- [数据结构](https://docs.smartping.org/arch/data.html)
-
+本系统的定位为轻量级工具，即使组多点成互Ping网络可以遵守无中心化原则，所有的数据均存储自身节点中，每个节点提供出方向的数据，从任意节点查询数据均会通过Ajax请求关联节点的API接口获取并组装全部数据。
 ## 项目截图 ##
 
 ![app-bg.jpg](http://smartping.org/assets/img/app-bg.png "")

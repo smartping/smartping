@@ -1,10 +1,12 @@
 package http
 
 import (
-	"../g"
 	"encoding/json"
 	"fmt"
-	"github.com/gy-games-libs/seelog"
+	"github.com/cihub/seelog"
+	"github.com/smartping/smartping/src/g"
+	"github.com/wcharczuk/go-chart"
+	"github.com/wcharczuk/go-chart/drawing"
 	"log"
 	"net/http"
 	"os"
@@ -29,6 +31,48 @@ func RenderJson(w http.ResponseWriter, v interface{}) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(bs)
+}
+
+func AuthUserIp(RemoteAddr string) bool {
+	if len(g.AuthUserIpMap) == 0 {
+		return true
+	}
+	ips := strings.Split(RemoteAddr, ":")
+	if len(ips) == 2 {
+		if _, ok := g.AuthUserIpMap[ips[0]]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+func AuthAgentIp(RemoteAddr string,drt bool) bool {
+	if drt {
+		if len(g.AuthUserIpMap) == 0 {
+			return true
+		}
+	}
+	if len(g.AuthAgentIpMap) == 0 {
+		return true
+	}
+	ips := strings.Split(RemoteAddr, ":")
+	if len(ips) == 2 {
+		if _, ok := g.AuthAgentIpMap[ips[0]]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+func GraphText(x int, y int, txt string) chart.Renderer {
+	f, _ := chart.GetDefaultFont()
+	rhart, _ := chart.PNG(300, 130)
+	chart.Draw.Text(rhart, txt, x, y, chart.Style{
+		FontColor: drawing.ColorBlack,
+		FontSize:  10,
+		Font:      f,
+	})
+	return rhart
 }
 
 func StartHttp() {

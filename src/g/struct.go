@@ -1,38 +1,31 @@
 package g
 
-//Main Config
 type Config struct {
-	Ver          string
-	Port         int
-	Name         string
-	Timeout      string
-	Ip           string
-	Db           string
-	Password     string
-	Alerthistory int
-	Alertcycle   int
-	Alertsound   string
-	Thdchecksec  int
-	Thdoccnum    int
-	Thdavgdelay  int
-	Thdloss      int
-	Tline        string
-	Tsymbolsize  string
-	Targets      []Target
+	Ver        string
+	Port       int
+	Name       string
+	Addr       string
+	Mode       map[string]string
+	Base       map[string]int
+	Topology   map[string]string
+	Alert      map[string]string
+	Network    map[string]NetworkMember
+	Chinamap   map[string]map[string][]string
+	Toollimit  int
+	Authiplist string
+	Password   string
 }
 
-//Target Config
-type Target struct {
-	Name        string
-	Addr        string
-	Type        string
-	Thdchecksec int
-	Thdoccnum   int
-	Thdavgdelay int
-	Thdloss     int
+type NetworkMember struct {
+	Name      string
+	Addr      string
+	Smartping bool
+	Ping      []string
+	//Tools map[string][]string
+	Topology []map[string]string
 }
 
-//Ping Stuct
+//Ping Struct
 type PingSt struct {
 	SendPk   int
 	RevcPk   int
@@ -42,55 +35,44 @@ type PingSt struct {
 	MaxDelay float64
 }
 
-type LogInfo struct {
-	Logtime   string
-	Ip        string
-	Name      string
-	Maxdelay  string
-	Mindelay  string
-	Avgdelay  string
-	Sendpk    string
-	Revcpk    string
-	Losspk    string
-	Lastcheck string
+//Ping mini graph Struct
+type PingStMini struct {
+	Lastcheck []string `json:"lastcheck"`
+	LossPk    []string `json:"losspk"`
+	AvgDelay  []string `json:"avgdelay"`
 }
 
-//Topology
-type Topo struct {
-	From  map[string]string
-	To    map[string]string
-	Color string
-}
-
-type TopoLog struct {
-	Maxavgdelay string
-	Maxlosspk   string
-	Cnt         string
-}
-
-type Todataarea struct {
-	Name      string      `json:"name"`
-	ItemStyle ToitemStyle `json:"itemStyle"`
-}
-
-type ToitemStyle struct {
-	Normal map[string]string `json:"normal"`
-}
-
-type Todataline struct {
-	Source    string      `json:"source"`
-	Target    string      `json:"target"`
-	ItemStyle ToitemStyle `json:"itemStyle"`
-}
-
-type Todata struct {
-	Area []Todataarea `json:"area"`
-	Line []Todataline `json:"line"`
-}
-
-type Alterdata struct {
+type PingLog struct {
 	Logtime  string
-	Fromname string
-	Toname   string
-	Tracert  string
+	Maxdelay string
+	Mindelay string
+	Avgdelay string
+	Losspk   string
+}
+
+type AlertLog struct {
+	Logtime    string
+	Targetip   string
+	Targetname string
+	Tracert    string
+	Fromip     string
+	Fromname   string
+}
+
+type ChinaMp struct {
+	Text     string              `json:"text"`
+	Subtext  string              `json:"subtext"`
+	Avgdelay map[string][]MapVal `json:"avgdelay"`
+}
+
+type MapVal struct {
+	Value float64 `json:"value"`
+	Name  string  `json:"name"`
+}
+
+type ToolsRes struct {
+	Status string `json:"status"`
+	Error  string `json:"error"`
+	Ip     string `json:"ip"`
+	Ping   PingSt `json:"ping"`
 }
