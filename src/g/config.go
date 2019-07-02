@@ -171,14 +171,14 @@ func SaveConfig() error {
 func saveAuth() {
 	AuthUserIpMap = map[string]bool{}
 	AuthAgentIpMap = map[string]bool{}
+	for _, k := range Cfg.Network {
+		AuthAgentIpMap[k.Addr] = true
+	}
 	Cfg.Authiplist = strings.Replace(Cfg.Authiplist, " ", "", -1)
 	if Cfg.Authiplist != "" {
 		authiplist := strings.Split(Cfg.Authiplist, ",")
 		for _, ip := range authiplist {
 			AuthUserIpMap[ip] = true
-		}
-		for _, k := range Cfg.Network {
-			AuthAgentIpMap[k.Addr] = true
 		}
 	}
 }

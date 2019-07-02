@@ -46,7 +46,12 @@ func AuthUserIp(RemoteAddr string) bool {
 	return false
 }
 
-func AuthAgentIp(RemoteAddr string) bool {
+func AuthAgentIp(RemoteAddr string,drt bool) bool {
+	if drt {
+		if len(g.AuthUserIpMap) == 0 {
+			return true
+		}
+	}
 	if len(g.AuthAgentIpMap) == 0 {
 		return true
 	}
