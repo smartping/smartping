@@ -114,16 +114,16 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 
 func MapPingStorage() {
 	seelog.Info("Start MapPingStorage...")
-	seelog.Info(MapStatus)
+	seelog.Debug(MapStatus)
 	jdata, err := json.Marshal(MapStatus)
 	if err != nil {
 		seelog.Error("[func:StartPing] Json Error ", err)
 	}
-	sql := "INSERT INTO [mappinglog] (logtime, mapjson) values('" + time.Now().Format("2006-01-02 15:04") + "','" + string(jdata) + "')"
+	sql := "REPLACE INTO [mappinglog] (logtime, mapjson) values('" + time.Now().Format("2006-01-02 15:04") + "','" + string(jdata) + "')"
 	g.DLock.Lock()
 	g.Db.Exec(sql)
 	_, err = g.Db.Exec(sql)
-	//seelog.Info(sql)
+	seelog.Debug(sql)
 	if err != nil {
 		seelog.Error("[func:StartPing] Sql Error ", err)
 	}
