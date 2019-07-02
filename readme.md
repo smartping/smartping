@@ -47,5 +47,5 @@
 
 - 官网： http://smartping.org
 - 文档： https://docs.smartping.org
-- - 下载安装：https://docs.smartping.org/install.html
-- - API文档：https://docs.smartping.org/api.html
+- - 下载安装：https://docs.smartping.org/install/
+- - API文档：https://docs.smartping.org/api/
