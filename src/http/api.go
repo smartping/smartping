@@ -23,7 +23,7 @@ func configApiRoutes() {
 
 	//配置文件API
 	http.HandleFunc("/api/config.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -31,10 +31,10 @@ func configApiRoutes() {
 		r.ParseForm()
 		nconf := g.Config{}
 		cfgJson, _ := json.Marshal(g.Cfg)
-		json.Unmarshal(cfgJson,&nconf)
+		json.Unmarshal(cfgJson, &nconf)
 		nconf.Password = ""
-		if !AuthAgentIp(r.RemoteAddr,false) {
-			if nconf.Alert["SendEmailPassword"] !=""{
+		if !AuthAgentIp(r.RemoteAddr, false) {
+			if nconf.Alert["SendEmailPassword"] != "" {
 				nconf.Alert["SendEmailPassword"] = "samepasswordasbefore"
 			}
 		}
@@ -49,7 +49,7 @@ func configApiRoutes() {
 
 	//Ping数据API
 	http.HandleFunc("/api/ping.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -144,7 +144,7 @@ func configApiRoutes() {
 
 	//Ping拓扑API
 	http.HandleFunc("/api/topology.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -163,7 +163,7 @@ func configApiRoutes() {
 
 	//报警API
 	http.HandleFunc("/api/alert.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -223,7 +223,7 @@ func configApiRoutes() {
 
 	//全国延迟API
 	http.HandleFunc("/api/mapping.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -269,7 +269,7 @@ func configApiRoutes() {
 
 	//检测工具API
 	http.HandleFunc("/api/tools.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -351,7 +351,7 @@ func configApiRoutes() {
 
 	//保存配置文件
 	http.HandleFunc("/api/saveconfig.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
@@ -513,7 +513,7 @@ func configApiRoutes() {
 
 	//发送测试邮件
 	http.HandleFunc("/api/sendmailtest.json", func(w http.ResponseWriter, r *http.Request) {
-		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr,true) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
 			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
 			http.Error(w, o, 401)
 			return
