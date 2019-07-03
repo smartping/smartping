@@ -9,13 +9,16 @@
         <a href="http://smartping.org"><strong>-- Browse website --</strong></a>
         <br>
         <br>
-        <a href="https://goreportcard.com/report/github.com/gy-games/smartping">
-            <img src="https://goreportcard.com/badge/github.com/gy-games/smartping" >
+        <a href="https://www.travis-ci.org/smartping/smartping">
+            <img src="https://www.travis-ci.org/smartping/smartping.svg?branch=master" >
         </a>
-         <a href="https://github.com/gy-games/smartping/releases">
-             <img src="https://img.shields.io/github/release/gy-games/smartping.svg" >
+        <a href="https://goreportcard.com/report/github.com/smartping/smartping">
+            <img src="https://goreportcard.com/badge/github.com/smartping/smartping" >
+        </a>
+         <a href="https://github.com/smartping/smartping/releases">
+             <img src="https://img.shields.io/github/release/smartping/smartping.svg" >
          </a>
-         <a href="https://github.com/gy-games/smartping/blob/master/LICENSE">
+         <a href="https://github.com/smartping/smartping/blob/master/LICENSE">
              <img src="https://img.shields.io/hexpm/l/plug.svg" >
          </a>
     </p>    
@@ -41,7 +44,7 @@
 
 ## 项目贡献
 
-欢迎参与项目贡献！比如提交PR修复一个bug，或者新建 [Issue](https://github.com/gy-games/smartping/issues/) 讨论新特性或者变更。
+欢迎参与项目贡献！比如提交PR修复一个bug，或者新建 [Issue](https://github.com/smartping/smartping/issues/) 讨论新特性或者变更。
 
 ## 其他资料 ##
 

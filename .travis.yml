@@ -2,7 +2,7 @@ language: go
 
 matrix:
   include:
-    - go: 1.7.x
+    - go: 1.9.x
     
 
 script:
