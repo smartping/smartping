@@ -35,7 +35,7 @@ type ICMP struct {
 func (t *pkg) Send(ttl int) ICMP {
 	var hop ICMP
 	var err error
-	t.conn, hop.Error = net.ListenPacket("ip4:icmp", "0.0.0.0")
+	t.conn, err = net.ListenPacket("ip4:icmp", "0.0.0.0")
 	if nil != err {
 		return hop
 	}
