@@ -92,7 +92,7 @@ func AlertStorage(t g.AlertLog) {
 	seelog.Info("[func:AlertStorage] ", "(", t.Logtime, ")Starting AlertStorage ", t.Targetname)
 	sql := "INSERT INTO [alertlog] (logtime, targetip, targetname, tracert) values('" + t.Logtime + "','" + t.Targetip + "','" + t.Targetname + "','" + t.Tracert + "')"
 	g.DLock.Lock()
-	g.Db.Exec(sql)
+	//g.Db.Exec(sql)
 	_, err := g.Db.Exec(sql)
 	if err != nil {
 		seelog.Error("[func:StartPing] Sql Error ", err)
