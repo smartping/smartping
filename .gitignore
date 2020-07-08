@@ -9,6 +9,10 @@ bin/*
 *-journal
 *.db-journal
 *.iml
+.idea
+.vscode
+bin/smartping
+bin/smartping-linux
 db/database.db
 db/ping/*.db
 db/ping/*.lock
@@ -23,3 +27,8 @@ conf/config.json
 !bin/nssm.exe*
 logs/*
 html/admin/*
+.DS_Store
+tmp1
+tmp2
+tmp2.zip
+vendor
