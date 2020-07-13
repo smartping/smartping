@@ -72,7 +72,7 @@ func main() {
 	}()
 
 	// 非云模式下开启配置自动发现
-	g.StartAutoDiscoveryConfig4LocalMode(consulEndpoint)
+	g.StartAutoDiscoveryConfig4LocalMode(consulEndpoint, Version)
 	// 开启退出信号监听
 	sigterm := make(chan os.Signal, 1)
 	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)

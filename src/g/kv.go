@@ -12,15 +12,17 @@ import (
 	"github.com/smartping/smartping/src/kv"
 )
 
+var version string
+
 // StartAutoDiscoveryConfig4LocalMode 开启local模式配置自动更新
-func StartAutoDiscoveryConfig4LocalMode(consulEndpoint string) {
-	if hostName, hostIP, err := kv.GetHostInfo(); err != nil {
+func StartAutoDiscoveryConfig4LocalMode(consulEndpoint string, ver string) {
+	if hostName, hostIP, err := kv.GetHostInfo(); err == nil {
 		Cfg.Addr = hostIP
 		Cfg.Name = hostName
 	} else {
-		seelog.Error(err)
+		seelog.Errorf("StartAutoDiscoveryConfig4LocalMode ——> %v", err)
 	}
-
+	version = ver
 	// 判断是否是cloud模式
 	if Cfg.Mode["Type"] != "cloud" {
 		pipe := make(chan AgentInfos, 1)
@@ -116,6 +118,7 @@ func DefaultHandler(datas AgentInfos) {
 func UpdateAgentConfig(datas AgentInfos) {
 	if datas.checkUpdate(Cfg.Network) {
 		SaveConfig()
+		ParseConfig(version)
 	}
 }
 

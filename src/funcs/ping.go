@@ -1,19 +1,22 @@
 package funcs
 
 import (
-	"github.com/cihub/seelog"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/nettools"
 	"net"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/cihub/seelog"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/smartping/smartping/src/g"
+	"github.com/smartping/smartping/src/nettools"
 )
 
 func Ping() {
 	var wg sync.WaitGroup
+	seelog.Infof("Ping===>>targets: %v", g.SelfCfg.Ping)
 	for _, target := range g.SelfCfg.Ping {
+		seelog.Infof("Ping===>>target: %s", target)
 		wg.Add(1)
 		go PingTask(g.Cfg.Network[target], &wg)
 	}
