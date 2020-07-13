@@ -31,6 +31,7 @@ func init() {
 }
 
 func main() {
+	defer seelog.Flush()
 	hostName, hostIP, err := kv.GetHostInfo()
 	if err != nil {
 		panic(err)
