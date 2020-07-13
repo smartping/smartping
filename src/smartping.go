@@ -39,7 +39,7 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	if consulEndpoint == "" {
-		if consulEndpoint = os.Getenv("consul-endpoint"); consulEndpoint == "" {
+		if consulEndpoint = os.Getenv("CONSUL_ENDPOINT"); consulEndpoint == "" {
 			panic("cannot find consul-endpoint in flag and env")
 		}
 	}
