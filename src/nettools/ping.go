@@ -3,11 +3,12 @@ package nettools
 import (
 	"bytes"
 	"encoding/binary"
-	"golang.org/x/net/icmp"
-	"golang.org/x/net/ipv4"
 	"math/rand"
 	"net"
 	"time"
+
+	"golang.org/x/net/icmp"
+	"golang.org/x/net/ipv4"
 )
 
 type pkg struct {
@@ -35,9 +36,8 @@ type ICMP struct {
 
 func (t *pkg) Send(ttl int) ICMP {
 	var hop ICMP
-	var err error
-	t.conn, err = net.ListenPacket("ip4:icmp", "0.0.0.0")
-	if nil != err {
+	t.conn, hop.Error = net.ListenPacket("ip4:icmp", "0.0.0.0")
+	if nil != hop.Error {
 		return hop
 	}
 	defer t.conn.Close()

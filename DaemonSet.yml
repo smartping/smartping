@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: smartping
+  name: smartping
+  namespace: devops
+spec:
+  selector:
+    matchLabels:
+      k8s-app: smartping
+  template:
+    metadata:
+      labels:
+        k8s-app: smartping
+    spec:
+      containers:
+        - image: xxxxxxx
+          imagePullPolicy: IfNotPresent
+          name: smartping
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: 50m
+              memory: 50Mi

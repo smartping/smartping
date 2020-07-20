@@ -1,0 +1,17 @@
+# /etc/systemd/system/smartping.service
+[Unit]
+Description=smartping
+After=network.target
+
+
+[Service]
+Type=simple
+Environment="CONSUL_ENDPOINT=10.93.10.66:80"
+ExecStart=/data/smartping/bin/smartping start
+WorkingDirectory=/data/smartping
+Restart=on-failure
+
+
+
+[Install]
+WantedBy=multi-user.target

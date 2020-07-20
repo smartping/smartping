@@ -4,12 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cihub/seelog"
-	"github.com/smartping/smartping/src/funcs"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/nettools"
-	"github.com/wcharczuk/go-chart"
-	"github.com/wcharczuk/go-chart/drawing"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -17,6 +11,13 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cihub/seelog"
+	"github.com/smartping/smartping/src/funcs"
+	"github.com/smartping/smartping/src/g"
+	"github.com/smartping/smartping/src/nettools"
+	"github.com/wcharczuk/go-chart"
+	"github.com/wcharczuk/go-chart/drawing"
 )
 
 func configApiRoutes() {
@@ -615,7 +616,7 @@ func configApiRoutes() {
 			},
 			XAxis: chart.XAxis{
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				TickPosition: chart.TickPositionBetweenTicks,
@@ -625,7 +626,7 @@ func configApiRoutes() {
 			},
 			YAxis: chart.YAxis{
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				Range: &chart.ContinuousRange{
@@ -642,7 +643,7 @@ func configApiRoutes() {
 			YAxisSecondary: chart.YAxis{
 				//NameStyle: chart.StyleShow(),
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				Range: &chart.ContinuousRange{
@@ -659,7 +660,7 @@ func configApiRoutes() {
 			Series: []chart.Series{
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{249, 246, 241, 255},
 						FillColor:   drawing.Color{249, 246, 241, 255},
 					},
@@ -668,7 +669,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{0, 204, 102, 200},
 						FillColor:   drawing.Color{0, 204, 102, 200},
 					},
@@ -678,7 +679,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{255, 0, 0, 200},
 						FillColor:   drawing.Color{255, 0, 0, 200},
 					},
