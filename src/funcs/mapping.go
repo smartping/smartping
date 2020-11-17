@@ -57,7 +57,7 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 					if stat.MinDelay == -1 || stat.MinDelay > delay {
 						stat.MinDelay = delay
 					}
-					stat.RevcPk = stat.RevcPk + 1
+					stat.RecvPk = stat.RecvPk + 1
 					seelog.Debug("[func:StartChinaMapPing IcmpPing] ID:", i, " IP:", ip)
 				} else {
 					seelog.Debug("[func:StartChinaMapPing IcmpPing] ID:", i, " IP:", ip, " | ", err)
@@ -65,8 +65,8 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 				}
 				stat.SendPk = stat.SendPk + 1
 				stat.LossPk = int((float64(stat.LossPk) / float64(stat.SendPk)) * 100)
-				if stat.RevcPk > 0 {
-					stat.AvgDelay = stat.AvgDelay / float64(stat.RevcPk)
+				if stat.RecvPk > 0 {
+					stat.AvgDelay = stat.AvgDelay / float64(stat.RecvPk)
 				} else {
 					stat.AvgDelay = 2000
 				}
@@ -78,7 +78,7 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 			stat.MinDelay = 2000.00
 			stat.MaxDelay = 2000.00
 			stat.SendPk = 0
-			stat.RevcPk = 0
+			stat.RecvPk = 0
 			stat.LossPk = 100
 			statMap = append(statMap, stat)
 		}
@@ -97,8 +97,8 @@ func MappingTask(tel string, prov string, ips []string, wg *sync.WaitGroup) {
 		fStatDetail.MinDelay = fStatDetail.MinDelay + stat.MinDelay
 		fStatDetail.AvgDelay = fStatDetail.AvgDelay + stat.AvgDelay
 		fStatDetail.SendPk = fStatDetail.SendPk + stat.SendPk
-		fStatDetail.RevcPk = fStatDetail.RevcPk + stat.RevcPk
-		fStatDetail.LossPk = fStatDetail.SendPk - fStatDetail.RevcPk
+		fStatDetail.RecvPk = fStatDetail.RecvPk + stat.RecvPk
+		fStatDetail.LossPk = fStatDetail.SendPk - fStatDetail.RecvPk
 		effCnt = effCnt + 1
 	}
 	gMapVal := g.MapVal{}

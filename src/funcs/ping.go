@@ -59,6 +59,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 		} else {
 			stat.AvgDelay = 0.0
 		}
+
 		stat.LossPk = int((float64(lossPK) / float64(stat.SendPk)) * 100)
 		seelog.Debug("[func:IcmpPing] Finish Addr:", t.Addr, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Recv:", stat.RecvPk, " LossPK:", stat.LossPk)
 	} else {

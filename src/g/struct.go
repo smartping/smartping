@@ -42,6 +42,15 @@ type PingStMini struct {
 	AvgDelay  []string `json:"avgdelay"`
 }
 
+type TcpingSt struct {
+	SendPk		int
+	RecvPk 		int // send package successfully
+	LossPk		int
+	MinDelay	float64
+	AvgDelay	float64
+	MaxDelay	float64
+}
+
 type PingLog struct {
 	Logtime  string
 	Maxdelay string

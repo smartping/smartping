@@ -329,7 +329,7 @@ func configApiRoutes() {
 					if preout.Ping.MinDelay == -1 || preout.Ping.MinDelay > delay {
 						preout.Ping.MinDelay = delay
 					}
-					preout.Ping.RevcPk = preout.Ping.RevcPk + 1
+					preout.Ping.RecvPk = preout.Ping.RecvPk + 1
 				} else {
 					lossPK = lossPK + 1
 				}
@@ -337,8 +337,8 @@ func configApiRoutes() {
 				preout.Ping.LossPk = int((float64(lossPK) / float64(preout.Ping.SendPk)) * 100)
 			}
 		}
-		if preout.Ping.RevcPk > 0 {
-			preout.Ping.AvgDelay = preout.Ping.AvgDelay / float64(preout.Ping.RevcPk)
+		if preout.Ping.RecvPk > 0 {
+			preout.Ping.AvgDelay = preout.Ping.AvgDelay / float64(preout.Ping.RecvPk)
 		} else {
 			preout.Ping.AvgDelay = 3000
 			preout.Ping.MinDelay = 3000
