@@ -28,7 +28,7 @@ type NetworkMember struct {
 //Ping Struct
 type PingSt struct {
 	SendPk   int
-	RevcPk   int
+	RecvPk   int
 	LossPk   int
 	MinDelay float64
 	AvgDelay float64
