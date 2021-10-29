@@ -4,12 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jakecoffman/cron"
-	"github.com/smartping/smartping/src/funcs"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/http"
 	"os"
 	"runtime"
-	//"sync"
+	"smartping/src/funcs"
+	"smartping/src/g"
+	"smartping/src/http"
 )
 
 // Init config

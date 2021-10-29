@@ -102,7 +102,7 @@ func ParseConfig(ver string) {
 		defer dst.Close()
 		io.Copy(dst, src)
 	}
-	seelog.Info("Config loaded")
+	seelog.Info("Config loaded, " + Root + "/conf/" + cfile)
 	Db, err = sql.Open("sqlite3", Root+"/db/database.db")
 	if err != nil {
 		log.Fatalln("[Fault]db open fail .", err)

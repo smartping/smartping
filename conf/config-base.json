@@ -23,7 +23,9 @@
 		"EmailHost": "",
 		"RevcEmailList": "",
 		"SendEmailAccount": "",
-		"SendEmailPassword": ""
+		"SendEmailPassword": "",
+		"FeishuWebhook": "",
+		"FeishuAtAll": "no"
 	},
 	"Network": {
 		"1.2.3.4": {

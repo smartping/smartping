@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cihub/seelog"
-	"github.com/smartping/smartping/src/funcs"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/nettools"
 	"github.com/wcharczuk/go-chart"
 	"github.com/wcharczuk/go-chart/drawing"
 	"io/ioutil"
 	"net"
 	"net/http"
+	"smartping/src/funcs"
+	"smartping/src/g"
+	"smartping/src/nettools"
 	"strconv"
 	"strings"
 	"sync"
@@ -548,7 +548,29 @@ func configApiRoutes() {
 			RenderJson(w, preout)
 			return
 		}
+		//resp := funcs.SendFeishu(r.Form["FeishuWebhook"][0],"报警测试 - SmartPing", "报警测试邮件", r.Form["FeishuAtAll"][0]=="yes")
 		preout["status"] = "true"
+		RenderJson(w, preout)
+	})
+
+	//发送测试邮件
+	http.HandleFunc("/api/sendfeishutest.json", func(w http.ResponseWriter, r *http.Request) {
+		if !AuthUserIp(r.RemoteAddr) && !AuthAgentIp(r.RemoteAddr, true) {
+			o := "Your ip address (" + r.RemoteAddr + ")  is not allowed to access this site!"
+			http.Error(w, o, 401)
+			return
+		}
+		preout := make(map[string]string)
+		r.ParseForm()
+		preout["status"] = "false"
+		if len(r.Form["FeishuWebhook"]) == 0 {
+			preout["info"] = "webhook不能为空!"
+			RenderJson(w, preout)
+			return
+		}
+		resp := funcs.SendFeishu(r.Form["FeishuWebhook"][0], "报警测试 - SmartPing", "报警测试消息", r.Form["FeishuAtAll"][0] == "yes")
+		preout["status"] = "true"
+		preout["resp"] = resp
 		RenderJson(w, preout)
 	})
 

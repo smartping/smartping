@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/cihub/seelog"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/nettools"
 	"net/smtp"
+	"smartping/src/g"
+	"smartping/src/nettools"
 	"strconv"
 	"strings"
 	"time"
@@ -117,14 +117,19 @@ func AlertSendMail(t g.AlertLog) {
 	fmt.Fprintf(mtrstr, "</table>")
 	title := "【" + t.Fromname + "->" + t.Targetname + "】网络异常报警（" + t.Logtime + "）- SmartPing"
 	content := "报警时间：" + t.Logtime + " <br> 来路：" + t.Fromname + "(" + t.Fromip + ") <br>  目的：" + t.Targetname + "(" + t.Targetip + ") <br> "
-	SendEmailAccount := g.Cfg.Alert["SendEmailAccount"]
-	SendEmailPassword := g.Cfg.Alert["SendEmailPassword"]
-	EmailHost := g.Cfg.Alert["EmailHost"]
-	RevcEmailList := g.Cfg.Alert["RevcEmailList"]
-	err = SendMail(SendEmailAccount, SendEmailPassword, EmailHost, RevcEmailList, title, content+mtrstr.String())
-	if err != nil {
-		seelog.Error("[func:AlertSendMail] SendMail Error ", err)
-	}
+	FeishuWebhook := g.Cfg.Alert["FeishuWebhook"]
+	FeishuAtAll := g.Cfg.Alert["FeishuAtAll"]
+	//SendEmailAccount := g.Cfg.Alert["SendEmailAccount"]
+	//SendEmailPassword := g.Cfg.Alert["SendEmailPassword"]
+	//EmailHost := g.Cfg.Alert["EmailHost"]
+	//RevcEmailList := g.Cfg.Alert["RevcEmailList"]
+	//err = SendMail(SendEmailAccount, SendEmailPassword, EmailHost, RevcEmailList, title, content+mtrstr.String())
+	//if err != nil {
+	//	seelog.Error("[func:AlertSendMail] SendMail Error ", err)
+	//}
+	seelog.Info("[func:SendFeishu] SendFeishu webhook: ", FeishuWebhook)
+	resp := SendFeishu(FeishuWebhook, title, content+mtrstr.String(), FeishuAtAll == "yes")
+	seelog.Info("[func:SendFeishu] SendFeishu resp: ", resp)
 }
 
 func SendMail(user, pwd, host, to, subject, body string) error {

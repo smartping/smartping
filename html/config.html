@@ -160,8 +160,19 @@
                     <input type="text" style="width:97%"   id="RevcEmailList" value="">
                 </div> <!-- /controls -->
             </div> <!-- /control-group -->
-
-
+            <h4>报警消息<button style="float: right" onclick="sendFeishuTest(this)">测试发送飞书机器人</button></h4><br>
+            <div class="control-group" >
+              <label class="control-label" for="Tsymbolsize">飞书机器人webhook</label>
+              <div class="controls">
+                <input type="text" style="width:97%"   id="FeishuWebhook" value="">
+              </div> <!-- /controls -->
+            </div>
+              <div class="control-group" >
+                <label class="control-label" for="Tsymbolsize">飞书机器人 AtAll</label>
+                <div class="controls">
+                  <input type="text" style="width:97%"   id="FeishuAtAll" value="no">
+                </div> <!-- /controls -->
+              </div>
               <hr style="clear:both;">
 
               <h4>检测工具</h4><br>
@@ -891,6 +902,8 @@
         data["SendEmailAccount"] = $("#SendEmailAccount").val();
         data["SendEmailPassword"] = $("#SendEmailPassword").val();
         data["RevcEmailList"] = $("#RevcEmailList").val();
+        data["FeishuWebhook"] = $("#FeishuWebhook").val();
+        data["FeishuAtAll"] = $("#FeishuAtAll").val();
         $.ajax({
             dataType: "json",
             type: 'POST',
@@ -910,6 +923,33 @@
             $(obj).html("发送测试邮件")
         });
     }
+
+    //发送飞书机器人测试
+    function sendFeishuTest(obj){
+      $(obj).html("测试飞书发送中(最长1分钟,请等待)...")
+      data = {}
+      data["FeishuWebhook"] = $("#FeishuWebhook").val();
+      data["FeishuAtAll"] = $("#FeishuAtAll").val();
+      $.ajax({
+        dataType: "json",
+        type: 'POST',
+        url: "/api/sendfeishutest.json",
+        data: data,
+        success: function( retdata ) {
+          if (retdata["status"]=="true"){
+            alert("测试消息发送成功!")
+          }else{
+            alert("测试消息发送失败 ("+retdata["info"]+")")
+          }
+          $(obj).html("发送测试消息")
+        },
+        timeout: 65*1000
+      }).fail( function( xhr, status ) {
+        alert("测试消息发送失败 (API错误!)")
+        $(obj).html("发送测试消息")
+      });
+    }
+
     //全国延迟测试网络-新增节点
     function addChinaMap(Save){
         if(Save){
@@ -1037,6 +1077,8 @@
         config["Alert"]["SendEmailAccount"] = $("#SendEmailAccount").val();
         config["Alert"]["SendEmailPassword"] = $("#SendEmailPassword").val();
         config["Alert"]["RevcEmailList"] = $("#RevcEmailList").val();
+        config["Alert"]["FeishuWebhook"] = $("#FeishuWebhook").val();
+        config["Alert"]["FeishuAtAll"] = $("#FeishuAtAll").val();
         config["Authiplist"] = $("#Authiplist").val();
         config["Toollimit"] = parseInt($("#Toollimit").val());
         data = {}
@@ -1160,6 +1202,8 @@
             $("#SendEmailAccount").val(config["Alert"]["SendEmailAccount"]);
             $("#SendEmailPassword").val(config["Alert"]["SendEmailPassword"]);
             $("#RevcEmailList").val(config["Alert"]["RevcEmailList"]);
+            $("#FeishuWebhook").val(config["Alert"]["FeishuWebhook"]);
+            $("#FeishuAtAll").val(config["Alert"]["FeishuAtAll"]);
             $("#Authiplist").val(config["Authiplist"]);
             $("#Toollimit").val(config["Toollimit"]);
             selfconfig=config["Network"][config["Addr"]]

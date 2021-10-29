@@ -1,9 +1,9 @@
 package http
 
 import (
-	"github.com/smartping/smartping/src/g"
 	"net/http"
 	"path/filepath"
+	"smartping/src/g"
 	"strings"
 )
 

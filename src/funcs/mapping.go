@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/cihub/seelog"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/nettools"
 	"math"
 	"net"
+	"smartping/src/g"
+	"smartping/src/nettools"
 	"strconv"
 	"sync"
 	"time"
@@ -121,7 +121,7 @@ func MapPingStorage() {
 	}
 	sql := "REPLACE INTO [mappinglog] (logtime, mapjson) values('" + time.Now().Format("2006-01-02 15:04") + "','" + string(jdata) + "')"
 	g.DLock.Lock()
-	g.Db.Exec(sql)
+	//g.Db.Exec(sql)
 	_, err = g.Db.Exec(sql)
 	seelog.Debug(sql)
 	if err != nil {
