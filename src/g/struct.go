@@ -76,3 +76,26 @@ type ToolsRes struct {
 	Ip     string `json:"ip"`
 	Ping   PingSt `json:"ping"`
 }
+
+type AllDomainstruct struct {
+	Domainipslice  map[string][]string
+	Domainipmap    map[string][]map[string]string
+	Domainipstruct map[string][]NetworkMember
+	AllDomainslice []string
+	Size           int
+}
+
+type Domainstruct struct {
+	Result []DomainInfostruct
+}
+
+type DomainInfostruct struct {
+	ID            int
+	Domaintitle   string
+	Busline       string
+	Principal     string
+	On_off_status string
+	Status        string
+	Create_time   string
+	Mod_time      string
+}

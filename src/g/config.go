@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -27,7 +29,70 @@ var (
 	ToolLimit      map[string]int
 	Db             *sql.DB
 	DLock          sync.Mutex
+	Ads            AllDomainstruct
+	Url            = "http://searchdns.search.weibo.com/domain/fourteenth_showalldomain"
 )
+
+func Parseurl() []string {
+	domaintitleslice := []string{}
+	client := &http.Client{Timeout: 5 * time.Second}
+	payload := strings.NewReader(``)
+	req, _ := http.NewRequest(http.MethodGet, Url, payload)
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	res, _ := client.Do(req)
+
+	defer res.Body.Close()
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	domainstruct := new(Domainstruct)
+	json.Unmarshal(body, domainstruct)
+	for _, eveinfo := range (*domainstruct).Result {
+		tmpdomainslice := strings.Split(eveinfo.Domaintitle, ".")
+		domainbeforeslice := tmpdomainslice[:len(tmpdomainslice)-3]
+		domaintitleslice = append(domaintitleslice, strings.Join(domainbeforeslice, "."))
+	}
+	return domaintitleslice
+}
+
+func CheckIsIn(slicename []string, linename string) bool {
+	for _, line := range slicename {
+		if strings.TrimSpace(line) == strings.TrimSpace(linename) {
+			return true
+		}
+	}
+	return false
+}
+
+func ValidDomain(domainName string) bool {
+	domainName = strings.Trim(domainName, " ")
+	domainre, _ := regexp.Compile(`[a-zA-Z][-a-zA-Z]{0,62}(\.[a-zA-Z][-a-zA-Z]{0,62})\.?`)
+	if domainre.MatchString(domainName) {
+		return true
+	}
+	return false
+}
+
+func ValidDomaina(domainName string) bool {
+	domainName = strings.Trim(domainName, " ")
+	domainre, _ := regexp.Compile(`[a-zA-Z]{0,62}-.*`)
+	if domainre.MatchString(domainName) {
+		return true
+	}
+	return false
+}
+
+func Backmap(fline string) map[string]string {
+	var tmpmap = make(map[string]string, 6)
+	tmpmap["Addr"] = fline
+	tmpmap["Name"] = fline
+	tmpmap["Thdavgdelay"] = "100"
+	tmpmap["Thdchecksec"] = "130"
+	tmpmap["Thdloss"] = "30"
+	tmpmap["Thdoccnum"] = "2"
+	return tmpmap
+}
 
 func IsExist(fp string) bool {
 	_, err := os.Stat(fp)
@@ -47,6 +112,49 @@ func ReadConfig(filename string) Config {
 		}
 	}
 	return config
+}
+
+func ReadAdsConfig() {
+	seelog.Info("[func:Monitor_Domain] Start reload monitor domain config...")
+	domaintitleslice := Parseurl()
+	var m = make(map[string]string)
+	Ads.Domainipslice = make(map[string][]string, 0)
+	Ads.Domainipmap = make(map[string][]map[string]string, 0)
+	Ads.Domainipstruct = make(map[string][]NetworkMember, 0)
+	Ads.AllDomainslice = make([]string, 0)
+
+	for networkey, _ := range Cfg.Network {
+		if ValidDomain(networkey) {
+			Ads.AllDomainslice = append(Ads.AllDomainslice, networkey)
+			Ads.Size++
+			tmpdomainslice := strings.Split(networkey, ".")
+			domainbeforeslice := tmpdomainslice[:len(tmpdomainslice)-3]
+			domainbeforestr := strings.Join(domainbeforeslice, ".")
+			m[domainbeforestr] = networkey
+
+			Ads.Domainipslice[networkey] = make([]string, 0)
+			Ads.Domainipmap[networkey] = make([]map[string]string, 0)
+			Ads.Domainipstruct[networkey] = make([]NetworkMember, 0)
+		}
+	}
+
+	for networkey, _ := range Cfg.Network {
+		if ValidDomaina(networkey) && CheckIsIn(domaintitleslice, strings.Split(networkey, "-")[0]) {
+			domainbeforestr := strings.Split(networkey, "-")[0]
+			domainame := m[domainbeforestr]
+
+			adddomainipstruct := NetworkMember{Name: networkey, Addr: networkey, Smartping: false, Ping: []string{}, Topology: []map[string]string{}}
+
+			Ads.Domainipstruct[domainame] = append(Ads.Domainipstruct[domainame], adddomainipstruct)
+			Ads.Domainipslice[domainame] = append(Ads.Domainipslice[domainame], networkey)
+			tmpmap := Backmap(networkey)
+			Ads.Domainipmap[domainame] = append(Ads.Domainipmap[domainame], tmpmap)
+		}
+	}
+	seelog.Info(fmt.Sprintf("[func:Monitor_Domain] Ads.Domainipslice %v", Ads.Domainipslice))
+	seelog.Info(fmt.Sprintf("[func:Monitor_Domain] Ads.Domainipmap %v", Ads.Domainipmap))
+	seelog.Info(fmt.Sprintf("[func:Monitor_Domain] Ads.Domainipstruct %v", Ads.Domainipstruct))
+	seelog.Info("[func:Monitor_Domain] reload monitor domain config finished")
 }
 
 func GetRoot() string {
@@ -85,6 +193,10 @@ func ParseConfig(ver string) {
 	if Cfg.Addr == "" {
 		Cfg.Addr = "127.0.0.1"
 	}
+
+	//读取需要监控的配置
+	ReadAdsConfig()
+
 	Cfg.Ver = ver
 	if !IsExist(Root + "/db/" + "database.db") {
 		if !IsExist(Root + "/db/" + "database-base.db") {
