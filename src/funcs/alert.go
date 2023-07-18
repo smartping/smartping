@@ -19,11 +19,13 @@ func StartAlert() {
 	for _, v := range g.SelfCfg.Topology {
 		if v["Addr"] != g.SelfCfg.Addr {
 			sFlag := CheckAlertStatus(v)
-			if sFlag {
-				g.AlertStatus[v["Addr"]] = true
-			}
-			_, haskey := g.AlertStatus[v["Addr"]]
-			if (!haskey && !sFlag) || (!sFlag && g.AlertStatus[v["Addr"]]) {
+			//if sFlag {
+			//	g.AlertStatus[v["Addr"]] = true
+			//}
+			//_, haskey := g.AlertStatus[v["Addr"]]
+			//if (!haskey && !sFlag) || (!sFlag && g.AlertStatus[v["Addr"]]) {
+			seelog.Info(v, sFlag)
+			if !sFlag {
 				seelog.Debug("[func:StartAlert] ", v["Addr"]+" Alert!")
 				g.AlertStatus[v["Addr"]] = false
 				l := g.AlertLog{}
@@ -47,9 +49,10 @@ func StartAlert() {
 				}
 				l.Tracert = mtrString
 				go AlertStorage(l)
-				if g.Cfg.Alert["SendEmailAccount"] != "" && g.Cfg.Alert["SendEmailPassword"] != "" && g.Cfg.Alert["EmailHost"] != "" && g.Cfg.Alert["RevcEmailList"] != "" {
-					go AlertSendMail(l)
-				}
+				go SendAlarm(v["Addr"])
+				//if g.Cfg.Alert["SendEmailAccount"] != "" && g.Cfg.Alert["SendEmailPassword"] != "" && g.Cfg.Alert["EmailHost"] != "" && g.Cfg.Alert["RevcEmailList"] != "" {
+				//	go AlertSendMail(l)
+				//}
 			}
 
 		}
@@ -79,7 +82,8 @@ func CheckAlertStatus(v map[string]string) bool {
 			return false
 		}
 		Thdoccnum, _ := strconv.Atoi(v["Thdoccnum"])
-		if l.Cnt <= Thdoccnum {
+		seelog.Info(*l, Thdoccnum)
+		if l.Cnt < Thdoccnum {
 			return true
 		} else {
 			return false
@@ -91,8 +95,9 @@ func CheckAlertStatus(v map[string]string) bool {
 func AlertStorage(t g.AlertLog) {
 	seelog.Info("[func:AlertStorage] ", "(", t.Logtime, ")Starting AlertStorage ", t.Targetname)
 	sql := "INSERT INTO [alertlog] (logtime, targetip, targetname, tracert) values('" + t.Logtime + "','" + t.Targetip + "','" + t.Targetname + "','" + t.Tracert + "')"
+	seelog.Info(sql)
 	g.DLock.Lock()
-	//g.Db.Exec(sql)
+	g.Db.Exec(sql)
 	_, err := g.Db.Exec(sql)
 	if err != nil {
 		seelog.Error("[func:StartPing] Sql Error ", err)
@@ -140,4 +145,13 @@ func SendMail(user, pwd, host, to, subject, body string) error {
 		return err
 	}
 	return nil
+}
+
+func SendAlarm(ipvalue string) {
+	revicestring, ok := g.Cfg.Alert["RevcEmailList"]
+	if !ok {
+		revicestring = "zhiping7"
+	}
+	ret := SendAlert(fmt.Sprintf("smartping-(%s)", ipvalue), fmt.Sprintf("smartping-(%s)", ipvalue), revicestring)
+	seelog.Info(ret)
 }

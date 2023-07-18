@@ -14,6 +14,24 @@ import (
 	"strings"
 )
 
+func ValidDomain(domainName string) bool {
+	domainName = strings.Trim(domainName, " ")
+	domainre, _ := regexp.Compile(`[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z]{0,62})\.?`)
+	if domainre.MatchString(domainName) {
+		return true
+	}
+	return false
+}
+
+func ValidDomaina(domainName string) bool {
+	domainName = strings.Trim(domainName, " ")
+	domainre, _ := regexp.Compile(`[a-zA-Z]{0,62}-.*`)
+	if domainre.MatchString(domainName) {
+		return true
+	}
+	return false
+}
+
 func ValidIP4(ipAddress string) bool {
 	ipAddress = strings.Trim(ipAddress, " ")
 	re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)

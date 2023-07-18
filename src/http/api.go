@@ -39,6 +39,12 @@ func configApiRoutes() {
 			}
 		}
 		//fmt.Print(g.Cfg.Alert["SendEmailPassword"])
+
+		//for i, j := range nconf.Network {
+		//	if i == "10.182.12.179" {
+		//		seelog.Info(i, j)
+		//	}
+		//}
 		onconf, _ := json.Marshal(nconf)
 		var out bytes.Buffer
 		json.Indent(&out, onconf, "", "\t")
@@ -420,10 +426,12 @@ func configApiRoutes() {
 		}
 		//Network
 		for k, network := range nconfig.Network {
-			if !ValidIP4(network.Addr) || !ValidIP4(k) {
-				preout["info"] = "Ping节点测试网络信息错误!(非法节点IP地址 " + k + ")"
-				RenderJson(w, preout)
-				return
+			if !ValidDomain(network.Addr) {
+				if !ValidIP4(network.Addr) || !ValidIP4(k) {
+					preout["info"] = "Ping节点测试网络信息错误!(非法节点IP地址 " + k + ")"
+					RenderJson(w, preout)
+					return
+				}
 			}
 			if network.Name == "" {
 				preout["info"] = "Ping节点测试网络信息错误!( " + k + " 节点名称为空)"
@@ -499,8 +507,151 @@ func configApiRoutes() {
 		if nconfig.Alert["SendEmailPassword"] == "samepasswordasbefore" {
 			nconfig.Alert["SendEmailPassword"] = g.Cfg.Alert["SendEmailPassword"]
 		}
+
 		g.Cfg = nconfig
-		g.SelfCfg = g.Cfg.Network[g.Cfg.Addr]
+		var allneedaddpingslice = make([]string, 0, 10)
+		var alladdneedaddtopolo = make([]map[string]string, 0, 10)
+		domaintitleslice := g.Parseurl()
+
+		//增加域名解析到self Ping
+		selfNetworkMember := g.Cfg.Network[g.Cfg.Addr]
+		selfpingslice := g.Cfg.Network[g.Cfg.Addr].Ping
+		for _, ipline := range selfpingslice {
+			ipline = strings.Trim(ipline, " ")
+			if funcs.ValidDomain(ipline) {
+				domainipslice := funcs.DnsResolve(ipline, 0)
+				for _, fline := range domainipslice {
+					if !funcs.CheckIsIn(selfpingslice, fline) {
+						selfpingslice = append(selfpingslice, fline)
+					}
+					if !funcs.CheckIsIn(allneedaddpingslice, fline) {
+						allneedaddpingslice = append(allneedaddpingslice, fline)
+					}
+				}
+			}
+			if ValidDomaina(ipline) && funcs.CheckIsIn(domaintitleslice, strings.Split(ipline, "-")[0]) {
+				allneedaddpingslice = append(allneedaddpingslice, ipline)
+			}
+		}
+		seelog.Info(selfpingslice)
+		selfNetworkMember.Ping = selfpingslice
+		g.SelfCfg = selfNetworkMember
+
+		//增加域名解析到Topology
+		selfpingtopology := g.Cfg.Network[g.Cfg.Addr].Topology
+		for _, evemap := range selfpingtopology {
+			if funcs.ValidDomain(evemap["Addr"]) {
+				domainipslice := funcs.DnsResolve(evemap["Addr"], 0)
+				for _, fline := range domainipslice {
+					var tmpmap = make(map[string]string, 6)
+					tmpmap["Addr"] = fline
+					tmpmap["Name"] = fline
+					tmpmap["Thdavgdelay"] = "100"
+					tmpmap["Thdchecksec"] = "130"
+					tmpmap["Thdloss"] = "30"
+					tmpmap["Thdoccnum"] = "2"
+					if !funcs.CheckIsInMap(&selfpingtopology, tmpmap) {
+						selfpingtopology = append(selfpingtopology, tmpmap)
+					}
+					if !funcs.CheckIsInMap(&alladdneedaddtopolo, tmpmap) {
+						alladdneedaddtopolo = append(alladdneedaddtopolo, tmpmap)
+					}
+					seelog.Info(tmpmap)
+				}
+			}
+			if ValidDomaina(evemap["Addr"]) && funcs.CheckIsIn(domaintitleslice, strings.Split(evemap["Addr"], "-")[0]) {
+				var tmpmap = make(map[string]string, 6)
+				tmpmap["Addr"] = evemap["Addr"]
+				tmpmap["Name"] = evemap["Addr"]
+				tmpmap["Thdavgdelay"] = "100"
+				tmpmap["Thdchecksec"] = "130"
+				tmpmap["Thdloss"] = "30"
+				tmpmap["Thdoccnum"] = "2"
+				alladdneedaddtopolo = append(alladdneedaddtopolo, tmpmap)
+			}
+		}
+		seelog.Info(selfpingtopology)
+		selfNetworkMember.Topology = selfpingtopology
+		g.SelfCfg = selfNetworkMember
+		g.Cfg.Network[g.Cfg.Addr] = g.SelfCfg
+
+		g.Ads.Domainipslice = make(map[string][]string, 0)
+		g.Ads.Domainipmap = make(map[string][]map[string]string, 0)
+		g.Ads.Domainipstruct = make(map[string][]g.NetworkMember, 0)
+		g.Ads.AllDomainslice = make([]string, 0)
+
+		//全局的
+		var m = make(map[string]string)
+		//先获取域名和域名前缀的map
+		for networkey, _ := range g.Cfg.Network {
+			if funcs.ValidDomain(networkey) {
+				g.Ads.AllDomainslice = append(g.Ads.AllDomainslice, networkey)
+				g.Ads.Size++
+
+				tmpdomainslice := strings.Split(networkey, ".")
+				domainbeforeslice := tmpdomainslice[:len(tmpdomainslice)-3]
+				domainbeforestr := strings.Join(domainbeforeslice, ".")
+				m[domainbeforestr] = networkey
+			}
+		}
+
+		seelog.Info(domaintitleslice)
+		for networkey, networkvalue := range g.Cfg.Network {
+
+			//判断是否是域名-ip
+			if ValidDomaina(networkey) && g.CheckIsIn(domaintitleslice, strings.Split(networkey, "-")[0]) {
+				domainbeforestr := strings.Split(networkey, "-")[0]
+				domainame := m[domainbeforestr]
+				adddomainipstruct := g.NetworkMember{Name: networkey, Addr: networkey, Smartping: false, Ping: []string{}, Topology: []map[string]string{}}
+				if !funcs.CheckIsInAllMap(&(g.Cfg), adddomainipstruct) { //返回true说明已经存在
+					g.Cfg.Network[networkey] = adddomainipstruct
+				}
+
+				g.Ads.Domainipslice[domainame] = make([]string, 0)
+				g.Ads.Domainipmap[domainame] = make([]map[string]string, 0)
+				g.Ads.Domainipstruct[domainame] = make([]g.NetworkMember, 0)
+
+				g.Ads.Domainipstruct[domainame] = append(g.Ads.Domainipstruct[domainame], adddomainipstruct)
+				g.Ads.Domainipslice[domainame] = append(g.Ads.Domainipslice[domainame], networkey)
+				tmpmap := funcs.Backmap(networkey)
+				g.Ads.Domainipmap[domainame] = append(g.Ads.Domainipmap[domainame], tmpmap)
+			}
+
+			//判断是否是真域名
+			if funcs.ValidDomain(networkey) {
+				adddomainipstruct := g.NetworkMember{Name: networkey, Addr: networkey, Smartping: false, Ping: []string{}, Topology: []map[string]string{}}
+				if !funcs.CheckIsInAllMap(&(g.Cfg), adddomainipstruct) { //返回true说明已经存在
+					g.Cfg.Network[networkey] = adddomainipstruct
+				}
+				domainipslice := funcs.DnsResolve(networkey, 0)
+				for _, domainip := range domainipslice {
+					adddomainipstruct = g.NetworkMember{Name: domainip, Addr: domainip, Smartping: false, Ping: []string{}, Topology: []map[string]string{}}
+					g.Cfg.Network[domainip] = adddomainipstruct
+				}
+			}
+
+			if networkvalue.Smartping && networkey != g.Cfg.Addr {
+				thisNetworkMember := g.Cfg.Network[networkey]
+				thispingslice := g.Cfg.Network[networkey].Ping
+				thispingtopologyslice := g.Cfg.Network[networkey].Topology
+
+				for _, addping := range allneedaddpingslice {
+					if !funcs.CheckIsIn(thispingslice, strings.TrimSpace(addping)) {
+						thispingslice = append(thispingslice, strings.TrimSpace(addping))
+					}
+				}
+				for _, addpingtopo := range alladdneedaddtopolo {
+					if !funcs.CheckIsInMap(&thispingtopologyslice, addpingtopo) {
+						thispingtopologyslice = append(thispingtopologyslice, addpingtopo)
+					}
+				}
+				thisNetworkMember.Ping = thispingslice
+				thisNetworkMember.Topology = thispingtopologyslice
+				g.SelfCfg = thisNetworkMember
+				g.Cfg.Network[networkey] = g.SelfCfg
+			}
+		}
+
 		saveerr := g.SaveConfig()
 		if saveerr != nil {
 			preout["info"] = saveerr.Error()
@@ -615,7 +766,7 @@ func configApiRoutes() {
 			},
 			XAxis: chart.XAxis{
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				TickPosition: chart.TickPositionBetweenTicks,
@@ -625,7 +776,7 @@ func configApiRoutes() {
 			},
 			YAxis: chart.YAxis{
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				Range: &chart.ContinuousRange{
@@ -640,9 +791,9 @@ func configApiRoutes() {
 				},
 			},
 			YAxisSecondary: chart.YAxis{
-				//NameStyle: chart.StyleShow(),
+				NameStyle: chart.StyleShow(),
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				Range: &chart.ContinuousRange{
@@ -659,7 +810,7 @@ func configApiRoutes() {
 			Series: []chart.Series{
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{249, 246, 241, 255},
 						FillColor:   drawing.Color{249, 246, 241, 255},
 					},
@@ -668,7 +819,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{0, 204, 102, 200},
 						FillColor:   drawing.Color{0, 204, 102, 200},
 					},
@@ -678,7 +829,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{255, 0, 0, 200},
 						FillColor:   drawing.Color{255, 0, 0, 200},
 					},
